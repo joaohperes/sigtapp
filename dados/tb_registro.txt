@@ -1,0 +1,10 @@
+01BPA (Consolidado)                                 202602
+02BPA (Individualizado)                             202602
+03AIH (Proc. Principal)                             202602
+04AIH (Proc. Especial)                              202602
+05AIH (Proc. Secundário)                            202602
+06APAC (Proc. Principal)                            202602
+07APAC (Proc. Secundário)                           202602
+08RAAS (Atenção Domiciliar)                         202602
+09RAAS (Atenção Psicossocial)                       202602
+10e-SUS APS (Atenção Primária à Saúde)              202602

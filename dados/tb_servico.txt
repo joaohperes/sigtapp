@@ -1,0 +1,73 @@
+100Serviço de Atenção a Saúde no Sistema Penitenciário                                                                     202602
+101Estratégia de Saúde da Família                                                                                          202602
+102Estratégias de Agentes Comunitário de Saúde                                                                             202602
+103Serviço de Atendimento Móvel de Urgências                                                                               202602
+104Regulação Assistêncial dos Serviços de Saúde                                                                            202602
+105Serviço de Atenção em Neurologia/ Neurocirurgia                                                                         202602
+106Serviço de Atenção a DST/HIV/AIDS                                                                                       202602
+107Atenção à Saúde Auditiva                                                                                                202602
+108Atenção a Saúde do Trabalhador                                                                                          202602
+109Serviço de Atenção a Saúde dos Adolecentes em Conflito com a Lei, em Regime de Internação e Internação Provisória       202602
+110Serviço de Atenção a Saúde Reprodutiva                                                                                  202602
+111Serviço de Atenção ao Paciente com Tuberculose                                                                          202602
+112Serviço de Atenção ao Pré-Natal e Nascimento                                                                            202602
+113Serviço de Atenção Domiciliar                                                                                           202602
+114Serviço de Atenção em Saúde Bucal                                                                                       202602
+115Serviço de Atenção Psicossocial                                                                                         202602
+116Serviço de Atenção Cardiovascular/Cardiologia                                                                           202602
+117Serviço de Cirurgia Reparadora                                                                                          202602
+118Serviço de Cirurgia Torácica                                                                                            202602
+119Serviço de Controle de Tabagismo                                                                                        202602
+120Serviço de Diagnóstico por Anatomia Patológica e/ou Citopatologia                                                       202602
+121Diagnóstico por Imagem                                                                                                  202602
+122Serviço de Diagnóstico por Métodos Gráficos/Dinâmicos                                                                   202602
+123Serviço de Dispensação de Órteses, Próteses e Materiais Especiais                                                       202602
+124Serviço de Endocrinologia                                                                                               202602
+125Serviço de Farmácia                                                                                                     202602
+126Serviço de Fisioterapia                                                                                                 202602
+127Serviço de Atenção à Obesidade                                                                                          202602
+128Serviço de Hemoterapia                                                                                                  202602
+129Servico de Laboratório de Histocompatibilidade                                                                          202602
+130Atenção à Doença Renal Crônica                                                                                          202602
+131Serviço de Oftalmologia                                                                                                 202602
+132Serviço de Oncologia                                                                                                    202602
+133Serviço de Pneumologia                                                                                                  202602
+134Serviço de Práticas Integrativas e Complementares                                                                       202602
+135Serviço de Reabilitação                                                                                                 202602
+136Serviço de Suporte Nutricional                                                                                          202602
+137Serviço de Telemedicina                                                                                                 202602
+138Serviço de Traumato-Ortopedia                                                                                           202602
+139Serviço de Triagem Neonatal                                                                                             202602
+140Serviço de Urgência e Emergência                                                                                        202602
+141Serviço de Vigilância em Saúde                                                                                          202602
+142Serviço de Endoscopia                                                                                                   202602
+143Serviço Móvel de Urgência (exceto SAMU)                                                                                 202602
+144Serviço Posto de Coleta de Materiais Biológicos                                                                         202602
+145Serviço de Diagnóstico por Laboratório Clínico                                                                          202602
+146Serviço de Videolaparoscopia                                                                                            202602
+147Serviço de Apoio a Saúde da Família                                                                                     202602
+148Hospital-Dia                                                                                                            202602
+149Transplante                                                                                                             202602
+150Cirurgia Vascular                                                                                                       202602
+151Medicina Nuclear                                                                                                        202602
+152Atenção à Saúde da População Indígena                                                                                   202602
+153Atenção Especializada no Processo Transexualizador                                                                      202602
+154Serviço de Banco de Tecidos                                                                                             202602
+155Serviço de Traumatologia  Ortopedia                                                                                     202602
+157Serviço de Laboratorio de Protese Dentaria                                                                              202602
+158Serviço de Atenção Integral em Hanseniase                                                                               202602
+159Atenção Primária                                                                                                        202602
+160Teleconsultoria                                                                                                         202602
+161Consultório na Rua                                                                                                      202602
+162Serviço de Terapia Intensiva                                                                                            202602
+163Serviço de Cuidados Intermediários                                                                                      202602
+164Serviço de Órteses,Próteses e Materiais Especiais em Reabilitação                                                       202602
+165Atenção às Pessoas em Situação de Violência Sexual                                                                      202602
+166Serviço de  Análise Laboratorial  de Produtos Sujeitos á  Vigilância Sanitária                                          202602
+167Atendimento Itinerante de Asistência e Ensino em Saúde                                                                  202602
+168Atenção Às Pessoas com Doenças Raras                                                                                    202602
+169Serviço de Atenção em Urologia                                                                                          202602
+170Comissões e Comitês                                                                                                     202602
+171Cuidados Paliativos                                                                                                     202602
+173Logística de Imunobiológicos                                                                                            202602
+174Imunização                                                                                                              202602

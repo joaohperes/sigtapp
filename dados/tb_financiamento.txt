@@ -1,0 +1,7 @@
+01Atenção Básica (PAB)                                                                                202602
+02Assistência Farmacêutica                                                                            202602
+04Fundo de Ações Estratégicas e Compensações (FAEC)                                                   202602
+05Incentivo - MAC                                                                                     202602
+06Média e Alta Complexidade (MAC)                                                                     202602
+07Vigilância em Saúde                                                                                 202602
+08Gestão do SUS                                                                                       202602

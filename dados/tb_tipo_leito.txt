@@ -1,0 +1,41 @@
+01Cirúrgico                                                   202602
+02Obstétricos                                                 202602
+03Clínico                                                     202602
+04Crônicos                                                    202602
+05Psiquiatria                                                 202602
+06Pneumologia Sanitária (Tisiologia)                          202602
+07Pediátricos                                                 202602
+08Reabilitação                                                202602
+09Leito Dia / Cirúrgicos                                      202602
+10Leito Dia / Aids                                            202602
+11Leito Dia / Fibrose Cística                                 202602
+12Leito Dia / Intercorrência Pós-Transplante                  202602
+13Leito Dia / Geriatria                                       202602
+14Leito Dia / Saúde Mental                                    202602
+17Estabelecimento Exclusivo UTI SUS                           202602
+51UTI II ADULTO-SINDROME RESP. AGUDA GRAVE (SRAG)-COVID-19    202602
+52UTI II PEDIATRICO-SINDROME RESP. AGUDA GRAVE (SRAG)-COVID-19202602
+65Unidade Intermediária Neonatal                              202602
+74UTI-PED TIPO II                                             202602
+75UTI-A TIPO II                                               202602
+76UTI-A TIPO III                                              202602
+77UTI Infantil I                                              202602
+78UTI Infantil II                                             202602
+79UTI-PED TIPO III                                            202602
+80UTI Neonatal I                                              202602
+81UTI Neonatal II                                             202602
+82UTI Neonatal III                                            202602
+83UTI-Q                                                       202602
+84Acolhimento Noturno                                         202602
+85UCO TIPO II                                                 202602
+86UCO TIPO III                                                202602
+87Saúde Mental (Clínico)                                      202602
+88Queimado Adulto (Clínico)                                   202602
+89Queimado Pediátrico (Clínico)                               202602
+90Queimado Adulto (Cirúrgico)                                 202602
+91Queimado Pediátrico (Cirúrgico)                             202602
+92UCI Unidade de Cuidados Intermediarios Neonatal Convencional202602
+93UCI Unidade de Cuidados Intermediarios Neonatal Canguru     202602
+94UCI-PED                                                     202602
+95UCI-A                                                       202602
+96Suporte Ventilatório Pulmonar                               202602

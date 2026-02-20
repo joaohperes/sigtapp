@@ -1,0 +1,48 @@
+001Inclui valor da anestesia                                                                           202602
+003Admite longa permanência                                                                            202602
+004Admite permanência à maior                                                                          202602
+005Admite liberação de quantidade na AIH                                                               202602
+006CNRAC                                                                                               202602
+007Permanência por dia                                                                                 202602
+008Não permite mudança de procedimento                                                                 202602
+009Exige CPF/CNS                                                                                       202602
+011Permite alta direta de UTI                                                                          202602
+012Exige idade no BPA (Consolidado)                                                                    202602
+013Verifica habilitação de terceiro                                                                    202602
+014Admite APAC de Continuidade                                                                         202602
+015Admitido apenas em Hosp.Espec/Psiquiatria                                                           202602
+017Exige Informação da OPM                                                                             202602
+020Monitoramento do CEO                                                                                202602
+021Não Exige CBO                                                                                       202602
+022Exige registro na APAC de dados complementares                                                      202602
+023Registro no SISCOLO                                                                                 202602
+024Registro no SISPRENATAL                                                                             202602
+025Registro no SISMAMA                                                                                 202602
+026Registro de Procedimentos Secundário Compativel                                                     202602
+029Admite período maior para a apresentação                                                            202602
+033APAC com validade fixa de 03 competências                                                           202602
+034Não exige CPF/CNS                                                                                   202602
+036Exige Autorização                                                                                   202602
+037Exige CNPJ do Fornecedor                                                                            202602
+038Exige Serviço/Classificação                                                                         202602
+040Registro no SISCAN                                                                                  202602
+041APAC com validade fixa de 12 competências                                                           202602
+042Não Admite Liberação de Crítica de Idade                                                            202602
+043Exige registro de CID de causas associadas                                                          202602
+044Cirurgias Eletivas                                                                                  202602
+045Diárias de Leitos Complementares                                                                    202602
+046Tratamento Ambulatorial de Doenças Crônicas                                                         202602
+047Autorização com limite máximo de 6 meses.                                                           202602
+048Exige CID                                                                                           202602
+049Permite Informação de Equipe Cirúrgica                                                              202602
+050Permite o Registro de Informações do CPF/CNS do(s) Recém-Nascido(s)                                 202602
+051Programa Mais Acesso a Especialistas - Componente Cirurgias Hospitalares                            202602
+052Programa Mais Acesso a Especialistas - Componente Cirurgias Ambulatoriais.                          202602
+053Programa Mais Acesso a Especialistas (PMAE)                                                         202602
+054APAC com validade fixa de 2 competências.                                                           202602
+055Exige data do resultado diagnóstico de Neoplasia                                                    202602
+056Exige procedimento de tomografia computadorizada                                                    202602
+057Exige procedimento de ressonância magnética                                                         202602
+058Obrigatório CPF                                                                                     202602
+059Componente Complementar - Modalidade 2                                                              202602
+060Componente Complementar - Modalidade 3                                                              202602

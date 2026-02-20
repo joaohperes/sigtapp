@@ -1,0 +1,42 @@
+040009Atendimento/acompanhamento em reabilitação física, mental, visual, auditiva e múltiplas deficiências202602
+040013Atendimento/acompanhamento de diagnóstico de doenças endocrinas/metabólicas e nutricionais          202602
+040017Nefrologia                                                                                          202602
+040024Cirurgia do aparelho digestivo, orgãos anexos e parede abdominal(inclui pré e pós operatório)       202602
+040028Outras cirurgias plásticas/reparadoras                                                              202602
+040030Sequenciais                                                                                         202602
+040032Transplantes de orgãos, tecidos e células                                                           202602
+040033Medicamentos para transplante                                                                       202602
+040038OPM para transplantes                                                                               202602
+040041Central Nacional de Regulação de Alta Complexidade (CNRAC)                                          202602
+040044Redesignação e Acompanhamento                                                                       202602
+040049Implementar Cirg. CV Pediátrica                                                                     202602
+040055Transplante - Histocompatibilidade                                                                  202602
+040062Doenças Raras                                                                                       202602
+040063Cadeiras de Rodas                                                                                   202602
+040065Medicamentos em Urgência                                                                            202602
+040066Cirurgias Eletivas - Componente Único                                                               202602
+040067Atenção Especializada em Saúde Auditiva                                                             202602
+040068Terapias Especializadas em Angiologia                                                               202602
+040069Tratamento de Doença Macular                                                                        202602
+040070OPME Não Relacionados ao Ato Cirúrgico                                                              202602
+040071Diagnóstico/tratamento em oncologia                                                                 202602
+040072Diagnóstico de trombofilia em gestante                                                              202602
+040073Reabilitação Pós-COVID-19                                                                           202602
+040074Telemedicina em Urgência                                                                            202602
+040075Fisioterapia Cardiovascular                                                                         202602
+040076Hemodinâmica em atendimento de urgência                                                             202602
+040077Exames Sorológicos e Imunológicos                                                                   202602
+040078QualiSUS Cardio                                                                                     202602
+040079Pré-cirúrgico em Cirurgias Prioritárias                                                             202602
+040080Programa Agora Tem Especialistas -Componente Cirúrgico                                              202602
+040081Síndrome Respiratória Aguda Grave - SRAG                                                            202602
+040082Alta Complexidade em Cardiologia                                                                    202602
+040083Cirurgia da Face e do Sistema Estomatognático                                                       202602
+040084Neurocirurgias                                                                                      202602
+040085Exames coprológicos                                                                                 202602
+040086Programa Agora Tem Especialistas -Componente Ambulatorial                                           202602
+040087Saúde Bucal                                                                                         202602
+040088Radioterapia                                                                                        202602
+040089Recursos Vinculados a Parcela Única                                                                 202602
+040090Recursos Vinculados a Emendas Parlamentares                                                         202602
+040091Materno Infântil                                                                                    202602
