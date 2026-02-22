@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 
 export function useProcedures() {
@@ -31,11 +31,11 @@ export function useProcedures() {
         .from('procedimentos')
         .select('co_procedimento, no_procedimento, vl_sa, vl_sh, vl_sp, tp_financiamento, no_financiamento, ds_procedimento')
         .ilike('co_procedimento', `${q}%`)
-        .limit(50))
+        .limit(200))
     } else if (isCid) {
       ;({ data, error: err } = await supabase.rpc('buscar_por_cid', {
         query: q,
-        limite: 50,
+        limite: 200,
       }))
       if (data?.length > 0) {
         setSearchMeta({ type: 'cid', co_cid: data[0].co_cid ?? q.toUpperCase(), no_cid: data[0].no_cid })
@@ -46,7 +46,7 @@ export function useProcedures() {
       setSearchMeta({ type: 'name' })
       ;({ data, error: err } = await supabase.rpc('buscar_procedimentos', {
         query: q,
-        limite: 50,
+        limite: 200,
       }))
     }
 
@@ -68,7 +68,7 @@ export function useProcedureByCode(codigo) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
-  useState(() => {
+  useEffect(() => {
     if (!codigo) return
 
     supabase

@@ -12,6 +12,13 @@ export function ProcedureDetail() {
   const [error, setError] = useState(null)
 
   useEffect(() => {
+    if (data) {
+      document.title = `${data.no_procedimento} — SIGTAP`
+      return () => { document.title = 'SIGTAP — Tabela de Procedimentos SUS' }
+    }
+  }, [data])
+
+  useEffect(() => {
     Promise.all([
       supabase
         .from('procedimentos')

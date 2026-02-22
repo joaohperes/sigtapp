@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useState, useEffect, useCallback } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
 import { SearchBar } from '../components/SearchBar'
 import { ProcedureCard } from '../components/ProcedureCard'
 import { ProcedureTable } from '../components/ProcedureTable'
@@ -9,20 +9,73 @@ import { GRUPO_MAP } from '../data/grupos'
 
 const VIEW_MODES = ['cards', 'tabela']
 const EXEMPLOS = ['colecistectomia', 'endoscopia', 'ressonância magnética', '0407010005']
+const SORT_OPTIONS = [
+  { value: 'relevancia', label: 'Relevância' },
+  { value: 'nome_az', label: 'Nome A→Z' },
+  { value: 'nome_za', label: 'Nome Z→A' },
+  { value: 'maior_valor', label: 'Maior valor' },
+  { value: 'menor_valor', label: 'Menor valor' },
+]
+const PAGE_SIZE = 30
+const RECENT_KEY = 'sigtap-recent'
+
+function totalOf(p) {
+  return (p.vl_sa || 0) + (p.vl_sh || 0) + (p.vl_sp || 0)
+}
+
+function applySort(arr, key) {
+  if (key === 'nome_az') return [...arr].sort((a, b) => a.no_procedimento.localeCompare(b.no_procedimento, 'pt-BR'))
+  if (key === 'nome_za') return [...arr].sort((a, b) => b.no_procedimento.localeCompare(a.no_procedimento, 'pt-BR'))
+  if (key === 'maior_valor') return [...arr].sort((a, b) => totalOf(b) - totalOf(a))
+  if (key === 'menor_valor') return [...arr].sort((a, b) => totalOf(a) - totalOf(b))
+  return arr
+}
 
 export function Home() {
+  const [searchParams, setSearchParams] = useSearchParams()
+  const initialQuery = searchParams.get('q') || ''
+
   const { results, loading, error, search, searchMeta } = useProcedures()
   const { grupos } = useGrupos()
   const [view, setView] = useState('cards')
-  const [searched, setSearched] = useState(false)
+  const [searched, setSearched] = useState(!!initialQuery)
 
-  // Filters
+  // Filtros
   const [showFilters, setShowFilters] = useState(false)
   const [filtroGrupo, setFiltroGrupo] = useState(null)
   const [filtroFinanciamento, setFiltroFinanciamento] = useState(null)
   const [valorMin, setValorMin] = useState('')
   const [valorMax, setValorMax] = useState('')
   const [soComDescricao, setSoComDescricao] = useState(false)
+
+  // Ordenação
+  const [sortKey, setSortKey] = useState('relevancia')
+
+  // Paginação client-side
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
+
+  // Buscas recentes
+  const [recentSearches, setRecentSearches] = useState(() => {
+    try { return JSON.parse(localStorage.getItem(RECENT_KEY) || '[]') } catch { return [] }
+  })
+
+  // Busca inicial via URL
+  useEffect(() => {
+    if (initialQuery.trim().length >= 3) {
+      search(initialQuery)
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Resetar paginação ao mudar resultados ou filtros
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE)
+  }, [results, filtroGrupo, filtroFinanciamento, valorMin, valorMax, soComDescricao, sortKey])
+
+  function saveRecentSearch(term) {
+    const updated = [term, ...recentSearches.filter(s => s !== term)].slice(0, 5)
+    setRecentSearches(updated)
+    localStorage.setItem(RECENT_KEY, JSON.stringify(updated))
+  }
 
   function resetFilters() {
     setFiltroGrupo(null)
@@ -35,14 +88,18 @@ export function Home() {
   function handleSearch(query) {
     if (query.trim().length >= 3) {
       setSearched(true)
+      setSearchParams({ q: query.trim() })
+      saveRecentSearch(query.trim())
       resetFilters()
+      setSortKey('relevancia')
     } else {
       setSearched(false)
+      setSearchParams({})
     }
     search(query)
   }
 
-  // Derived filter options from current results
+  // Opções de filtro derivadas dos resultados
   const gruposPresentes = [...new Set(
     results.map(p => p.co_procedimento?.slice(0, 2)).filter(Boolean)
   )].sort()
@@ -53,9 +110,9 @@ export function Home() {
       .map(p => [p.tp_financiamento, { tp: p.tp_financiamento, no: p.no_financiamento }])
   ).values()].sort((a, b) => a.tp.localeCompare(b.tp))
 
-  // Apply filters
+  // Aplicar filtros
   const filteredResults = results.filter(p => {
-    const total = (p.vl_sa || 0) + (p.vl_sh || 0) + (p.vl_sp || 0)
+    const total = totalOf(p)
     const grupo = p.co_procedimento?.slice(0, 2)
     if (filtroGrupo && grupo !== filtroGrupo) return false
     if (filtroFinanciamento && p.tp_financiamento !== filtroFinanciamento) return false
@@ -64,6 +121,13 @@ export function Home() {
     if (soComDescricao && p.ds_procedimento !== undefined && !p.ds_procedimento) return false
     return true
   })
+
+  // Aplicar ordenação
+  const sortedResults = applySort(filteredResults, sortKey)
+
+  // Paginação
+  const visibleResults = sortedResults.slice(0, visibleCount)
+  const hasMore = sortedResults.length > visibleCount
 
   const filtrosAtivos = [filtroGrupo, filtroFinanciamento, valorMin, valorMax, soComDescricao].filter(Boolean).length
 
@@ -81,7 +145,13 @@ export function Home() {
           </p>
 
           <div className="mt-8">
-            <SearchBar onSearch={handleSearch} loading={loading} />
+            <SearchBar
+              onSearch={handleSearch}
+              loading={loading}
+              initialValue={initialQuery}
+              recentSearches={recentSearches}
+              onSelectRecent={saveRecentSearch}
+            />
           </div>
 
           {!searched && (
@@ -122,10 +192,24 @@ export function Home() {
             {/* Results header */}
             <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
               <p className="text-sm text-slate-500">
-                {filteredResults.length}
-                {filtrosAtivos > 0 && ` de ${results.length}`} resultado{filteredResults.length !== 1 ? 's' : ''}
+                {sortedResults.length}
+                {filtrosAtivos > 0 && ` de ${results.length}`} resultado{sortedResults.length !== 1 ? 's' : ''}
+                {hasMore && <span className="text-slate-400"> · mostrando {visibleCount}</span>}
               </p>
+
               <div className="flex items-center gap-2">
+                {/* Sort */}
+                <select
+                  value={sortKey}
+                  onChange={e => setSortKey(e.target.value)}
+                  className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs
+                             text-slate-600 shadow-sm focus:border-blue-400 focus:outline-none"
+                >
+                  {SORT_OPTIONS.map(o => (
+                    <option key={o.value} value={o.value}>{o.label}</option>
+                  ))}
+                </select>
+
                 {/* Filter toggle */}
                 <button
                   onClick={() => setShowFilters(s => !s)}
@@ -259,7 +343,6 @@ export function Home() {
                   <span className="text-sm text-slate-700">Só procedimentos com descrição</span>
                 </label>
 
-                {/* Clear filters */}
                 {filtrosAtivos > 0 && (
                   <button onClick={resetFilters} className="text-xs text-blue-600 hover:underline">
                     Limpar filtros
@@ -271,20 +354,33 @@ export function Home() {
         )}
 
         {/* Results */}
-        {filteredResults.length > 0 && (
+        {visibleResults.length > 0 && (
           view === 'cards' ? (
             <div className="grid gap-3 sm:grid-cols-2">
-              {filteredResults.map((p) => (
+              {visibleResults.map((p) => (
                 <ProcedureCard key={p.co_procedimento} procedure={p} />
               ))}
             </div>
           ) : (
-            <ProcedureTable results={filteredResults} />
+            <ProcedureTable results={visibleResults} />
           )
         )}
 
-        {/* Empty after filtering */}
-        {!loading && searched && results.length > 0 && filteredResults.length === 0 && (
+        {/* Carregar mais */}
+        {hasMore && !loading && (
+          <div className="mt-6 text-center">
+            <button
+              onClick={() => setVisibleCount(c => c + PAGE_SIZE)}
+              className="rounded-lg border border-slate-200 bg-white px-6 py-2.5 text-sm font-medium
+                         text-slate-600 shadow-sm transition hover:border-slate-300 hover:text-slate-800"
+            >
+              Carregar mais ({sortedResults.length - visibleCount} restantes)
+            </button>
+          </div>
+        )}
+
+        {/* Vazio após filtro */}
+        {!loading && searched && results.length > 0 && sortedResults.length === 0 && (
           <div className="py-12 text-center">
             <p className="text-sm font-medium text-slate-600">Nenhum resultado com esses filtros</p>
             <button onClick={resetFilters} className="mt-2 text-xs text-blue-600 hover:underline">
@@ -293,7 +389,7 @@ export function Home() {
           </div>
         )}
 
-        {/* Empty - no results */}
+        {/* Sem resultados */}
         {!loading && searched && results.length === 0 && !error && (
           <div className="py-20 text-center">
             <p className="text-sm font-medium text-slate-600">Nenhum procedimento encontrado</p>
