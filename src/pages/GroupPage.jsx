@@ -122,36 +122,24 @@ export function GroupPage() {
         {/* Filtro por subgrupo */}
         {subgrupos.length > 0 && (
           <div className="mb-6">
-            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">
               Subgrupo
-            </p>
-            <div className="flex flex-wrap gap-2">
-              <button
-                onClick={() => setSubgrupoAtivo(null)}
-                className={`rounded-full px-3 py-1.5 text-xs font-medium transition border ${
-                  subgrupoAtivo === null
-                    ? `${grupo.bg} ${grupo.text} ${grupo.border}`
-                    : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
-                }`}
-              >
-                Todos ({subgrupos.reduce((s, g) => s + Number(g.qt_procedimentos), 0)})
-              </button>
+            </label>
+            <select
+              value={subgrupoAtivo ?? ''}
+              onChange={e => setSubgrupoAtivo(e.target.value || null)}
+              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm shadow-sm
+                         text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+            >
+              <option value="">
+                Todos os subgrupos ({subgrupos.reduce((s, g) => s + Number(g.qt_procedimentos), 0)})
+              </option>
               {subgrupos.map((s) => (
-                <button
-                  key={s.co_subgrupo}
-                  onClick={() => setSubgrupoAtivo(
-                    s.co_subgrupo === subgrupoAtivo ? null : s.co_subgrupo
-                  )}
-                  className={`rounded-full px-3 py-1.5 text-xs font-medium transition border ${
-                    s.co_subgrupo === subgrupoAtivo
-                      ? `${grupo.bg} ${grupo.text} ${grupo.border}`
-                      : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
-                  }`}
-                >
+                <option key={s.co_subgrupo} value={s.co_subgrupo}>
                   {s.no_subgrupo} ({s.qt_procedimentos})
-                </button>
+                </option>
               ))}
-            </div>
+            </select>
           </div>
         )}
 
