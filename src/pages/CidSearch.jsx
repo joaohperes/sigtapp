@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { useCidSearch } from '../hooks/useCidSearch'
 
-const SEXO_LABEL = { M: 'Masculino', F: 'Feminino', A: 'Ambos' }
+const SEXO_LABEL = { M: 'Masculino', F: 'Feminino', I: null, A: null } // I/A = Indiferente, não exibe badge
 const EXEMPLOS = ['câncer de ovário', 'infarto', 'diabetes', 'derrame cerebral', 'pneumonia']
 
 export function CidSearch() {
@@ -190,7 +190,7 @@ function CidRow({ cid }) {
 
       {/* Badges e ação */}
       <div className="flex shrink-0 items-center gap-2">
-        {sexo && sexo !== 'Ambos' && (
+        {sexo && (
           <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-500">
             {sexo}
           </span>
