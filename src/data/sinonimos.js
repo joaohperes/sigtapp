@@ -37,6 +37,34 @@ export const SINONIMOS = [
   ['obesidade mórbida','obesidade'],
   ['tireoide',         'tireoide'],
 
+  // Distúrbios eletrolíticos — nomenclatura dupla (kalemia/potassemia, etc.)
+  // Potássio (kalium → kalemia | potassium → potassemia)
+  ['hipocalemia',      'hipopotassemia'],   // ↓K+ — CID usa "hipopotassemia" (E876)
+  ['hipercalemia',     'hiperpotassemia'],  // ↑K+ — CID usa "hiperpotassemia" (E875)
+  ['hipokaliemia',     'hipopotassemia'],
+  ['hiperkaliemia',    'hiperpotassemia'],
+  ['kaliemia',         'potassemia'],
+  ['potassio',         'potassemia'],       // busca genérica por potássio
+  ['potássio',         'potassemia'],
+
+  // Sódio (natrium → natremia)
+  ['sodio',            'natremia'],
+  ['sódio',            'natremia'],
+  ['hipersodiemia',    'hipernatremia'],
+  ['hiposodiemia',     'hiponatremia'],
+
+  // Cálcio
+  ['calcio',           'calcemia'],
+  ['cálcio',           'calcemia'],
+
+  // Magnésio
+  ['magnesio',         'magnesemia'],
+  ['magnésio',         'magnesemia'],
+
+  // Fósforo
+  ['fosforo',          'fosfatemia'],
+  ['fósforo',          'fosfatemia'],
+
   // Neurológico / Psiquiátrico
   ['alzheimer',        'doença de alzheimer'],
   ['parkinson',        'doença de parkinson'],
