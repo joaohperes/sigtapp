@@ -175,6 +175,17 @@ export function Home() {
     search(query, searchMode)
   }
 
+  // Chamado ao clicar "Procedimentos →" em um CID específico
+  function handleCidSelect(code) {
+    setCidResults([])
+    setSearched(true)
+    setSearchParams({ q: code })
+    saveRecentSearch(code)
+    resetFilters()
+    setSortKey('relevancia')
+    search(code, null)
+  }
+
   async function handleGroupClick(g) {
     if (selectedGroup?.co_grupo === g.co_grupo) {
       setSelectedGroup(null); setSelectedSubgroup(null)
@@ -322,7 +333,7 @@ export function Home() {
                   </span>
                   <span className="flex-1 text-sm text-slate-700 truncate">{cid.no_cid?.trim()}</span>
                   <button
-                    onClick={() => handleSearch(cid.co_cid.trim())}
+                    onClick={() => handleCidSelect(cid.co_cid.trim())}
                     className="shrink-0 rounded-md border border-blue-200 bg-white px-2.5 py-1
                                text-xs font-medium text-blue-600 hover:bg-blue-50 transition"
                   >
@@ -334,7 +345,7 @@ export function Home() {
           </div>
         )}
 
-        {results.length > 0 && (
+        {results.length > 0 && cidResults.length === 0 && (
           <>
 
             {/* Results header */}
@@ -493,7 +504,7 @@ export function Home() {
         )}
 
         {/* Results */}
-        {visibleResults.length > 0 && (
+        {visibleResults.length > 0 && cidResults.length === 0 && (
           view === 'cards' ? (
             <div className="grid gap-3 sm:grid-cols-2">
               {visibleResults.map((p) => (
@@ -505,7 +516,7 @@ export function Home() {
           )
         )}
 
-        {hasMore && !loading && (
+        {hasMore && !loading && cidResults.length === 0 && (
           <div className="mt-6 text-center">
             <button
               onClick={() => setVisibleCount(c => c + PAGE_SIZE)}
