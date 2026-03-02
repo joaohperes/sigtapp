@@ -141,7 +141,7 @@ export function Home() {
       const termos = palavras.length > 0 ? palavras : [expanded]
       const { data } = await supabase
         .rpc('search_cid_unaccent', { search_terms: termos })
-      setCidResults((data || []).slice(0, 50))
+      setCidResults((data || []).slice(0, 200))
     }
   }
 
