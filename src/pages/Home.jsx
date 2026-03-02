@@ -132,7 +132,7 @@ export function Home() {
         .select('co_cid, no_cid, tp_sexo')
         .ilike('co_cid', `${q.toUpperCase()}%`)
         .order('co_cid')
-        .limit(30)
+        .limit(200)
       setCidResults(data || [])
     } else {
       // Busca por nome com unaccent
