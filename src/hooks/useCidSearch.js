@@ -34,25 +34,10 @@ export function useCidSearch() {
     setMeta({ original: q, expanded, substituicoes })
 
     const palavras = palavrasSignificativas(expanded)
+    const termos = palavras.length > 0 ? palavras : [expanded]
 
-    let queryBuilder = supabase
-      .from('cid')
-      .select('co_cid, no_cid, tp_sexo')
-      .limit(100)
-
-    // Filtra pela busca expandida completa primeiro, se tiver múltiplas palavras
-    // usa AND implícito encadeando .ilike
-    if (palavras.length === 0) {
-      queryBuilder = queryBuilder.ilike('no_cid', `%${expanded}%`)
-    } else {
-      for (const palavra of palavras) {
-        queryBuilder = queryBuilder.ilike('no_cid', `%${palavra}%`)
-      }
-    }
-
-    queryBuilder = queryBuilder.order('co_cid')
-
-    const { data, error: err } = await queryBuilder
+    const { data, error: err } = await supabase
+      .rpc('search_cid_unaccent', { search_terms: termos })
 
     if (err) {
       setError(err.message)

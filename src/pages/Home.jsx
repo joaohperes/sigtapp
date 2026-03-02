@@ -122,13 +122,11 @@ export function Home() {
     const isCid  = /^[A-Za-z]\d/i.test(q)
     if (q.length < 3 || isCode || isCid) { setCidResults([]); return }
     const { expanded } = expandirSinonimos(q)
+    const palavras = expanded.toLowerCase().split(/\s+/).filter(w => w.length >= 3)
+    const termos = palavras.length > 0 ? palavras : [expanded]
     const { data } = await supabase
-      .from('cid')
-      .select('co_cid, no_cid, tp_sexo')
-      .ilike('no_cid', `%${expanded}%`)
-      .order('co_cid')
-      .limit(8)
-    setCidResults(data || [])
+      .rpc('search_cid_unaccent', { search_terms: termos })
+    setCidResults((data || []).slice(0, 8))
   }
 
   async function handleSearch(query) {
