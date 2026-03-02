@@ -243,7 +243,7 @@ export function Home() {
   const sortedResults  = applySort(filteredResults, sortKey)
   const visibleResults = sortedResults.slice(0, visibleCount)
   const hasMore        = sortedResults.length > visibleCount
-  const filtrosAtivos  = [filtroGrupo, filtroFinanciamento, valorMin, valorMax, soComDescricao].filter(Boolean).length
+  const filtrosAtivos  = [filtroFinanciamento, valorMin, valorMax, soComDescricao].filter(Boolean).length
   const selectedEstilo = selectedGroup ? GRUPO_MAP[selectedGroup.co_grupo] : null
   const totalProcedimentos = grupos.reduce((s, g) => s + Number(g.qt_procedimentos), 0)
 
@@ -348,194 +348,222 @@ export function Home() {
         )}
 
         {results.length > 0 && cidResults.length === 0 && (
-          <>
+          <div className="flex gap-6">
 
-            {/* Results header */}
-            <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-              <p className="text-sm text-slate-500">
-                {sortedResults.length}
-                {filtrosAtivos > 0 && ` de ${results.length}`} resultado{sortedResults.length !== 1 ? 's' : ''}
-                {hasMore && <span className="text-slate-400"> · mostrando {visibleCount}</span>}
-              </p>
-
-              <div className="flex items-center gap-2">
-                <select
-                  value={sortKey}
-                  onChange={e => setSortKey(e.target.value)}
-                  className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs
-                             text-slate-600 shadow-sm focus:border-blue-400 focus:outline-none"
-                >
-                  {SORT_OPTIONS.map(o => (
-                    <option key={o.value} value={o.value}>{o.label}</option>
-                  ))}
-                </select>
-
-                <button
-                  onClick={() => setShowFilters(s => !s)}
-                  className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition ${
-                    showFilters || filtrosAtivos > 0
-                      ? 'border-blue-300 bg-blue-50 text-blue-700'
-                      : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
-                  }`}
-                >
-                  <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                      d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z" />
-                  </svg>
-                  Filtros
-                  {filtrosAtivos > 0 && (
-                    <span className="rounded-full bg-blue-600 px-1.5 py-0.5 text-[10px] font-bold text-white leading-none">
-                      {filtrosAtivos}
-                    </span>
-                  )}
-                </button>
-
-                <div className="flex rounded-lg border border-slate-200 bg-white p-0.5 shadow-sm">
-                  {VIEW_MODES.map((m) => (
+            {/* Sidebar — grupos presentes nos resultados */}
+            {gruposPresentes.length > 1 && (
+              <aside className="hidden lg:block w-56 shrink-0">
+                <div className="sticky top-6 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+                  <div className="border-b border-slate-100 px-4 py-3">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Grupos</p>
+                  </div>
+                  <div className="divide-y divide-slate-50 max-h-[80vh] overflow-y-auto">
                     <button
-                      key={m}
-                      onClick={() => setView(m)}
-                      className={`rounded-md px-3 py-1.5 text-xs font-medium capitalize transition ${
-                        view === m ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                      onClick={() => setFiltroGrupo(null)}
+                      className={`flex w-full items-center justify-between px-4 py-2.5 text-left transition ${
+                        !filtroGrupo
+                          ? 'bg-blue-50 text-blue-700 font-medium'
+                          : 'text-slate-600 hover:bg-slate-50'
                       }`}
                     >
-                      {m}
+                      <span className="text-xs leading-snug">Todos</span>
+                      <span className="ml-2 shrink-0 rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-500">
+                        {results.length.toLocaleString('pt-BR')}
+                      </span>
                     </button>
-                  ))}
+                    {gruposPresentes.map(g => {
+                      const estilo = GRUPO_MAP[g]
+                      const count = results.filter(p => p.co_procedimento?.slice(0, 2) === g).length
+                      const isActive = filtroGrupo === g
+                      return (
+                        <button
+                          key={g}
+                          onClick={() => setFiltroGrupo(isActive ? null : g)}
+                          className={`flex w-full items-center justify-between px-4 py-2.5 text-left transition ${
+                            isActive
+                              ? `${estilo?.bg ?? 'bg-blue-50'} ${estilo?.text ?? 'text-blue-700'} font-medium`
+                              : 'text-slate-600 hover:bg-slate-50'
+                          }`}
+                        >
+                          <span className="text-xs leading-snug">{estilo?.no ?? g}</span>
+                          <span className="ml-2 shrink-0 rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-500">
+                            {count.toLocaleString('pt-BR')}
+                          </span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              </aside>
+            )}
+
+            {/* Conteúdo principal */}
+            <div className="flex-1 min-w-0">
+
+              {/* Controls */}
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+                <p className="text-sm text-slate-500">
+                  {sortedResults.length}
+                  {filtrosAtivos > 0 && ` de ${results.length}`} resultado{sortedResults.length !== 1 ? 's' : ''}
+                  {hasMore && <span className="text-slate-400"> · mostrando {visibleCount}</span>}
+                </p>
+
+                <div className="flex items-center gap-2">
+                  <select
+                    value={sortKey}
+                    onChange={e => setSortKey(e.target.value)}
+                    className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs
+                               text-slate-600 shadow-sm focus:border-blue-400 focus:outline-none"
+                  >
+                    {SORT_OPTIONS.map(o => (
+                      <option key={o.value} value={o.value}>{o.label}</option>
+                    ))}
+                  </select>
+
+                  {(financiamentosPresentes.length > 1 || valorMin || valorMax || soComDescricao) && (
+                    <button
+                      onClick={() => setShowFilters(s => !s)}
+                      className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition ${
+                        showFilters || filtrosAtivos > 0
+                          ? 'border-blue-300 bg-blue-50 text-blue-700'
+                          : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
+                      }`}
+                    >
+                      <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                          d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z" />
+                      </svg>
+                      Filtros
+                      {filtrosAtivos > 0 && (
+                        <span className="rounded-full bg-blue-600 px-1.5 py-0.5 text-[10px] font-bold text-white leading-none">
+                          {filtrosAtivos}
+                        </span>
+                      )}
+                    </button>
+                  )}
+
+                  <div className="flex rounded-lg border border-slate-200 bg-white p-0.5 shadow-sm">
+                    {VIEW_MODES.map((m) => (
+                      <button
+                        key={m}
+                        onClick={() => setView(m)}
+                        className={`rounded-md px-3 py-1.5 text-xs font-medium capitalize transition ${
+                          view === m ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                        }`}
+                      >
+                        {m}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Filter panel */}
-            {showFilters && (
-              <div className="mb-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm space-y-5">
-                {gruposPresentes.length > 1 && (
+              {/* Filter panel */}
+              {showFilters && (
+                <div className="mb-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm space-y-5">
+                  {financiamentosPresentes.length > 1 && (
+                    <div>
+                      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Financiamento</p>
+                      <div className="flex flex-wrap gap-2">
+                        {financiamentosPresentes.map(({ tp, no }) => {
+                          const active = filtroFinanciamento === tp
+                          return (
+                            <button
+                              key={tp}
+                              onClick={() => setFiltroFinanciamento(active ? null : tp)}
+                              className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
+                                active
+                                  ? 'border-transparent bg-slate-700 text-white'
+                                  : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
+                              }`}
+                            >
+                              {no || tp}
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )}
+
                   <div>
-                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Grupo</p>
-                    <div className="flex flex-wrap gap-2">
-                      {gruposPresentes.map(g => {
-                        const estilo = GRUPO_MAP[g]
-                        const active = filtroGrupo === g
-                        return (
-                          <button
-                            key={g}
-                            onClick={() => setFiltroGrupo(active ? null : g)}
-                            className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
-                              active
-                                ? `${estilo?.bg ?? 'bg-blue-100'} ${estilo?.text ?? 'text-blue-700'} border-transparent`
-                                : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
-                            }`}
-                          >
-                            {g} — {estilo?.no ?? g}
-                          </button>
-                        )
-                      })}
+                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Valor total SUS</p>
+                    <div className="flex items-center gap-3">
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">R$</span>
+                        <input
+                          type="number" min="0" value={valorMin}
+                          onChange={e => setValorMin(e.target.value)}
+                          placeholder="Mínimo"
+                          className="w-36 rounded-lg border border-slate-200 pl-8 pr-3 py-2 text-sm
+                                     focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400/20"
+                        />
+                      </div>
+                      <span className="text-slate-400 text-sm">—</span>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">R$</span>
+                        <input
+                          type="number" min="0" value={valorMax}
+                          onChange={e => setValorMax(e.target.value)}
+                          placeholder="Máximo"
+                          className="w-36 rounded-lg border border-slate-200 pl-8 pr-3 py-2 text-sm
+                                     focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400/20"
+                        />
+                      </div>
                     </div>
                   </div>
-                )}
 
-                {financiamentosPresentes.length > 1 && (
-                  <div>
-                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Financiamento</p>
-                    <div className="flex flex-wrap gap-2">
-                      {financiamentosPresentes.map(({ tp, no }) => {
-                        const active = filtroFinanciamento === tp
-                        return (
-                          <button
-                            key={tp}
-                            onClick={() => setFiltroFinanciamento(active ? null : tp)}
-                            className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
-                              active
-                                ? 'border-transparent bg-slate-700 text-white'
-                                : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
-                            }`}
-                          >
-                            {no || tp}
-                          </button>
-                        )
-                      })}
-                    </div>
-                  </div>
-                )}
+                  <label className="flex cursor-pointer items-center gap-2.5">
+                    <input
+                      type="checkbox"
+                      checked={soComDescricao}
+                      onChange={e => setSoComDescricao(e.target.checked)}
+                      className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="text-sm text-slate-700">Só procedimentos com descrição</span>
+                  </label>
 
-                <div>
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Valor total SUS</p>
-                  <div className="flex items-center gap-3">
-                    <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">R$</span>
-                      <input
-                        type="number" min="0" value={valorMin}
-                        onChange={e => setValorMin(e.target.value)}
-                        placeholder="Mínimo"
-                        className="w-36 rounded-lg border border-slate-200 pl-8 pr-3 py-2 text-sm
-                                   focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400/20"
-                      />
-                    </div>
-                    <span className="text-slate-400 text-sm">—</span>
-                    <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">R$</span>
-                      <input
-                        type="number" min="0" value={valorMax}
-                        onChange={e => setValorMax(e.target.value)}
-                        placeholder="Máximo"
-                        className="w-36 rounded-lg border border-slate-200 pl-8 pr-3 py-2 text-sm
-                                   focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400/20"
-                      />
-                    </div>
-                  </div>
+                  {filtrosAtivos > 0 && (
+                    <button onClick={resetFilters} className="text-xs text-blue-600 hover:underline">
+                      Limpar filtros
+                    </button>
+                  )}
                 </div>
+              )}
 
-                <label className="flex cursor-pointer items-center gap-2.5">
-                  <input
-                    type="checkbox"
-                    checked={soComDescricao}
-                    onChange={e => setSoComDescricao(e.target.checked)}
-                    className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                  />
-                  <span className="text-sm text-slate-700">Só procedimentos com descrição</span>
-                </label>
+              {/* Results grid */}
+              {visibleResults.length > 0 && (
+                view === 'cards' ? (
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {visibleResults.map((p) => (
+                      <ProcedureCard key={p.co_procedimento} procedure={p} />
+                    ))}
+                  </div>
+                ) : (
+                  <ProcedureTable results={visibleResults} />
+                )
+              )}
 
-                {filtrosAtivos > 0 && (
-                  <button onClick={resetFilters} className="text-xs text-blue-600 hover:underline">
+              {hasMore && !loading && (
+                <div className="mt-6 text-center">
+                  <button
+                    onClick={() => setVisibleCount(c => c + PAGE_SIZE)}
+                    className="rounded-lg border border-slate-200 bg-white px-6 py-2.5 text-sm font-medium
+                               text-slate-600 shadow-sm transition hover:border-slate-300 hover:text-slate-800"
+                  >
+                    Carregar mais ({sortedResults.length - visibleCount} restantes)
+                  </button>
+                </div>
+              )}
+
+              {!loading && searched && results.length > 0 && sortedResults.length === 0 && (
+                <div className="py-12 text-center">
+                  <p className="text-sm font-medium text-slate-600">Nenhum resultado com esses filtros</p>
+                  <button onClick={resetFilters} className="mt-2 text-xs text-blue-600 hover:underline">
                     Limpar filtros
                   </button>
-                )}
-              </div>
-            )}
-          </>
-        )}
-
-        {/* Results */}
-        {visibleResults.length > 0 && cidResults.length === 0 && (
-          view === 'cards' ? (
-            <div className="grid gap-3 sm:grid-cols-2">
-              {visibleResults.map((p) => (
-                <ProcedureCard key={p.co_procedimento} procedure={p} />
-              ))}
+                </div>
+              )}
             </div>
-          ) : (
-            <ProcedureTable results={visibleResults} />
-          )
-        )}
-
-        {hasMore && !loading && cidResults.length === 0 && (
-          <div className="mt-6 text-center">
-            <button
-              onClick={() => setVisibleCount(c => c + PAGE_SIZE)}
-              className="rounded-lg border border-slate-200 bg-white px-6 py-2.5 text-sm font-medium
-                         text-slate-600 shadow-sm transition hover:border-slate-300 hover:text-slate-800"
-            >
-              Carregar mais ({sortedResults.length - visibleCount} restantes)
-            </button>
-          </div>
-        )}
-
-        {!loading && searched && results.length > 0 && sortedResults.length === 0 && (
-          <div className="py-12 text-center">
-            <p className="text-sm font-medium text-slate-600">Nenhum resultado com esses filtros</p>
-            <button onClick={resetFilters} className="mt-2 text-xs text-blue-600 hover:underline">
-              Limpar filtros
-            </button>
           </div>
         )}
 
