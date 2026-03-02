@@ -57,10 +57,11 @@ export function SearchBar({ onSearch, loading, initialValue = '', recentSearches
 
       <input
         type="text"
+        autoComplete="off"
         value={value}
         onChange={handleChange}
         onFocus={handleFocus}
-        placeholder="Buscar por nome ou código  (ex: colecistectomia, 0407010005)"
+        placeholder="Buscar por nome, código ou CID  (ex: colecistectomia, 0407010005, J94)"
         className="w-full rounded-xl border border-gray-200 bg-white py-3.5 pl-12 pr-10
                    text-sm shadow-sm placeholder:text-gray-400
                    focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
