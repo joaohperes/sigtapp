@@ -10,7 +10,8 @@ export function useProcedures() {
   const search = useCallback(async (query, mode = null) => {
     const q = query?.trim() ?? ''
 
-    const isCode = (mode === 'codigo') || (!mode && /^\d+$/.test(q))
+    const isNumeric = /^\d+$/.test(q)
+    const isCode = (mode === 'codigo' && isNumeric) || (!mode && isNumeric)
     const isCid  = (mode === 'cid')    || (!mode && /^[A-Za-z]\d/i.test(q))
 
     // Modo forçado: 2 chars mínimo; CID auto: 2 chars; texto: 3 chars

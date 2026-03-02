@@ -141,7 +141,7 @@ export function Home() {
       const termos = palavras.length > 0 ? palavras : [expanded]
       const { data } = await supabase
         .rpc('search_cid_unaccent', { search_terms: termos })
-      setCidResults((data || []).slice(0, 10))
+      setCidResults((data || []).slice(0, 50))
     }
   }
 
@@ -151,7 +151,8 @@ export function Home() {
     const currentQ = searchParams.get('q') || ''
     if (currentQ.trim().length >= 2) {
       search(currentQ, newMode)
-      searchCids(currentQ)
+      if (newMode !== 'codigo') searchCids(currentQ)
+      else setCidResults([])
     }
   }
 
@@ -166,7 +167,8 @@ export function Home() {
       setSortKey('relevancia')
       setSelectedGroup(null)
       setSelectedSubgroup(null)
-      searchCids(q)
+      if (searchMode !== 'codigo') searchCids(q)
+      else setCidResults([])
     } else {
       setSearched(false)
       setSearchParams({})
