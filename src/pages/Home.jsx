@@ -120,15 +120,29 @@ export function Home() {
 
   async function searchCids(query) {
     const q = query.trim()
-    const isCode = /^\d+$/.test(q)
-    const isCid  = /^[A-Za-z]\d/i.test(q)
-    if (q.length < 3 || isCode || isCid) { setCidResults([]); return }
-    const { expanded } = expandirSinonimos(q)
-    const palavras = expanded.toLowerCase().split(/\s+/).filter(w => w.length >= 3)
-    const termos = palavras.length > 0 ? palavras : [expanded]
-    const { data } = await supabase
-      .rpc('search_cid_unaccent', { search_terms: termos })
-    setCidResults((data || []).slice(0, 8))
+    const isNumericCode = /^\d+$/.test(q)
+    const isCidCode     = /^[A-Za-z]\d/i.test(q)
+
+    if (q.length < 2 || isNumericCode) { setCidResults([]); return }
+
+    if (isCidCode) {
+      // Busca todos os CIDs cujo código começa com o prefixo digitado (ex: "j1" → J10, J11...)
+      const { data } = await supabase
+        .from('cid')
+        .select('co_cid, no_cid, tp_sexo')
+        .ilike('co_cid', `${q.toUpperCase()}%`)
+        .order('co_cid')
+        .limit(30)
+      setCidResults(data || [])
+    } else {
+      // Busca por nome com unaccent
+      const { expanded } = expandirSinonimos(q)
+      const palavras = expanded.toLowerCase().split(/\s+/).filter(w => w.length >= 3)
+      const termos = palavras.length > 0 ? palavras : [expanded]
+      const { data } = await supabase
+        .rpc('search_cid_unaccent', { search_terms: termos })
+      setCidResults((data || []).slice(0, 10))
+    }
   }
 
   function handleModeChange(mode) {
@@ -322,13 +336,6 @@ export function Home() {
 
         {results.length > 0 && (
           <>
-            {/* CID banner (busca por código CID) */}
-            {searchMeta?.type === 'cid' && (
-              <div className="mb-4 flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-4 py-2.5 text-sm text-blue-700">
-                <span className="font-mono font-semibold">{searchMeta.co_cid}</span>
-                {searchMeta.no_cid && <span className="text-blue-600">— {searchMeta.no_cid}</span>}
-              </div>
-            )}
 
             {/* Results header */}
             <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
