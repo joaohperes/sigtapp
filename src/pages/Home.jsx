@@ -324,7 +324,7 @@ export function Home() {
               </svg>
               Diagnósticos CID-10 relacionados
             </p>
-            <div className="space-y-0.5">
+            <div className="grid gap-x-4 gap-y-0.5 sm:grid-cols-2">
               {cidResults.map((cid) => (
                 <div
                   key={cid.co_cid}
