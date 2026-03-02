@@ -637,7 +637,7 @@ export function Home() {
                           }`}>
                             {g.co_grupo}
                           </span>
-                          <span className="min-w-0 truncate text-xs leading-tight">{estilo.no}</span>
+                          <span className="text-xs leading-snug">{estilo.no}</span>
                         </button>
                       )
                     })}
@@ -679,7 +679,7 @@ export function Home() {
                                               : 'text-slate-700 hover:bg-slate-50'
                                           }`}
                             >
-                              <span className="min-w-0 flex-1 truncate text-sm">{s.no_subgrupo}</span>
+                              <span className="flex-1 text-sm leading-snug">{s.no_subgrupo}</span>
                               <span className="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-500">
                                 {Number(s.qt_procedimentos).toLocaleString('pt-BR')}
                               </span>
