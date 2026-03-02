@@ -10,7 +10,6 @@ import { supabase } from '../lib/supabase'
 import { expandirSinonimos } from '../data/sinonimos'
 
 const VIEW_MODES = ['cards', 'tabela']
-const EXEMPLOS = ['colecistectomia', 'endoscopia', 'ressonância magnética', '0407010005']
 const SORT_OPTIONS = [
   { value: 'relevancia', label: 'Relevância' },
   { value: 'nome_az',    label: 'Nome A→Z' },
@@ -78,6 +77,9 @@ export function Home() {
     try { return JSON.parse(localStorage.getItem(RECENT_KEY) || '[]') } catch { return [] }
   })
 
+  // Modo de busca forçado
+  const [searchMode, setSearchMode] = useState(null) // null | 'cid' | 'codigo'
+
   // Drill-down de grupos
   const [selectedGroup, setSelectedGroup] = useState(null)
   const [selectedSubgroup, setSelectedSubgroup] = useState(null)
@@ -129,10 +131,20 @@ export function Home() {
     setCidResults((data || []).slice(0, 8))
   }
 
+  function handleModeChange(mode) {
+    const newMode = searchMode === mode ? null : mode
+    setSearchMode(newMode)
+    const currentQ = searchParams.get('q') || ''
+    if (currentQ.trim().length >= 2) {
+      search(currentQ, newMode)
+      searchCids(currentQ)
+    }
+  }
+
   async function handleSearch(query) {
     const q = query.trim()
-    const isCidPattern = /^[A-Za-z]\d/i.test(q)
-    if (q.length >= 3 || (q.length >= 2 && isCidPattern)) {
+    const isCidLike = searchMode === 'cid' || /^[A-Za-z]\d/i.test(q)
+    if (q.length >= 3 || (q.length >= 2 && isCidLike)) {
       setSearched(true)
       setSearchParams({ q })
       saveRecentSearch(q)
@@ -146,7 +158,7 @@ export function Home() {
       setSearchParams({})
       setCidResults([])
     }
-    search(query)
+    search(query, searchMode)
   }
 
   async function handleGroupClick(g) {
@@ -231,19 +243,25 @@ export function Home() {
             />
           </div>
 
-          {!searched && (
-            <div className="mt-4 flex flex-wrap justify-center gap-2">
-              {EXEMPLOS.map((term) => (
-                <button
-                  key={term}
-                  onClick={() => handleSearch(term)}
-                  className="rounded-full bg-white/10 px-3 py-1 text-xs text-blue-100 hover:bg-white/20 transition"
-                >
-                  {term}
-                </button>
-              ))}
-            </div>
-          )}
+          {/* Filtros de modo de busca */}
+          <div className="mt-4 flex justify-center gap-2">
+            {[
+              { mode: 'cid',    label: 'CID-10' },
+              { mode: 'codigo', label: 'Código' },
+            ].map(({ mode, label }) => (
+              <button
+                key={mode}
+                onClick={() => handleModeChange(mode)}
+                className={`rounded-full px-4 py-1.5 text-xs font-medium transition ${
+                  searchMode === mode
+                    ? 'bg-white text-blue-700 shadow'
+                    : 'bg-white/10 text-blue-100 hover:bg-white/20'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
 
           <div className="mt-5">
             <Link

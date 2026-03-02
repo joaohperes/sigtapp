@@ -7,14 +7,14 @@ export function useProcedures() {
   const [error, setError] = useState(null)
   const [searchMeta, setSearchMeta] = useState(null)
 
-  const search = useCallback(async (query) => {
+  const search = useCallback(async (query, mode = null) => {
     const q = query?.trim() ?? ''
 
-    const isCode = /^\d+$/.test(q)
-    const isCid  = /^[A-Za-z]\d/i.test(q)
+    const isCode = (mode === 'codigo') || (!mode && /^\d+$/.test(q))
+    const isCid  = (mode === 'cid')    || (!mode && /^[A-Za-z]\d/i.test(q))
 
-    // CID codes buscam a partir de 2 chars (ex: "j1" → J1x); demais precisam de 3
-    if (q.length < 2 || (q.length < 3 && !isCid)) {
+    // Modo forçado: 2 chars mínimo; CID auto: 2 chars; texto: 3 chars
+    if (q.length < 2 || (q.length < 3 && !isCid && mode === null)) {
       setResults([])
       setError(null)
       setSearchMeta(null)
