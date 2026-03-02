@@ -578,7 +578,7 @@ export function Home() {
           </div>
         )}
 
-        {!loading && searched && results.length === 0 && !error && (
+        {!loading && searched && results.length === 0 && !error && searchMode !== 'cid' && (
           <div className="py-20 text-center">
             <p className="text-sm font-medium text-slate-600">Nenhum procedimento encontrado</p>
             <p className="mt-1 text-xs text-slate-400">Tente outros termos ou verifique o código</p>
