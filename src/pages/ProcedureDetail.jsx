@@ -60,7 +60,7 @@ export function ProcedureDetail() {
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
       <div className="bg-gradient-to-br from-blue-800 via-blue-700 to-blue-600">
-        <div className="mx-auto max-w-3xl px-4 py-8">
+        <div className="mx-auto max-w-7xl px-6 py-8">
           <Link
             to={data.co_grupo ? `/grupo/${data.co_grupo}` : '/'}
             className="text-sm text-blue-300 hover:text-white transition"
@@ -88,83 +88,90 @@ export function ProcedureDetail() {
         </div>
       </div>
 
-      <main className="mx-auto max-w-3xl px-4 py-8 space-y-4">
-        {/* Valores */}
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <ValueCard label="Ambulatorial (SA)" value={data.vl_sa} />
-          <ValueCard label="Hospitalar (SH)" value={data.vl_sh} />
-          <ValueCard label="Profissional (SP)" value={data.vl_sp} />
-          <ValueCard label="Total SUS" value={total} highlight />
-        </div>
+      <main className="mx-auto max-w-7xl px-6 py-8">
+        <div className="grid gap-4 lg:grid-cols-[220px_1fr_1fr]">
 
-        {/* Descrição */}
-        {data.ds_procedimento && (
-          <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-            <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
-              Descrição
-            </h2>
-            <p className="text-sm leading-relaxed text-slate-700">{toSentenceCase(data.ds_procedimento)}</p>
+          {/* Coluna esquerda — Valores */}
+          <div className="space-y-3">
+            <ValueCard label="Ambulatorial (SA)" value={data.vl_sa} />
+            <ValueCard label="Hospitalar (SH)" value={data.vl_sh} />
+            <ValueCard label="Profissional (SP)" value={data.vl_sp} />
+            <ValueCard label="Total SUS" value={total} highlight />
           </div>
-        )}
 
-        {/* CIDs relacionados */}
-        {cids.length > 0 && (
-          <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-            <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                CIDs relacionados
-              </h2>
-              <span className="text-xs text-slate-400">{cids.length} código{cids.length !== 1 ? 's' : ''}</span>
-            </div>
-
-            {cidsPrincipais.length > 0 && (
-              <div className="mb-4">
-                <p className="mb-2 text-xs font-medium text-slate-400">Principais</p>
-                <div className="grid sm:grid-cols-2 divide-y sm:divide-y-0 divide-slate-100 rounded-lg border border-slate-100">
-                  {cidsPrincipais.map((c) => (
-                    <CidRow key={c.co_cid} cid={c} principal />
-                  ))}
-                </div>
+          {/* Coluna central — Classificação + Descrição */}
+          <div className="space-y-4">
+            {(data.no_grupo || data.no_subgrupo || data.no_forma_org) && (
+              <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  Classificação
+                </h2>
+                <dl className="space-y-2">
+                  {data.no_grupo && (
+                    <Row label="Grupo" value={`${data.co_grupo} — ${data.no_grupo}`} />
+                  )}
+                  {data.no_subgrupo && (
+                    <Row label="Subgrupo" value={`${data.co_subgrupo} — ${data.no_subgrupo}`} />
+                  )}
+                  {data.no_forma_org && (
+                    <Row label="Forma de Organização" value={`${data.co_forma_org} — ${data.no_forma_org}`} />
+                  )}
+                  {data.no_financiamento && (
+                    <Row label="Financiamento" value={`${data.tp_financiamento} — ${data.no_financiamento}`} />
+                  )}
+                </dl>
               </div>
             )}
 
-            {cidsSecundarios.length > 0 && (
-              <div>
+            {data.ds_procedimento && (
+              <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  Descrição
+                </h2>
+                <p className="text-sm leading-relaxed text-slate-700">{toSentenceCase(data.ds_procedimento)}</p>
+              </div>
+            )}
+          </div>
+
+          {/* Coluna direita — CIDs relacionados */}
+          {cids.length > 0 && (
+            <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+              <div className="mb-3 flex items-center justify-between">
+                <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  CIDs relacionados
+                </h2>
+                <span className="text-xs text-slate-400">{cids.length} código{cids.length !== 1 ? 's' : ''}</span>
+              </div>
+
+              <div className="max-h-[70vh] overflow-y-auto space-y-4">
                 {cidsPrincipais.length > 0 && (
-                  <p className="mb-2 text-xs font-medium text-slate-400">Secundários</p>
+                  <div>
+                    <p className="mb-2 text-xs font-medium text-slate-400">Principais</p>
+                    <div className="divide-y divide-slate-100 rounded-lg border border-slate-100">
+                      {cidsPrincipais.map((c) => (
+                        <CidRow key={c.co_cid} cid={c} principal />
+                      ))}
+                    </div>
+                  </div>
                 )}
-                <div className="grid sm:grid-cols-2 divide-y sm:divide-y-0 divide-slate-100 rounded-lg border border-slate-100">
-                  {cidsSecundarios.map((c) => (
-                    <CidRow key={c.co_cid} cid={c} />
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
 
-        {/* Classificação */}
-        {(data.no_grupo || data.no_subgrupo || data.no_forma_org) && (
-          <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-            <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
-              Classificação
-            </h2>
-            <dl className="space-y-2">
-              {data.no_grupo && (
-                <Row label="Grupo" value={`${data.co_grupo} — ${data.no_grupo}`} />
-              )}
-              {data.no_subgrupo && (
-                <Row label="Subgrupo" value={`${data.co_subgrupo} — ${data.no_subgrupo}`} />
-              )}
-              {data.no_forma_org && (
-                <Row label="Forma de Organização" value={`${data.co_forma_org} — ${data.no_forma_org}`} />
-              )}
-              {data.no_financiamento && (
-                <Row label="Financiamento" value={`${data.tp_financiamento} — ${data.no_financiamento}`} />
-              )}
-            </dl>
-          </div>
-        )}
+                {cidsSecundarios.length > 0 && (
+                  <div>
+                    {cidsPrincipais.length > 0 && (
+                      <p className="mb-2 text-xs font-medium text-slate-400">Secundários</p>
+                    )}
+                    <div className="divide-y divide-slate-100 rounded-lg border border-slate-100">
+                      {cidsSecundarios.map((c) => (
+                        <CidRow key={c.co_cid} cid={c} />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+        </div>
       </main>
     </div>
   )
