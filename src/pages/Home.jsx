@@ -131,7 +131,8 @@ export function Home() {
 
   async function handleSearch(query) {
     const q = query.trim()
-    if (q.length >= 3) {
+    const isCidPattern = /^[A-Za-z]\d/i.test(q)
+    if (q.length >= 3 || (q.length >= 2 && isCidPattern)) {
       setSearched(true)
       setSearchParams({ q })
       saveRecentSearch(q)

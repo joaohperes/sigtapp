@@ -10,7 +10,11 @@ export function useProcedures() {
   const search = useCallback(async (query) => {
     const q = query?.trim() ?? ''
 
-    if (q.length < 3) {
+    const isCode = /^\d+$/.test(q)
+    const isCid  = /^[A-Za-z]\d/i.test(q)
+
+    // CID codes buscam a partir de 2 chars (ex: "j1" → J1x); demais precisam de 3
+    if (q.length < 2 || (q.length < 3 && !isCid)) {
       setResults([])
       setError(null)
       setSearchMeta(null)
@@ -19,9 +23,6 @@ export function useProcedures() {
 
     setLoading(true)
     setError(null)
-
-    const isCode = /^\d+$/.test(q)
-    const isCid = /^[A-Za-z]\d/i.test(q)
 
     let data, err
 
