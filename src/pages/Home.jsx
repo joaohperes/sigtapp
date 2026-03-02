@@ -139,8 +139,21 @@ export function Home() {
       const { expanded } = expandirSinonimos(q)
       const palavras = expanded.toLowerCase().split(/\s+/).filter(w => w.length >= 3)
       const termos = palavras.length > 0 ? palavras : [expanded]
-      const { data } = await supabase
-        .rpc('search_cid_unaccent', { search_terms: termos })
+      let { data } = await supabase.rpc('search_cid_unaccent', { search_terms: termos })
+
+      // Fallback: se não achou com todos os termos, busca cada um separado e une
+      if ((!data || data.length === 0) && termos.length > 1) {
+        const buscas = await Promise.all(
+          termos.map(t => supabase.rpc('search_cid_unaccent', { search_terms: [t] }))
+        )
+        const seen = new Set()
+        data = buscas.flatMap(r => r.data || []).filter(c => {
+          if (seen.has(c.co_cid)) return false
+          seen.add(c.co_cid)
+          return true
+        })
+      }
+
       setCidResults((data || []).slice(0, 200))
     }
   }
@@ -273,35 +286,24 @@ export function Home() {
           {/* Filtros de modo de busca */}
           <div className="mt-4 flex justify-center gap-2">
             {[
+              { mode: null,     label: 'Tudo' },
               { mode: 'cid',    label: 'CID-10' },
               { mode: 'codigo', label: 'Código' },
             ].map(({ mode, label }) => (
               <button
-                key={mode}
+                key={mode ?? 'tudo'}
                 onClick={() => handleModeChange(mode)}
                 className={`rounded-full px-4 py-1.5 text-xs font-medium transition ${
                   searchMode === mode
-                    ? 'bg-white text-blue-700 shadow'
+                    ? mode === null
+                      ? 'bg-emerald-400/90 text-white shadow'
+                      : 'bg-white text-blue-700 shadow'
                     : 'bg-white/10 text-blue-100 hover:bg-white/20'
                 }`}
               >
                 {label}
               </button>
             ))}
-          </div>
-
-          <div className="mt-5">
-            <Link
-              to="/cid"
-              className="inline-flex items-center gap-1.5 rounded-full border border-blue-400/40
-                         bg-blue-900/30 px-4 py-1.5 text-xs text-blue-200 transition hover:bg-blue-900/50"
-            >
-              <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              Buscar por CID-10 (D.O., laudos)
-            </Link>
           </div>
         </div>
       </div>
