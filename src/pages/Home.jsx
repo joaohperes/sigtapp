@@ -19,6 +19,11 @@ const SORT_OPTIONS = [
 ]
 const PAGE_SIZE = 30
 const RECENT_KEY = 'sigtap-recent'
+const SEARCH_MODES = [
+  { mode: null,      label: 'Tudo' },
+  { mode: 'cid',     label: 'CID-10' },
+  { mode: 'codigo',  label: 'Código' },
+]
 
 function totalOf(p) {
   return (p.vl_sa || 0) + (p.vl_sh || 0) + (p.vl_sp || 0)
@@ -256,8 +261,9 @@ export function Home() {
   const sortedResults  = applySort(filteredResults, sortKey)
   const visibleResults = sortedResults.slice(0, visibleCount)
   const hasMore        = sortedResults.length > visibleCount
-  const filtrosAtivos  = [filtroFinanciamento, valorMin, valorMax, soComDescricao].filter(Boolean).length
-  const selectedEstilo = selectedGroup ? GRUPO_MAP[selectedGroup.co_grupo] : null
+  const filtrosAtivos     = [filtroFinanciamento, valorMin, valorMax, soComDescricao].filter(Boolean).length
+  const activeModeIndex   = SEARCH_MODES.findIndex(m => m.mode === searchMode)
+  const selectedEstilo    = selectedGroup ? GRUPO_MAP[selectedGroup.co_grupo] : null
   const totalProcedimentos = grupos.reduce((s, g) => s + Number(g.qt_procedimentos), 0)
 
   return (
@@ -283,27 +289,30 @@ export function Home() {
             />
           </div>
 
-          {/* Filtros de modo de busca */}
-          <div className="mt-4 flex justify-center gap-2">
-            {[
-              { mode: null,     label: 'Tudo' },
-              { mode: 'cid',    label: 'CID-10' },
-              { mode: 'codigo', label: 'Código' },
-            ].map(({ mode, label }) => (
-              <button
-                key={mode ?? 'tudo'}
-                onClick={() => handleModeChange(mode)}
-                className={`rounded-full px-4 py-1.5 text-xs font-medium transition ${
-                  searchMode === mode
-                    ? mode === null
-                      ? 'bg-emerald-400/90 text-white shadow'
-                      : 'bg-white text-blue-700 shadow'
-                    : 'bg-white/10 text-blue-100 hover:bg-white/20'
-                }`}
-              >
-                {label}
-              </button>
-            ))}
+          {/* Segmented control */}
+          <div className="mt-4 flex justify-center">
+            <div className="relative grid grid-cols-3 rounded-full bg-white/20">
+              {/* Sliding indicator */}
+              <div
+                aria-hidden
+                className="absolute inset-y-0 rounded-full bg-white shadow-sm transition-transform duration-200 ease-in-out"
+                style={{
+                  width: 'calc(100% / 3)',
+                  transform: `translateX(calc(${activeModeIndex} * 100%))`,
+                }}
+              />
+              {SEARCH_MODES.map(({ mode, label }) => (
+                <button
+                  key={mode ?? 'tudo'}
+                  onClick={() => handleModeChange(mode)}
+                  className={`relative z-10 rounded-full px-6 py-1.5 text-center text-xs font-semibold transition-colors duration-150 ${
+                    searchMode === mode ? 'text-blue-700' : 'text-blue-100 hover:text-white'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -349,7 +358,7 @@ export function Home() {
           </div>
         )}
 
-        {results.length > 0 && cidResults.length === 0 && (
+        {results.length > 0 && (cidResults.length === 0 || searchMode === null) && (
           <div className="flex gap-6">
 
             {/* Sidebar — grupos presentes nos resultados */}
