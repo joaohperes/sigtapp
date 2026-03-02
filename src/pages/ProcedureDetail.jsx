@@ -120,7 +120,7 @@ export function ProcedureDetail() {
             {cidsPrincipais.length > 0 && (
               <div className="mb-4">
                 <p className="mb-2 text-xs font-medium text-slate-400">Principais</p>
-                <div className="divide-y divide-slate-100 rounded-lg border border-slate-100">
+                <div className="grid sm:grid-cols-2 divide-y sm:divide-y-0 divide-slate-100 rounded-lg border border-slate-100">
                   {cidsPrincipais.map((c) => (
                     <CidRow key={c.co_cid} cid={c} principal />
                   ))}
@@ -133,7 +133,7 @@ export function ProcedureDetail() {
                 {cidsPrincipais.length > 0 && (
                   <p className="mb-2 text-xs font-medium text-slate-400">Secundários</p>
                 )}
-                <div className="divide-y divide-slate-100 rounded-lg border border-slate-100">
+                <div className="grid sm:grid-cols-2 divide-y sm:divide-y-0 divide-slate-100 rounded-lg border border-slate-100">
                   {cidsSecundarios.map((c) => (
                     <CidRow key={c.co_cid} cid={c} />
                   ))}
