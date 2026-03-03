@@ -22,6 +22,7 @@ export default async function handler(req, res) {
 Analise o texto clínico abaixo e retorne APENAS JSON válido com três campos:
 
 1. "cids": lista dos CIDs-10 mais prováveis (máximo 6) diretamente relacionados ao MOTIVO DA INTERNAÇÃO ATUAL, código SEM ponto (ex: "K920") e justificativa breve. Regras para CIDs:
+   - Prefira SEMPRE o CID mais específico disponível: se o texto descreve uma manifestação clínica precisa (ex: melena → K921, hematêmese → K920, dispneia → J069, edema agudo pulmão → J810), use esse código em vez do genérico "sem outra especificação"
    - Inclua comorbidades APENAS se impactarem diretamente o quadro atual
    - NÃO infira diagnósticos psiquiátricos (F00-F99) a partir de medicamentos de uso contínuo
    - NÃO inclua condições inferidas de medicamentos sem menção explícita no texto
