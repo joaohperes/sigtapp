@@ -21,8 +21,16 @@ export default async function handler(req, res) {
 
 Analise o texto clínico abaixo e retorne APENAS JSON válido com três campos:
 
-1. "cids": lista dos CIDs-10 mais prováveis (máximo 6), código SEM ponto (ex: "K920") e justificativa breve
-2. "termos": lista de 3 a 5 termos de busca em português para procedimentos SIGTAP. IMPORTANTE: o primeiro termo deve ser sempre "tratamento de [diagnóstico principal]" (ex: "tratamento infarto agudo miocardio", "tratamento pneumonia", "tratamento avc isquemico"). Os demais podem ser procedimentos específicos como exames, cirurgias ou intervenções
+1. "cids": lista dos CIDs-10 mais prováveis (máximo 6) diretamente relacionados ao MOTIVO DA INTERNAÇÃO ATUAL, código SEM ponto (ex: "K920") e justificativa breve. Regras para CIDs:
+   - Inclua comorbidades APENAS se impactarem diretamente o quadro atual
+   - NÃO infira diagnósticos psiquiátricos (F00-F99) a partir de medicamentos de uso contínuo
+   - NÃO inclua condições inferidas de medicamentos sem menção explícita no texto
+
+2. "termos": lista de 3 a 5 termos de busca em português para procedimentos SIGTAP. Regras para termos:
+   - O primeiro DEVE ser "tratamento de [diagnóstico principal COM qualificador anatômico]" (ex: "tratamento hemorragia digestiva alta", "tratamento infarto agudo miocardio", "tratamento pneumonia bacteriana", "tratamento avc isquemico")
+   - Os demais devem ser procedimentos ESPECÍFICOS ao sistema/órgão acometido, com qualificador anatômico obrigatório (ex: "endoscopia digestiva alta diagnostica", "transfusao concentrado hemacias", "cateterismo cardiaco", "tomografia cranio")
+   - NUNCA use termos genéricos sem qualificador anatômico (ex: ERRADO: "tratamento hemorragia"; CORRETO: "tratamento hemorragia digestiva alta")
+   - Use terminologia SUS/SIGTAP (ex: "hemacias" não "eritrócitos", "digestiva" não "gastrointestinal")
 3. "aih": parágrafo único corrido para AIH, seguindo EXATAMENTE este modelo (substitua os colchetes pelo conteúdo do texto clínico):
 
 "Internação por [diagnóstico principal], [complicações ou contexto clínico relevante], em paciente com [antecedentes/comorbidades relevantes], com [achados clínicos na admissão: sinais vitais, estado geral], [achados laboratoriais e/ou de imagem relevantes], necessitando [lista de intervenções necessárias: tratamentos, procedimentos, monitorização]. Quadro [grave/moderado/de risco] justificando internação hospitalar em regime de [urgência/eletivo]."

@@ -16,7 +16,11 @@ function ehRelevante(nomeProc, termo) {
   const palavras = normalizarTexto(termo).split(/\s+/).filter(w => w.length >= 4 && !STOPWORDS.has(w))
   if (palavras.length === 0) return true
   const matches = palavras.filter(w => procNorm.includes(w))
-  return matches.length >= Math.min(2, palavras.length)
+  // Para termos com 3+ palavras significativas, exige 75% de correspondência (arredondando pra cima).
+  // Na prática: 3 palavras → precisa de todas 3; 4 palavras → 3; 5 → 4.
+  // Isso evita que "tratamento hemorragia digestiva" aceite "HEMORRAGIA BUCO-DENTAL".
+  const threshold = palavras.length <= 2 ? palavras.length : Math.ceil(palavras.length * 0.75)
+  return matches.length >= threshold
 }
 
 function getSession() {
