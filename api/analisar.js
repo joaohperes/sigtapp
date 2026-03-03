@@ -1,4 +1,4 @@
-import Anthropic from '@anthropic-ai/sdk'
+import Groq from 'groq-sdk'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -10,56 +10,33 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Texto da anamnese não informado' })
   }
 
-  const apiKey = process.env.ANTHROPIC_API_KEY
+  const apiKey = process.env.GROQ_API_KEY
   if (!apiKey) {
     return res.status(500).json({ error: 'API key não configurada' })
   }
 
-  const client = new Anthropic({ apiKey })
+  const client = new Groq({ apiKey })
+
+  const prompt = `Você é um especialista em codificação médica no SUS brasileiro (CID-10 e SIGTAP).
+Analise o texto clínico abaixo e retorne APENAS JSON válido com:
+- "cids": lista dos CIDs-10 mais prováveis (máximo 6), com o código SEM ponto (ex: "K920") e uma justificativa breve
+- "termos": lista de 3 a 5 termos de busca em português para encontrar procedimentos SIGTAP relevantes
+
+Formato obrigatório:
+{"cids": [{"co_cid": "K920", "justificativa": "Melena e hematêmese descritas"}], "termos": ["endoscopia digestiva", "hemostasia endoscópica"]}
+
+Texto clínico:
+${anamnese}`
 
   try {
-    const response = await client.messages.create({
-      model: 'claude-opus-4-6',
-      max_tokens: 1024,
-      system: `Você é um especialista em codificação médica no SUS brasileiro (CID-10 e SIGTAP).
-Analise o texto clínico e retorne JSON com:
-- "cids": lista dos CIDs-10 mais prováveis (máximo 6), com código SEM ponto (ex: "K920") e justificativa breve
-- "termos": lista de 3 a 5 termos de busca em português para procedimentos SIGTAP`,
-      messages: [{ role: 'user', content: anamnese }],
-      output_config: {
-        format: {
-          type: 'json_schema',
-          json_schema: {
-            name: 'analise_medica',
-            schema: {
-              type: 'object',
-              properties: {
-                cids: {
-                  type: 'array',
-                  items: {
-                    type: 'object',
-                    properties: {
-                      co_cid: { type: 'string' },
-                      justificativa: { type: 'string' },
-                    },
-                    required: ['co_cid', 'justificativa'],
-                    additionalProperties: false,
-                  },
-                },
-                termos: {
-                  type: 'array',
-                  items: { type: 'string' },
-                },
-              },
-              required: ['cids', 'termos'],
-              additionalProperties: false,
-            },
-          },
-        },
-      },
+    const completion = await client.chat.completions.create({
+      model: 'llama-3.3-70b-versatile',
+      messages: [{ role: 'user', content: prompt }],
+      response_format: { type: 'json_object' },
+      temperature: 0.1,
     })
 
-    const text = response.content[0]?.text
+    const text = completion.choices[0]?.message?.content
     if (!text) {
       return res.status(502).json({ error: 'Resposta vazia da IA' })
     }
