@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { ProcedureRow } from '../components/ProcedureCard'
@@ -19,16 +19,26 @@ function ehRelevante(nomeProc, termo) {
   return matches.length >= Math.min(2, palavras.length)
 }
 
+function getSession() {
+  try { return JSON.parse(sessionStorage.getItem('aih-session') || 'null') ?? {} } catch { return {} }
+}
+
 export function AnamnesePage() {
   const navigate = useNavigate()
-  const [anamnese, setAnamnese] = useState('')
+  const [anamnese, setAnamnese] = useState(() => getSession().anamnese || '')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
-  const [cids, setCids] = useState([])
-  const [procedimentos, setProcedimentos] = useState([])
-  const [aih, setAih] = useState('')
-  const [analyzed, setAnalyzed] = useState(false)
+  const [cids, setCids] = useState(() => getSession().cids || [])
+  const [procedimentos, setProcedimentos] = useState(() => getSession().procedimentos || [])
+  const [aih, setAih] = useState(() => getSession().aih || '')
+  const [analyzed, setAnalyzed] = useState(() => getSession().analyzed || false)
   const [aihCopied, setAihCopied] = useState(false)
+
+  useEffect(() => {
+    if (analyzed) {
+      sessionStorage.setItem('aih-session', JSON.stringify({ anamnese, cids, procedimentos, aih, analyzed }))
+    }
+  }, [anamnese, cids, procedimentos, aih, analyzed])
 
   async function handleAnalyze() {
     if (anamnese.trim().length < 20) return
@@ -334,6 +344,18 @@ export function AnamnesePage() {
 
         </div>
       </main>
+
+      <footer className="py-6 text-center">
+        <p className="text-xs text-slate-400">
+          Desenvolvido por{' '}
+          <a href="https://github.com/joaohperes" target="_blank" rel="noopener noreferrer"
+            className="text-slate-500 transition hover:text-slate-700">
+            @joaohperes
+          </a>
+          {' '}com{' '}
+          <span className="font-medium text-orange-400">Claude</span>
+        </p>
+      </footer>
     </div>
   )
 }

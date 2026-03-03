@@ -834,6 +834,18 @@ export function Home() {
           </div>
         )}
       </main>
+
+      <footer className="py-6 text-center">
+        <p className="text-xs text-slate-400">
+          Desenvolvido por{' '}
+          <a href="https://github.com/joaohperes" target="_blank" rel="noopener noreferrer"
+            className="text-slate-500 transition hover:text-slate-700">
+            @joaohperes
+          </a>
+          {' '}com{' '}
+          <span className="font-medium text-orange-400">Claude</span>
+        </p>
+      </footer>
     </div>
   )
 }
