@@ -5,6 +5,20 @@ import { ProcedureRow } from '../components/ProcedureCard'
 
 const EXEMPLO = `Paciente masculino, 58 anos, hipertenso e diabético tipo 2. Queixa de dor torácica opressiva com irradiação para o membro superior esquerdo iniciada há 2 horas, associada a sudorese fria, náuseas e dispneia. Pressão arterial 160/100 mmHg, FC 98 bpm. ECG com supradesnivelamento de ST em V1-V4.`
 
+const STOPWORDS = new Set(['de', 'do', 'da', 'dos', 'das', 'em', 'no', 'na', 'nos', 'nas', 'e', 'ou', 'um', 'uma', 'para', 'com', 'por', 'a', 'o', 'as', 'os', 'ao', 'aos'])
+
+function normalizarTexto(str) {
+  return str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z\s]/g, '')
+}
+
+function ehRelevante(nomeProc, termo) {
+  const procNorm = normalizarTexto(nomeProc)
+  const palavras = normalizarTexto(termo).split(/\s+/).filter(w => w.length >= 4 && !STOPWORDS.has(w))
+  if (palavras.length === 0) return true
+  const matches = palavras.filter(w => procNorm.includes(w))
+  return matches.length >= Math.min(2, palavras.length)
+}
+
 export function AnamnesePage() {
   const navigate = useNavigate()
   const [anamnese, setAnamnese] = useState('')
@@ -64,14 +78,17 @@ export function AnamnesePage() {
       )
 
       const seen = new Set()
-      const procs = buscas
-        .flatMap(r => r.data || [])
-        .filter(p => {
-          if (seen.has(p.co_procedimento)) return false
+      const procs = []
+      for (let i = 0; i < buscas.length; i++) {
+        const termo = termos[i] ?? ''
+        for (const p of (buscas[i].data || [])) {
+          if (seen.has(p.co_procedimento)) continue
+          if (!ehRelevante(p.no_procedimento, termo)) continue
           seen.add(p.co_procedimento)
-          return true
-        })
-        .slice(0, 12)
+          procs.push(p)
+        }
+      }
+      procs.splice(12)
 
       setCids(cidsEnriquecidos)
       setProcedimentos(procs)

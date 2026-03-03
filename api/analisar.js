@@ -25,7 +25,7 @@ Analise o texto clínico abaixo e retorne APENAS JSON válido com três campos:
 2. "termos": lista de 3 a 5 termos de busca em português para procedimentos SIGTAP. IMPORTANTE: o primeiro termo deve ser sempre "tratamento de [diagnóstico principal]" (ex: "tratamento infarto agudo miocardio", "tratamento pneumonia", "tratamento avc isquemico"). Os demais podem ser procedimentos específicos como exames, cirurgias ou intervenções
 3. "aih": parágrafo único corrido para AIH, seguindo EXATAMENTE este modelo (substitua os colchetes pelo conteúdo do texto clínico):
 
-"AIH: Internação por [diagnóstico principal], [complicações ou contexto clínico relevante], em paciente com [antecedentes/comorbidades relevantes], com [achados clínicos na admissão: sinais vitais, estado geral], [achados laboratoriais e/ou de imagem relevantes], necessitando [lista de intervenções necessárias: tratamentos, procedimentos, monitorização]. Quadro [grave/moderado/de risco] justificando internação hospitalar em regime de [urgência/eletivo]."
+"Internação por [diagnóstico principal], [complicações ou contexto clínico relevante], em paciente com [antecedentes/comorbidades relevantes], com [achados clínicos na admissão: sinais vitais, estado geral], [achados laboratoriais e/ou de imagem relevantes], necessitando [lista de intervenções necessárias: tratamentos, procedimentos, monitorização]. Quadro [grave/moderado/de risco] justificando internação hospitalar em regime de [urgência/eletivo]."
 
 Regras:
 - Texto corrido, sem títulos, sem marcadores, sem quebras de linha
