@@ -25,12 +25,11 @@ Analise o texto clínico abaixo e retorne APENAS JSON válido com três campos:
 2. "termos": lista de 3 a 5 termos de busca em português para procedimentos SIGTAP
 3. "aih": parágrafo único corrido para AIH, seguindo EXATAMENTE este modelo (substitua os colchetes pelo conteúdo do texto clínico):
 
-"AIH: Internação por [diagnóstico principal] ([CID principal]), [complicações ou contexto clínico relevante com seus CIDs entre parênteses], em paciente com [antecedentes/comorbidades relevantes], com [achados clínicos na admissão: sinais vitais, estado geral], [achados laboratoriais e/ou de imagem relevantes], necessitando [lista de intervenções necessárias: tratamentos, procedimentos, monitorização]. Quadro [grave/moderado/de risco] justificando internação hospitalar em regime de [urgência/eletivo]. ([CID principal] / [A definir])"
+"AIH: Internação por [diagnóstico principal], [complicações ou contexto clínico relevante], em paciente com [antecedentes/comorbidades relevantes], com [achados clínicos na admissão: sinais vitais, estado geral], [achados laboratoriais e/ou de imagem relevantes], necessitando [lista de intervenções necessárias: tratamentos, procedimentos, monitorização]. Quadro [grave/moderado/de risco] justificando internação hospitalar em regime de [urgência/eletivo]."
 
 Regras:
 - Texto corrido, sem títulos, sem marcadores, sem quebras de linha
-- Inclua os códigos CID-10 inline entre parênteses ao mencionar cada diagnóstico
-- Mantenha "[A definir]" no final para o código SIGTAP
+- NÃO inclua nenhum código CID-10 ou SIGTAP no texto
 - Seja objetivo e técnico, como uma justificativa médica real para o SUS
 
 Texto clínico:

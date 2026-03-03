@@ -73,18 +73,9 @@ export function AnamnesePage() {
         })
         .slice(0, 12)
 
-      // Substituir [A definir] pelo primeiro procedimento encontrado
-      let aihFinal = aihTexto
-      if (procs.length > 0 && aihFinal.includes('[A definir]')) {
-        aihFinal = aihFinal.replace(
-          '[A definir]',
-          `${procs[0].co_procedimento} – ${procs[0].no_procedimento}`
-        )
-      }
-
       setCids(cidsEnriquecidos)
       setProcedimentos(procs)
-      setAih(aihFinal)
+      setAih(aihTexto)
       setAnalyzed(true)
     } catch (err) {
       setError(err.message)
