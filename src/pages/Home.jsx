@@ -29,12 +29,21 @@ function totalOf(p) {
   return (p.vl_sa || 0) + (p.vl_sh || 0) + (p.vl_sp || 0)
 }
 
+function relevancePriority(p) {
+  const nome = p.no_procedimento?.toUpperCase() || ''
+  const grupo = p.co_procedimento?.slice(0, 2) || ''
+  if (nome.startsWith('TRATAMENTO')) return 0
+  if (grupo === '03') return 1  // procedimentos clínicos
+  if (grupo === '04') return 2  // procedimentos cirúrgicos
+  return 3
+}
+
 function applySort(arr, key) {
   if (key === 'nome_az')    return [...arr].sort((a, b) => a.no_procedimento.localeCompare(b.no_procedimento, 'pt-BR'))
   if (key === 'nome_za')    return [...arr].sort((a, b) => b.no_procedimento.localeCompare(a.no_procedimento, 'pt-BR'))
   if (key === 'maior_valor') return [...arr].sort((a, b) => totalOf(b) - totalOf(a))
   if (key === 'menor_valor') return [...arr].sort((a, b) => totalOf(a) - totalOf(b))
-  return arr
+  return [...arr].sort((a, b) => relevancePriority(a) - relevancePriority(b))
 }
 
 function Spinner() {
