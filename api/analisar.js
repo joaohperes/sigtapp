@@ -62,7 +62,18 @@ ${anamnese}`
       return res.status(502).json({ error: 'Resposta vazia da IA' })
     }
 
-    const result = JSON.parse(text)
+    const raw = JSON.parse(text)
+
+    // Normaliza nomes de campos — Llama pode retornar variações como "code", "cid", "codigo"
+    const cids = (raw.cids || raw.diagnoses || raw.diagnosticos || []).map(c => ({
+      co_cid: (c.co_cid || c.code || c.cid || c.codigo || '')
+        .replace(/\./g, '')
+        .toUpperCase()
+        .trim(),
+      justificativa: c.justificativa || c.justification || c.rationale || c.description || '',
+    })).filter(c => c.co_cid)
+
+    const result = { cids, termos: raw.termos || raw.terms || [], aih: raw.aih || '' }
     return res.status(200).json(result)
   } catch (err) {
     console.error('Erro ao analisar anamnese:', err)
