@@ -336,7 +336,11 @@ export function AnamnesePage() {
                     )}
                   </button>
                 </div>
-                <p className="text-xs leading-relaxed text-slate-700 whitespace-pre-wrap">{aih}</p>
+                <div className="space-y-3">
+                  {aih.split('\n\n').filter(p => p.trim()).map((p, i) => (
+                    <p key={i} className="text-sm leading-relaxed text-slate-700">{p.trim()}</p>
+                  ))}
+                </div>
               </div>
             )}
           </div>

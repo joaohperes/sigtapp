@@ -32,13 +32,28 @@ Analise o texto clínico abaixo e retorne APENAS JSON válido com três campos:
    - Os demais devem ser procedimentos ESPECÍFICOS ao sistema/órgão acometido, com qualificador anatômico obrigatório (ex: "endoscopia digestiva alta diagnostica", "transfusao concentrado hemacias", "cateterismo cardiaco", "tomografia cranio")
    - NUNCA use termos genéricos sem qualificador anatômico (ex: ERRADO: "tratamento hemorragia"; CORRETO: "tratamento hemorragia digestiva alta")
    - Use terminologia SUS/SIGTAP (ex: "hemacias" não "eritrócitos", "digestiva" não "gastrointestinal")
-3. "aih": parágrafo único corrido para AIH, seguindo EXATAMENTE este modelo (substitua os colchetes pelo conteúdo do texto clínico):
+3. "aih": texto estruturado em parágrafos para laudo de AIH. Use EXATAMENTE a estrutura abaixo, separando os parágrafos com \n\n. Cada parágrafo é um texto corrido, sem títulos, sem marcadores.
 
-"Internação por [diagnóstico principal], [complicações ou contexto clínico relevante], em paciente com [antecedentes/comorbidades relevantes], com [achados clínicos na admissão: sinais vitais, estado geral], [achados laboratoriais e/ou de imagem relevantes], necessitando [lista de intervenções necessárias: tratamentos, procedimentos, monitorização]. Quadro [grave/moderado/de risco] justificando internação hospitalar em regime de [urgência/eletivo]."
+PARÁGRAFO 1 — APRESENTAÇÃO CLÍNICA (sempre presente):
+"Internação em caráter de [urgência/eletivo] por [diagnóstico principal com qualificação clínica, ex: hemorragia digestiva aguda com choque hipovolêmico], em paciente [contexto: oncológico em QT, diabético descompensado, etc.], admitido(a) com [achados de admissão: sinais vitais COMPLETOS com valores e unidades — PA mmHg, FC bpm, SpO₂ %, PAM mmHg se disponível — e estado geral: consciência, perfusão, etc.]."
+
+PARÁGRAFO 2 — EXAME FÍSICO ESPECÍFICO (inclua SOMENTE se houver achados específicos relevantes além dos sinais vitais, ex: toque retal, ausculta pulmonar, abdome, déficits neurológicos):
+"Exame físico [com/evidenciando] [achados específicos e relevantes ao diagnóstico]."
+
+PARÁGRAFO 3 — EXAMES COMPLEMENTARES (inclua SOMENTE se houver resultados laboratoriais ou de imagem mencionados no texto; liste os valores COM unidades completas — g/dL, /mm³, mg/L, mmol/L, s, U/L, etc.):
+"Provas diagnósticas realizadas na admissão: [exame 1 (valor unidade); exame 2 (valor unidade); ...] ."
+
+PARÁGRAFO 4 — CONDUTAS NECESSÁRIAS (sempre presente):
+"Necessitou de [lista de intervenções realizadas ou necessárias: reposição volêmica, transfusão, antibioticoterapia, monitorização hemodinâmica, procedimentos diagnósticos/terapêuticos, etc.]."
+
+PARÁGRAFO 5 — JUSTIFICATIVA (sempre presente):
+"Quadro clínico [grave/moderado/de risco], [elemento adicional de gravidade ou contexto relevante se houver], justificando internação hospitalar para [objetivos: estabilização hemodinâmica, suporte transfusional, investigação etiológica, tratamento específico, etc.]."
 
 Regras:
-- Texto corrido, sem títulos, sem marcadores, sem quebras de linha
+- Cada parágrafo é texto corrido sem subtítulos ou marcadores
+- Omita os parágrafos 2 e 3 se não houver dados suficientes no texto — nunca invente valores
 - NÃO inclua nenhum código CID-10 ou SIGTAP no texto
+- Inclua TODOS os valores laboratoriais mencionados no texto, com unidades corretas
 - Seja objetivo e técnico, como uma justificativa médica real para o SUS
 - OBRIGATÓRIO: use acentuação correta do português (ã, ç, ê, ô, á, é, í, ó, ú, etc.) em todos os textos
 
