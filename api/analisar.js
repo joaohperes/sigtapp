@@ -79,7 +79,18 @@ ${anamnese}`
   try {
     const completion = await client.chat.completions.create({
       model: 'llama-3.3-70b-versatile',
-      messages: [{ role: 'user', content: prompt }],
+      messages: [
+        {
+          role: 'system',
+          content: 'Você é um especialista em codificação médica no SUS brasileiro. ' +
+            'REGRA ABSOLUTA: todo texto em português deve usar acentuação correta — ' +
+            'internação (não "internacao"), urgência (não "urgencia"), diagnóstico (não "diagnostico"), ' +
+            'acidente vascular cerebral isquêmico, administração, avaliação, função, ' +
+            'crônico, médico, cardíaco, neurológico, etc. ' +
+            'Nunca omita acentos, cedilhas ou til em palavras portuguesas.',
+        },
+        { role: 'user', content: prompt },
+      ],
       response_format: { type: 'json_object' },
       temperature: 0.1,
     })
