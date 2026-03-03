@@ -118,38 +118,48 @@ export function AnamnesePage() {
         }))
       }
 
-      const buscas = await Promise.all(
-        termos.slice(0, 5).map(t =>
+      // Todas as buscas em paralelo: CID primeiro + FTS por termos
+      const [cidResult, ...buscas] = await Promise.all([
+        cidsSugeridos.length > 0
+          ? supabase.rpc('buscar_por_cid', { query: cidsSugeridos[0].co_cid, limite: 10 })
+          : Promise.resolve({ data: [] }),
+        ...termos.slice(0, 5).map(t =>
           supabase.rpc('buscar_procedimentos', { query: ftsQuery(t), limite: 20 })
-        )
-      )
+        ),
+      ])
 
       const seen = new Set()
       const procs = []
+      const numTermos = buscas.length
+
+      // CID-based: TRATAMENTO → _src = -1 (mais alta prioridade no sort)
+      //            outros     → _src = numTermos (vai para o final)
+      for (const p of (cidResult.data || [])) {
+        seen.add(p.co_procedimento)
+        const isTrat = /^TRATAMENTO\b/i.test(p.no_procedimento || '')
+        procs.push({ ...p, _src: isTrat ? -1 : numTermos })
+      }
+
+      // Termos FTS: _src = índice do termo (0 = mais relevante)
       for (let i = 0; i < buscas.length; i++) {
         const termo = termos[i] ?? ''
         for (const p of (buscas[i].data || [])) {
           if (seen.has(p.co_procedimento)) continue
           if (!ehRelevante(p.no_procedimento, termo)) continue
           seen.add(p.co_procedimento)
-          procs.push(p)
+          procs.push({ ...p, _src: i })
         }
       }
-      // Busca complementar pelo CID principal — captura procedimentos SIGTAP
-      // vinculados via tabela de CID (ex: K921 → "TRATAMENTO DE OUTRAS DOENCAS DO APARELHO DIGESTIVO")
-      // que a busca por texto normalmente não alcança.
-      if (cidsSugeridos.length > 0) {
-        const { data: cidProcs } = await supabase.rpc('buscar_por_cid', {
-          query: cidsSugeridos[0].co_cid,
-          limite: 10,
-        })
-        for (const p of (cidProcs || [])) {
-          if (!seen.has(p.co_procedimento)) {
-            seen.add(p.co_procedimento)
-            procs.push(p)
-          }
-        }
-      }
+
+      // Ordena por relevância:
+      // 1º TRATAMENTO (diretamente vinculado ao CID > por termo > outros)
+      // 2º demais procedimentos por índice de termo
+      procs.sort((a, b) => {
+        const aTrat = /^TRATAMENTO\b/i.test(a.no_procedimento || '')
+        const bTrat = /^TRATAMENTO\b/i.test(b.no_procedimento || '')
+        if (aTrat !== bTrat) return aTrat ? -1 : 1
+        return a._src - b._src
+      })
 
       procs.splice(12)
 
