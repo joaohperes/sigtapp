@@ -100,7 +100,15 @@ ${anamnese}`
       justificativa: c.justificativa || c.justification || c.rationale || c.description || '',
     })).filter(c => c.co_cid)
 
-    const result = { cids, termos: raw.termos || raw.terms || [], aih: raw.aih || '' }
+    // Normaliza separadores de parágrafo — o modelo às vezes usa ". . " (ponto espaço ponto espaço)
+    // em vez de "\n\n", especialmente em respostas compactas.
+    const aihRaw = raw.aih || ''
+    const aih = aihRaw
+      .replace(/\.\s*\n\s*\.\s*\n?/g, '.\n\n')                    // ".\n.\n" → ".\n\n"
+      .replace(/\.\s+\.\s+(?=[A-ZÁÉÍÓÚÃÕÂÊÎ])/g, '.\n\n')        // ". . P" → ".\n\nP"
+      .trim()
+
+    const result = { cids, termos: raw.termos || raw.terms || [], aih }
     return res.status(200).json(result)
   } catch (err) {
     console.error('Erro ao analisar anamnese:', err)

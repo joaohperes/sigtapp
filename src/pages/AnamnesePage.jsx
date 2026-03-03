@@ -139,9 +139,9 @@ export function AnamnesePage() {
       // vinculados via tabela de CID (ex: K921 → "TRATAMENTO DE OUTRAS DOENCAS DO APARELHO DIGESTIVO")
       // que a busca por texto normalmente não alcança.
       if (cidsSugeridos.length > 0) {
-        const { data: cidProcs } = await supabase.rpc('buscar_procedimentos', {
+        const { data: cidProcs } = await supabase.rpc('buscar_por_cid', {
           query: cidsSugeridos[0].co_cid,
-          limite: 5,
+          limite: 10,
         })
         for (const p of (cidProcs || [])) {
           if (!seen.has(p.co_procedimento)) {
