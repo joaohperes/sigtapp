@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import { ProcedureCard } from '../components/ProcedureCard'
+import { ProcedureRow } from '../components/ProcedureCard'
 
 const EXEMPLO = `Paciente masculino, 58 anos, hipertenso e diabético tipo 2. Queixa de dor torácica opressiva com irradiação para o membro superior esquerdo iniciada há 2 horas, associada a sudorese fria, náuseas e dispneia. Pressão arterial 160/100 mmHg, FC 98 bpm. ECG com supradesnivelamento de ST em V1-V4.`
 
@@ -169,7 +169,7 @@ export function AnamnesePage() {
 
         {/* Resultados */}
         {analyzed && (
-          <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_2fr]">
+          <div className="mt-6 space-y-6">
 
             {/* Painel CIDs */}
             <div>
@@ -183,33 +183,36 @@ export function AnamnesePage() {
               {cids.length === 0 ? (
                 <p className="text-sm text-slate-400">Nenhum CID identificado</p>
               ) : (
-                <div className="space-y-2">
-                  {cids.map((c) => (
+                <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                  {cids.map((c, i) => (
                     <div
                       key={c.co_cid}
                       className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
                     >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0">
-                          <span className="font-mono text-sm font-bold text-indigo-600">
-                            {c.co_cid}
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-sm font-bold text-indigo-600">
+                          {c.co_cid}
+                        </span>
+                        {i === 0 && (
+                          <span className="rounded-full bg-indigo-600 px-2 py-0.5 text-[10px] font-bold text-white">
+                            Principal
                           </span>
-                          {c.no_cid ? (
-                            <p className="mt-0.5 text-sm font-medium text-slate-800 leading-snug">
-                              {c.no_cid}
-                            </p>
-                          ) : (
-                            <p className="mt-0.5 text-xs text-slate-400 italic">
-                              Código não encontrado na tabela
-                            </p>
-                          )}
-                          {c.justificativa && (
-                            <p className="mt-1.5 text-xs leading-relaxed text-slate-500">
-                              {c.justificativa}
-                            </p>
-                          )}
-                        </div>
+                        )}
                       </div>
+                      {c.no_cid ? (
+                        <p className="mt-0.5 text-sm font-medium text-slate-800 leading-snug">
+                          {c.no_cid}
+                        </p>
+                      ) : (
+                        <p className="mt-0.5 text-xs text-slate-400 italic">
+                          Código não encontrado na tabela
+                        </p>
+                      )}
+                      {c.justificativa && (
+                        <p className="mt-1.5 text-xs leading-relaxed text-slate-500">
+                          {c.justificativa}
+                        </p>
+                      )}
                       <button
                         onClick={() => handleVerProcedimentos(c.co_cid)}
                         className="mt-3 w-full rounded-lg border border-indigo-200 bg-indigo-50 py-1.5
@@ -235,9 +238,9 @@ export function AnamnesePage() {
               {procedimentos.length === 0 ? (
                 <p className="text-sm text-slate-400">Nenhum procedimento encontrado</p>
               ) : (
-                <div className="grid gap-3 sm:grid-cols-2">
+                <div className="space-y-2">
                   {procedimentos.map((p) => (
-                    <ProcedureCard key={p.co_procedimento} procedure={p} />
+                    <ProcedureRow key={p.co_procedimento} procedure={p} />
                   ))}
                 </div>
               )}

@@ -53,3 +53,32 @@ function ValueCell({ label, value }) {
     </div>
   )
 }
+
+export function ProcedureRow({ procedure }) {
+  const { co_procedimento, no_procedimento, vl_sa, vl_sh, vl_sp, no_financiamento } = procedure
+  const total = (vl_sa || 0) + (vl_sh || 0) + (vl_sp || 0)
+  const estilo = GRUPO_MAP[co_procedimento?.slice(0, 2)]
+
+  return (
+    <Link
+      to={`/procedimento/${co_procedimento}`}
+      className="group flex items-center gap-3 rounded-lg border border-slate-200 bg-white
+                 px-4 py-3 shadow-sm transition hover:border-slate-300 hover:shadow-md"
+    >
+      {estilo && <div className={`h-8 w-1 shrink-0 rounded-full ${estilo.dot}`} />}
+      <div className="min-w-0 flex-1">
+        <p className="font-mono text-xs text-slate-400">{formatCodigo(co_procedimento)}</p>
+        <p className="text-sm font-medium leading-snug text-slate-800">{no_procedimento}</p>
+        {no_financiamento && (
+          <span className="mt-1 inline-block rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-500">
+            {no_financiamento}
+          </span>
+        )}
+      </div>
+      <div className="shrink-0 text-right">
+        <p className="text-xs text-slate-400">Total SUS</p>
+        <p className="text-sm font-bold text-emerald-600">{formatBRL(total)}</p>
+      </div>
+    </Link>
+  )
+}
