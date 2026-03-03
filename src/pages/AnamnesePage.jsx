@@ -11,14 +11,21 @@ function normalizarTexto(str) {
   return str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z\s]/g, '')
 }
 
+// Mini-stemming: remove os últimos 2 chars em palavras longas para lidar com
+// variações de gênero/número do SIGTAP (digestiva↔digestivo, hemácias↔hemácia, etc.)
+function stem(w) {
+  return w.length >= 7 ? w.slice(0, -2) : w
+}
+
 function ehRelevante(nomeProc, termo) {
   const procNorm = normalizarTexto(nomeProc)
   const palavras = normalizarTexto(termo).split(/\s+/).filter(w => w.length >= 4 && !STOPWORDS.has(w))
   if (palavras.length === 0) return true
-  const matches = palavras.filter(w => procNorm.includes(w))
-  // Para termos com 3+ palavras significativas, exige 75% de correspondência (arredondando pra cima).
-  // Na prática: 3 palavras → precisa de todas 3; 4 palavras → 3; 5 → 4.
-  // Isso evita que "tratamento hemorragia digestiva" aceite "HEMORRAGIA BUCO-DENTAL".
+  // Compara usando stem para tolerar digestiva↔digestivo, hemorragia↔hemorrágico, etc.
+  const matches = palavras.filter(w => procNorm.includes(stem(w)))
+  // 3+ palavras: exige 75% (na prática: 3 palavras→3, 4→3, 5→4).
+  // Evita "HEMORRAGIA BUCO-DENTAL" passar em busca de "hemorragia digestiva alta"
+  // sem que variações de gênero/número bloqueiem resultados legítimos.
   const threshold = palavras.length <= 2 ? palavras.length : Math.ceil(palavras.length * 0.75)
   return matches.length >= threshold
 }
