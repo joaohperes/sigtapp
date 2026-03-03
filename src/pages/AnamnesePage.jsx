@@ -135,6 +135,22 @@ export function AnamnesePage() {
           procs.push(p)
         }
       }
+      // Busca complementar pelo CID principal — captura procedimentos SIGTAP
+      // vinculados via tabela de CID (ex: K921 → "TRATAMENTO DE OUTRAS DOENCAS DO APARELHO DIGESTIVO")
+      // que a busca por texto normalmente não alcança.
+      if (cidsSugeridos.length > 0) {
+        const { data: cidProcs } = await supabase.rpc('buscar_procedimentos', {
+          query: cidsSugeridos[0].co_cid,
+          limite: 5,
+        })
+        for (const p of (cidProcs || [])) {
+          if (!seen.has(p.co_procedimento)) {
+            seen.add(p.co_procedimento)
+            procs.push(p)
+          }
+        }
+      }
+
       procs.splice(12)
 
       setCids(cidsEnriquecidos)
@@ -350,9 +366,13 @@ export function AnamnesePage() {
                   </button>
                 </div>
                 <div className="space-y-3">
-                  {aih.split('\n\n').filter(p => p.trim()).map((p, i) => (
-                    <p key={i} className="text-sm leading-relaxed text-slate-700">{p.trim()}</p>
-                  ))}
+                  {aih
+                    .split(/\n[\s.]*\n/)
+                    .map(p => p.replace(/^[\s.]+/, '').trim())
+                    .filter(p => p)
+                    .map((p, i) => (
+                      <p key={i} className="text-sm leading-relaxed text-slate-700">{p}</p>
+                    ))}
                 </div>
               </div>
             )}
