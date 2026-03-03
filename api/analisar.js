@@ -32,29 +32,45 @@ Analise o texto clínico abaixo e retorne APENAS JSON válido com três campos:
    - Os demais devem ser procedimentos ESPECÍFICOS ao sistema/órgão acometido, com qualificador anatômico obrigatório (ex: "endoscopia digestiva alta diagnostica", "transfusao concentrado hemacias", "cateterismo cardiaco", "tomografia cranio")
    - NUNCA use termos genéricos sem qualificador anatômico (ex: ERRADO: "tratamento hemorragia"; CORRETO: "tratamento hemorragia digestiva alta")
    - Use terminologia SUS/SIGTAP (ex: "hemacias" não "eritrócitos", "digestiva" não "gastrointestinal")
-3. "aih": texto estruturado em parágrafos para laudo de AIH. Use EXATAMENTE a estrutura abaixo, separando os parágrafos com \n\n. Cada parágrafo é um texto corrido, sem títulos, sem marcadores.
+3. "aih": texto estruturado em parágrafos para laudo de AIH. Separe os parágrafos com \n\n. Cada parágrafo é texto corrido, sem títulos, sem marcadores.
 
 PARÁGRAFO 1 — APRESENTAÇÃO CLÍNICA (sempre presente):
-"Internação em caráter de [urgência/eletivo] por [diagnóstico principal com qualificação clínica, ex: hemorragia digestiva aguda com choque hipovolêmico], em paciente [contexto: oncológico em QT, diabético descompensado, etc.], admitido(a) com [achados de admissão: sinais vitais COMPLETOS com valores e unidades — PA mmHg, FC bpm, SpO₂ %, PAM mmHg se disponível — e estado geral: consciência, perfusão, etc.]."
+Modelo: "Internação em caráter de [urgência/eletivo] por [diagnóstico + qualificação clínica], em paciente [contexto sucinto], admitido(a) com [qualificador hemodinâmico] (PA X/X mmHg, FC X bpm, SpO₂ X% em ar ambiente, PAM X mmHg), [outros achados do estado geral: consciência, perfusão, extremidades]."
+Regras obrigatórias do P1:
+  • Use ABREVIAÇÕES: PA, FC, SpO₂, PAM, GCS — nunca "pressão arterial" ou "frequência cardíaca" por extenso
+  • Coloque os valores dos sinais vitais ENTRE PARÊNTESES após o qualificador clínico (ex: "com instabilidade hemodinâmica (PA 89/65 mmHg, FC 113 bpm, SpO₂ 88% em ar ambiente, PAM 64 mmHg)")
+  • Inclua PAM se mencionada no texto; inclua o suporte de O₂ junto com SpO₂ (ex: "em ar ambiente", "sob cateter O₂")
+  • Inclua outros achados do estado geral de admissão (nível de consciência, perfusão periférica, extremidades, TEC)
 
-PARÁGRAFO 2 — EXAME FÍSICO ESPECÍFICO (inclua SOMENTE se houver achados específicos relevantes além dos sinais vitais, ex: toque retal, ausculta pulmonar, abdome, déficits neurológicos):
-"Exame físico [com/evidenciando] [achados específicos e relevantes ao diagnóstico]."
+PARÁGRAFO 2 — EXAME FÍSICO ESPECÍFICO (inclua SOMENTE se houver achados específicos relevantes ao diagnóstico — ex: toque retal, ausculta pulmonar, déficit neurológico focal, abdome agudo):
+Modelo: "Exame físico [com/evidenciando] [achado específico mais relevante ao diagnóstico]."
+Regra: foque no achado mais importante e diagnóstico — não repita sinais vitais nem achados genéricos.
 
-PARÁGRAFO 3 — EXAMES COMPLEMENTARES (inclua SOMENTE se houver resultados laboratoriais ou de imagem mencionados no texto; liste os valores COM unidades completas — g/dL, /mm³, mg/L, mmol/L, s, U/L, etc.):
-"Provas diagnósticas realizadas na admissão: [exame 1 (valor unidade); exame 2 (valor unidade); ...] ."
+PARÁGRAFO 3 — EXAMES COMPLEMENTARES (inclua SOMENTE se houver VALORES NUMÉRICOS de exames no texto):
+Modelo: "Provas diagnósticas realizadas na admissão: hemograma completo (Hb X g/dL; Ht X%; leucócitos X/mm³; plaquetas X/mm³), coagulograma (TP X s; RNI X,X; TTPa X,X s), PCR X mg/L, ureia X mg/dL, creatinina X mg/dL."
+Regras obrigatórias do P3:
+  • NUNCA liste apenas o nome do exame — inclua SEMPRE o valor numérico e a unidade (ex: "Hb 9,6 g/dL", não "hemoglobina")
+  • Se um exame foi solicitado mas o resultado não consta no texto, OMITA-O completamente
+  • Agrupe em subconjuntos quando pertinente: hemograma, coagulograma, função renal, etc.
+  • Unidades corretas: g/dL para hemoglobina, % para hematócrito, /mm³ para leucócitos e plaquetas, s para tempos de coagulação, mg/L para PCR, mg/dL para ureia/creatinina, mmol/L para eletrólitos, U/L para enzimas
 
-PARÁGRAFO 4 — CONDUTAS NECESSÁRIAS (sempre presente):
-"Necessitou de [lista de intervenções realizadas ou necessárias: reposição volêmica, transfusão, antibioticoterapia, monitorização hemodinâmica, procedimentos diagnósticos/terapêuticos, etc.]."
+PARÁGRAFO 4 — CONDUTAS (sempre presente):
+Modelo: "Necessitou de [lista das intervenções EFETIVAMENTE realizadas ou explicitamente solicitadas no texto]."
+Regras obrigatórias do P4:
+  • Liste APENAS o que está no texto (prescrições, condutas anotadas, procedimentos solicitados)
+  • NÃO invente condutas não mencionadas — se não há antibiótico prescrito, não escreva "antibioticoterapia"
+  • Use nomes específicos: "inibidor de bomba de prótons EV" (não "medicação endovenosa"), "transfusão de concentrado de hemácias" (não "transfusão sanguínea")
+  • Inclua procedimentos planejados se explicitamente mencionados (ex: "avaliação por endoscopia digestiva alta")
 
 PARÁGRAFO 5 — JUSTIFICATIVA (sempre presente):
-"Quadro clínico [grave/moderado/de risco], [elemento adicional de gravidade ou contexto relevante se houver], justificando internação hospitalar para [objetivos: estabilização hemodinâmica, suporte transfusional, investigação etiológica, tratamento específico, etc.]."
+Modelo: "Quadro clínico [grave/moderado/de risco], com [principal elemento de gravidade clínica], justificando internação hospitalar para [objetivos do tratamento]."
+Regras obrigatórias do P5:
+  • Foque no RISCO CLÍNICO PRIMÁRIO (ex: "risco iminente de deterioração hemodinâmica", "insuficiência respiratória aguda", "risco de sangramento ativo")
+  • NÃO use contexto administrativo como justificativa principal (não mencione limitação terapêutica, DNR, cuidados paliativos como elemento central)
 
-Regras:
-- Cada parágrafo é texto corrido sem subtítulos ou marcadores
-- Omita os parágrafos 2 e 3 se não houver dados suficientes no texto — nunca invente valores
+Regras gerais:
+- Omita P2 e P3 se não houver dados suficientes — NUNCA invente valores
 - NÃO inclua nenhum código CID-10 ou SIGTAP no texto
-- Inclua TODOS os valores laboratoriais mencionados no texto, com unidades corretas
-- Seja objetivo e técnico, como uma justificativa médica real para o SUS
 - OBRIGATÓRIO: use acentuação correta do português (ã, ç, ê, ô, á, é, í, ó, ú, etc.) em todos os textos
 
 Texto clínico:
