@@ -31,6 +31,7 @@ Regras:
 - Texto corrido, sem títulos, sem marcadores, sem quebras de linha
 - NÃO inclua nenhum código CID-10 ou SIGTAP no texto
 - Seja objetivo e técnico, como uma justificativa médica real para o SUS
+- OBRIGATÓRIO: use acentuação correta do português (ã, ç, ê, ô, á, é, í, ó, ú, etc.) em todos os textos
 
 Texto clínico:
 ${anamnese}`

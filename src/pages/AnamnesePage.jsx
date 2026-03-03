@@ -64,6 +64,22 @@ export function AnamnesePage() {
           .in('co_cid', cidCodes)
 
         const cidMap = Object.fromEntries((cidRows || []).map(r => [r.co_cid, r.no_cid]))
+
+        // Fallback: para códigos não encontrados, buscar categoria pai (ex: I640 → I64)
+        const naoEncontrados = cidCodes.filter(c => !cidMap[c])
+        if (naoEncontrados.length > 0) {
+          const codigosPai = [...new Set(naoEncontrados.map(c => c.slice(0, 3)))]
+          const { data: paiRows } = await supabase
+            .from('cid')
+            .select('co_cid, no_cid')
+            .in('co_cid', codigosPai)
+          for (const r of (paiRows || [])) {
+            for (const code of naoEncontrados) {
+              if (code.startsWith(r.co_cid) && !cidMap[code]) cidMap[code] = r.no_cid
+            }
+          }
+        }
+
         cidsEnriquecidos = cidsSugeridos.map(c => ({
           ...c,
           no_cid: cidMap[c.co_cid] ?? null,
