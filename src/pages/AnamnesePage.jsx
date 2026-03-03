@@ -7,6 +7,9 @@ const EXEMPLO = `Paciente masculino, 58 anos, hipertenso e diabético tipo 2. Qu
 
 const STOPWORDS = new Set(['de', 'do', 'da', 'dos', 'das', 'em', 'no', 'na', 'nos', 'nas', 'e', 'ou', 'um', 'uma', 'para', 'com', 'por', 'a', 'o', 'as', 'os', 'ao', 'aos'])
 
+// Palavras genéricas demais para o FTS do SIGTAP — removê-las da query melhora o ranking
+const FTS_GENERICO = new Set(['tratamento', 'procedimento', 'realizacao', 'realizacao'])
+
 function normalizarTexto(str) {
   return str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z\s]/g, '')
 }
@@ -15,6 +18,16 @@ function normalizarTexto(str) {
 // variações de gênero/número do SIGTAP (digestiva↔digestivo, hemácias↔hemácia, etc.)
 function stem(w) {
   return w.length >= 7 ? w.slice(0, -2) : w
+}
+
+// Gera a query FTS a partir de um termo da IA, removendo prefixos genéricos
+// ("tratamento", "procedimento") que prejudicam o ranking do Supabase FTS.
+// Ex: "tratamento hemorragia digestiva alta" → "hemorragia digestiva alta"
+// O ehRelevante ainda usa o termo original para filtrar.
+function ftsQuery(termo) {
+  const words = normalizarTexto(termo).split(/\s+/)
+  const filtered = words.filter(w => !FTS_GENERICO.has(w))
+  return (filtered.length > 0 ? filtered : words).join(' ')
 }
 
 function ehRelevante(nomeProc, termo) {
@@ -107,7 +120,7 @@ export function AnamnesePage() {
 
       const buscas = await Promise.all(
         termos.slice(0, 5).map(t =>
-          supabase.rpc('buscar_procedimentos', { query: t, limite: 10 })
+          supabase.rpc('buscar_procedimentos', { query: ftsQuery(t), limite: 20 })
         )
       )
 
