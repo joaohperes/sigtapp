@@ -23,28 +23,15 @@ Analise o texto clínico abaixo e retorne APENAS JSON válido com três campos:
 
 1. "cids": lista dos CIDs-10 mais prováveis (máximo 6), código SEM ponto (ex: "K920") e justificativa breve
 2. "termos": lista de 3 a 5 termos de busca em português para procedimentos SIGTAP
-3. "aih": texto completo para AIH seguindo EXATAMENTE este template (preencha com base no texto clínico):
+3. "aih": parágrafo único corrido para AIH, seguindo EXATAMENTE este modelo (substitua os colchetes pelo conteúdo do texto clínico):
 
-AIH – INTERNAÇÃO
+"AIH: Internação por [diagnóstico principal] ([CID principal]), [complicações ou contexto clínico relevante com seus CIDs entre parênteses], em paciente com [antecedentes/comorbidades relevantes], com [achados clínicos na admissão: sinais vitais, estado geral], [achados laboratoriais e/ou de imagem relevantes], necessitando [lista de intervenções necessárias: tratamentos, procedimentos, monitorização]. Quadro [grave/moderado/de risco] justificando internação hospitalar em regime de [urgência/eletivo]. ([CID principal] / [A definir])"
 
-Procedência: [cidade/UBS/hospital de origem do texto, ou "Não informado"]
-DIAGNÓSTICO PRINCIPAL:
-[descrição objetiva da condição clínica principal]
-CID-10:
-[código principal] – [nome do diagnóstico]
-CÓDIGO DO PROCEDIMENTO (SIGTAP):
-[A definir]
-COMORBIDADES:
-[comorbidades relevantes mencionadas no texto]
-JUSTIFICATIVA:
-Paciente necessita de internação hospitalar devido a [motivo principal].
-• [critério clínico 1]
-• [critério clínico 2]
-• [critério clínico 3, se aplicável]
-PROVAS DIAGNÓSTICAS:
-Laboratoriais: [resultados do texto, ou "Não informado"]
-Imagem: [achados de imagem do texto, ou "Não informado"]
-Outros: [outros exames do texto, ou "Não informado"]
+Regras:
+- Texto corrido, sem títulos, sem marcadores, sem quebras de linha
+- Inclua os códigos CID-10 inline entre parênteses ao mencionar cada diagnóstico
+- Mantenha "[A definir]" no final para o código SIGTAP
+- Seja objetivo e técnico, como uma justificativa médica real para o SUS
 
 Texto clínico:
 ${anamnese}`
