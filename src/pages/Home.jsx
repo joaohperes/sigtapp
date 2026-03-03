@@ -654,11 +654,11 @@ export function Home() {
             </div>
 
             {/* Painéis */}
-            <div className="flex items-start gap-3">
+            <div className="flex flex-col md:flex-row items-start gap-3">
 
               {/* Painel 1 — Groups */}
-              <div className={`transition-all duration-300 ease-in-out ${
-                selectedGroup ? 'w-52 shrink-0' : 'w-full'
+              <div className={`w-full transition-all duration-300 ease-in-out ${
+                selectedGroup ? 'md:w-52 md:shrink-0' : ''
               }`}>
                 {!selectedGroup ? (
                   <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -725,8 +725,8 @@ export function Home() {
               {selectedGroup && (
                 <div
                   key={selectedGroup.co_grupo}
-                  className={`shrink-0 animate-slide-right transition-all duration-300 ${
-                    selectedSubgroup ? 'w-64' : 'w-72'
+                  className={`w-full animate-slide-right transition-all duration-300 md:shrink-0 ${
+                    selectedSubgroup ? 'md:w-64' : 'md:w-72'
                   }`}
                 >
                   <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
@@ -781,7 +781,7 @@ export function Home() {
               {selectedSubgroup && (
                 <div
                   key={selectedSubgroup.co_subgrupo}
-                  className="flex-1 animate-slide-right"
+                  className="w-full md:flex-1 animate-slide-right"
                 >
                   <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
                     <div className="border-b border-slate-100 px-4 py-3">

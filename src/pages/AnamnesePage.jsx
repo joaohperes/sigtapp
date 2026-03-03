@@ -141,12 +141,12 @@ export function AnamnesePage() {
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
       <div className="bg-gradient-to-br from-blue-800 via-blue-700 to-blue-600">
-        <div className="mx-auto max-w-6xl px-6 py-8">
+        <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
           <Link to="/" className="text-sm text-blue-300 hover:text-white transition">
             ← Voltar
           </Link>
           <div className="mt-4">
-            <h1 className="text-2xl font-bold text-white">Análise de Anamnese</h1>
+            <h1 className="text-xl font-bold text-white sm:text-2xl">Análise de Anamnese</h1>
             <p className="mt-1 text-sm text-blue-200">
               Cole o texto clínico e a IA identificará CIDs, procedimentos SIGTAP e gerará o texto para AIH
             </p>
@@ -154,7 +154,7 @@ export function AnamnesePage() {
         </div>
       </div>
 
-      <main className="mx-auto max-w-6xl px-6 py-8">
+      <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
         <div className="grid gap-6 lg:grid-cols-2">
 
           {/* Coluna esquerda: input + AIH */}
@@ -185,16 +185,16 @@ export function AnamnesePage() {
                            focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400/20"
               />
 
-              <div className="mt-4 flex items-center justify-between gap-4">
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
                 <p className="text-xs text-slate-400">
                   Sugestões geradas por IA — confirme os códigos na tabela oficial antes de usar
                 </p>
                 <button
                   onClick={handleAnalyze}
                   disabled={loading || anamnese.trim().length < 20}
-                  className="flex shrink-0 items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm
                              font-semibold text-white shadow-sm transition hover:bg-blue-700
-                             disabled:cursor-not-allowed disabled:opacity-50"
+                             disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:justify-start"
                 >
                   {loading ? (
                     <>
@@ -278,7 +278,7 @@ export function AnamnesePage() {
                   {cids.length === 0 ? (
                     <p className="text-sm text-slate-400">Nenhum CID identificado</p>
                   ) : (
-                    <div className="grid gap-2 grid-cols-2">
+                    <div className="grid gap-2 grid-cols-1 sm:grid-cols-2">
                       {cids.map((c, i) => (
                         <div
                           key={c.co_cid}
