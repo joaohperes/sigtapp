@@ -841,7 +841,7 @@ export function Home() {
           Desenvolvido por{' '}
           <span className="font-medium text-blue-400">@joaohperes</span>
           {' '}com{' '}
-          <img src="https://claude.ai/favicon.ico" alt="Claude" className="mb-0.5 inline h-3.5 w-3.5" />
+          <img src="/claude-icon.svg" alt="Claude" className="mb-0.5 inline h-3.5 w-3.5" />
           {' '}<span className="font-medium text-orange-400">Claude</span>
         </p>
       </footer>
