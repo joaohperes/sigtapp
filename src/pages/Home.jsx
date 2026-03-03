@@ -284,7 +284,7 @@ export function Home() {
             Ministério da Saúde · DATASUS
           </p>
           <h1 className="mt-2 text-4xl font-bold tracking-tight text-white"
-              style={{ fontFamily: "'Space Grotesk', sans-serif" }}>SIGTAPP</h1>
+              style={{ fontFamily: "'Syne', sans-serif" }}>SIGTAPP</h1>
           <p className="mt-1.5 text-sm text-blue-200">
             Tabela de Procedimentos, Medicamentos e OPM do SUS
           </p>
