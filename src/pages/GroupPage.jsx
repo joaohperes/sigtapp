@@ -100,7 +100,7 @@ export function GroupPage() {
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
       <div className="bg-gradient-to-br from-blue-800 via-blue-700 to-blue-600">
-        <div className="mx-auto max-w-7xl px-6 py-8">
+        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
           <Link to="/" className="text-sm text-blue-300 hover:text-white transition">
             ← Todos os grupos
           </Link>
@@ -113,7 +113,7 @@ export function GroupPage() {
         </div>
       </div>
 
-      <div className="mx-auto max-w-7xl px-6 py-8">
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
         <div className="flex gap-6">
 
           {/* Sidebar — subgrupos */}
@@ -161,8 +161,8 @@ export function GroupPage() {
           {/* Conteúdo principal */}
           <div className="flex-1 min-w-0">
             {/* Busca + controles */}
-            <div className="mb-4 flex gap-2">
-              <div className="relative flex-1">
+            <div className="mb-4 flex flex-wrap gap-2">
+              <div className="relative w-full sm:flex-1">
                 <svg className="pointer-events-none absolute inset-y-0 left-3 my-auto h-4 w-4 text-slate-400"
                   viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clipRule="evenodd" />

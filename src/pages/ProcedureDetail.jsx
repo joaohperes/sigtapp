@@ -60,7 +60,7 @@ export function ProcedureDetail() {
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
       <div className="bg-gradient-to-br from-blue-800 via-blue-700 to-blue-600">
-        <div className="mx-auto max-w-7xl px-6 py-8">
+        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
           <Link
             to={data.co_grupo ? `/grupo/${data.co_grupo}` : '/'}
             className="text-sm text-blue-300 hover:text-white transition"
@@ -88,7 +88,7 @@ export function ProcedureDetail() {
         </div>
       </div>
 
-      <main className="mx-auto max-w-7xl px-6 py-8">
+      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
         <div className="grid gap-4 lg:grid-cols-[220px_1fr_1fr]">
 
           {/* Coluna esquerda — Valores */}
@@ -209,8 +209,8 @@ function CidRow({ cid, principal }) {
 
 function Row({ label, value }) {
   return (
-    <div className="flex gap-2 text-sm">
-      <dt className="w-44 shrink-0 text-slate-400">{label}</dt>
+    <div className="flex flex-col gap-0.5 text-sm sm:flex-row sm:gap-2">
+      <dt className="shrink-0 text-slate-400 sm:w-44">{label}</dt>
       <dd className="text-slate-700">{value}</dd>
     </div>
   )

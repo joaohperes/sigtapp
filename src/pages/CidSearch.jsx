@@ -175,9 +175,9 @@ function CidRow({ cid }) {
   const isCidCategory = cid.co_cid.trim().length === 3 // ex: "C56" vs "C560"
 
   return (
-    <div className="flex items-center gap-4 px-4 py-3.5 hover:bg-slate-50 transition-colors">
+    <div className="flex items-center gap-3 px-4 py-3.5 hover:bg-slate-50 transition-colors">
       {/* Código */}
-      <div className="w-16 shrink-0">
+      <div className="w-14 shrink-0">
         <span className={`font-mono text-sm font-semibold ${isCidCategory ? 'text-indigo-700' : 'text-slate-700'}`}>
           {cid.co_cid.trim()}
         </span>
@@ -185,22 +185,22 @@ function CidRow({ cid }) {
 
       {/* Nome */}
       <div className="flex-1 min-w-0">
-        <p className="text-sm text-slate-800">{cid.no_cid?.trim()}</p>
-      </div>
-
-      {/* Badges e ação */}
-      <div className="flex shrink-0 items-center gap-2">
+        <p className="text-sm text-slate-800 leading-snug">{cid.no_cid?.trim()}</p>
         {sexo && (
-          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-500">
+          <span className="mt-0.5 inline-block rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-500">
             {sexo}
           </span>
         )}
+      </div>
+
+      {/* Ação */}
+      <div className="shrink-0">
         <Link
           to={`/?q=${encodeURIComponent(cid.co_cid.trim())}`}
-          className="rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-1 text-xs
+          className="rounded-lg border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-xs
                      font-medium text-indigo-700 transition hover:bg-indigo-100 whitespace-nowrap"
         >
-          Ver procedimentos →
+          Ver →
         </Link>
       </div>
     </div>
