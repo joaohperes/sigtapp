@@ -63,7 +63,6 @@ export function AnamnesePage() {
 
       const { cids: cidsSugeridos = [], termos = [], aih: aihTexto = '' } = await res.json()
 
-      // Enriquecer CIDs com nomes do Supabase
       const cidCodes = cidsSugeridos.map(c => c.co_cid).filter(Boolean)
       let cidsEnriquecidos = cidsSugeridos
 
@@ -75,7 +74,6 @@ export function AnamnesePage() {
 
         const cidMap = Object.fromEntries((cidRows || []).map(r => [r.co_cid, r.no_cid]))
 
-        // Fallback: para códigos não encontrados, buscar categoria pai (ex: I640 → I64)
         const naoEncontrados = cidCodes.filter(c => !cidMap[c])
         if (naoEncontrados.length > 0) {
           const codigosPai = [...new Set(naoEncontrados.map(c => c.slice(0, 3)))]
@@ -96,7 +94,6 @@ export function AnamnesePage() {
         }))
       }
 
-      // Buscar procedimentos pelos termos
       const buscas = await Promise.all(
         termos.slice(0, 5).map(t =>
           supabase.rpc('buscar_procedimentos', { query: t, limite: 10 })
@@ -137,11 +134,80 @@ export function AnamnesePage() {
     setTimeout(() => setAihCopied(false), 2000)
   }
 
+  /* ── Blocos reutilizados em múltiplas colunas ── */
+
+  const cidsBlock = (
+    <div>
+      <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-600">
+        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-100 text-[10px] font-bold text-indigo-600">
+          {cids.length}
+        </span>
+        Diagnósticos CID-10 Prováveis
+      </h2>
+      {cids.length === 0 ? (
+        <p className="text-sm text-slate-400">Nenhum CID identificado</p>
+      ) : (
+        /* 2-col em sm/lg; 1-col em xl (coluna dedicada) */
+        <div className="grid gap-2 grid-cols-1 sm:grid-cols-2 xl:grid-cols-1">
+          {cids.map((c, i) => (
+            <div key={c.co_cid} className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-sm font-bold text-indigo-600">{c.co_cid}</span>
+                {i === 0 && (
+                  <span className="rounded-full bg-indigo-600 px-2 py-0.5 text-[10px] font-bold text-white">
+                    Principal
+                  </span>
+                )}
+              </div>
+              {c.no_cid ? (
+                <p className="mt-0.5 text-xs font-medium text-slate-800 leading-snug">{c.no_cid}</p>
+              ) : (
+                <p className="mt-0.5 text-xs text-slate-400 italic">Não encontrado</p>
+              )}
+              {c.justificativa && (
+                <p className="mt-1 text-xs leading-relaxed text-slate-500 line-clamp-2">{c.justificativa}</p>
+              )}
+              <button
+                onClick={() => handleVerProcedimentos(c.co_cid)}
+                className="mt-2 w-full rounded-lg border border-indigo-200 bg-indigo-50 py-1
+                           text-xs font-medium text-indigo-600 transition hover:bg-indigo-100"
+              >
+                Ver procedimentos →
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+
+  const procedimentosBlock = (
+    <div>
+      <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-600">
+        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 text-[10px] font-bold text-emerald-600">
+          {procedimentos.length}
+        </span>
+        Procedimentos SIGTAP Sugeridos
+      </h2>
+      {procedimentos.length === 0 ? (
+        <p className="text-sm text-slate-400">Nenhum procedimento encontrado</p>
+      ) : (
+        <div className="space-y-2">
+          {procedimentos.map((p) => (
+            <ProcedureRow key={p.co_procedimento} procedure={p} />
+          ))}
+        </div>
+      )}
+    </div>
+  )
+
+  /* ── Render ── */
+
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
       <div className="bg-gradient-to-br from-blue-800 via-blue-700 to-blue-600">
-        <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
+        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
           <Link to="/" className="text-sm text-blue-300 hover:text-white transition">
             ← Voltar
           </Link>
@@ -154,76 +220,84 @@ export function AnamnesePage() {
         </div>
       </div>
 
-      <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
-        <div className="grid gap-6 lg:grid-cols-2">
+      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
+        {/*
+          Mobile  (< lg):  1 coluna
+          Tablet  (lg):    2 colunas — anamnese | CIDs+Procs
+          Desktop (xl+):   3 colunas — anamnese | CIDs | Procs
+        */}
+        <div className="grid gap-6 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
 
-          {/* Coluna esquerda: input + AIH */}
-          <div className="space-y-4">
-            {/* Input card */}
-            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-              <div className="mb-3 flex items-center justify-between">
-                <label className="text-sm font-semibold text-slate-700">
-                  Texto clínico / Anamnese
-                </label>
-                {!anamnese && (
+          {/* ── Col 1: Input + AIH ──
+              Quando !analyzed: expande para ocupar todas as colunas e se centraliza */}
+          <div className={`space-y-4 ${!analyzed ? 'lg:col-span-2 xl:col-span-3' : ''}`}>
+
+            <div className={!analyzed ? 'mx-auto max-w-2xl' : ''}>
+              <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+                <div className="mb-3 flex items-center justify-between">
+                  <label className="text-sm font-semibold text-slate-700">
+                    Texto clínico / Anamnese
+                  </label>
+                  {!anamnese && (
+                    <button
+                      onClick={() => setAnamnese(EXEMPLO)}
+                      className="text-xs text-blue-500 hover:underline"
+                    >
+                      Usar exemplo
+                    </button>
+                  )}
+                </div>
+
+                <textarea
+                  value={anamnese}
+                  onChange={e => setAnamnese(e.target.value)}
+                  placeholder="Descreva o quadro clínico do paciente: queixas, história, exame físico, hipóteses diagnósticas..."
+                  rows={8}
+                  className="w-full resize-y rounded-lg border border-slate-200 p-3 text-sm leading-relaxed
+                             text-slate-700 placeholder:text-slate-400
+                             focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400/20"
+                />
+
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                  <p className="text-xs text-slate-400">
+                    Sugestões geradas por IA — confirme os códigos na tabela oficial antes de usar
+                  </p>
                   <button
-                    onClick={() => setAnamnese(EXEMPLO)}
-                    className="text-xs text-blue-500 hover:underline"
+                    onClick={handleAnalyze}
+                    disabled={loading || anamnese.trim().length < 20}
+                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm
+                               font-semibold text-white shadow-sm transition hover:bg-blue-700
+                               disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:justify-start"
                   >
-                    Usar exemplo
+                    {loading ? (
+                      <>
+                        <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                        </svg>
+                        Analisando...
+                      </>
+                    ) : (
+                      <>
+                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                            d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                        </svg>
+                        Analisar com IA
+                      </>
+                    )}
                   </button>
+                </div>
+
+                {error && (
+                  <div className="mt-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                    {error}
+                  </div>
                 )}
               </div>
-
-              <textarea
-                value={anamnese}
-                onChange={e => setAnamnese(e.target.value)}
-                placeholder="Descreva o quadro clínico do paciente: queixas, história, exame físico, hipóteses diagnósticas..."
-                rows={8}
-                className="w-full resize-y rounded-lg border border-slate-200 p-3 text-sm leading-relaxed
-                           text-slate-700 placeholder:text-slate-400
-                           focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400/20"
-              />
-
-              <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-                <p className="text-xs text-slate-400">
-                  Sugestões geradas por IA — confirme os códigos na tabela oficial antes de usar
-                </p>
-                <button
-                  onClick={handleAnalyze}
-                  disabled={loading || anamnese.trim().length < 20}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm
-                             font-semibold text-white shadow-sm transition hover:bg-blue-700
-                             disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:justify-start"
-                >
-                  {loading ? (
-                    <>
-                      <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                      </svg>
-                      Analisando...
-                    </>
-                  ) : (
-                    <>
-                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                          d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                      </svg>
-                      Analisar com IA
-                    </>
-                  )}
-                </button>
-              </div>
-
-              {error && (
-                <div className="mt-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                  {error}
-                </div>
-              )}
             </div>
 
-            {/* AIH output */}
+            {/* AIH — só aparece após análise */}
             {analyzed && aih && (
               <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                 <div className="mb-3 flex items-center justify-between">
@@ -251,96 +325,26 @@ export function AnamnesePage() {
                     )}
                   </button>
                 </div>
-                <pre className="whitespace-pre-wrap font-mono text-xs leading-relaxed text-slate-700">
-                  {aih}
-                </pre>
+                <p className="text-xs leading-relaxed text-slate-700 whitespace-pre-wrap">{aih}</p>
               </div>
             )}
           </div>
 
-          {/* Coluna direita: CIDs + Procedimentos */}
-          <div className="space-y-6">
-            {!analyzed ? (
-              <div className="flex h-48 items-center justify-center rounded-xl border-2 border-dashed border-slate-200">
-                <p className="text-sm text-slate-400">Os resultados aparecerão aqui</p>
-              </div>
-            ) : (
-              <>
-                {/* CIDs */}
-                <div>
-                  <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-600">
-                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-100 text-[10px] font-bold text-indigo-600">
-                      {cids.length}
-                    </span>
-                    Diagnósticos CID-10 Prováveis
-                  </h2>
+          {/* ── Col 2 (xl+): CIDs — oculta em mobile/tablet ── */}
+          {analyzed && (
+            <div className="hidden xl:block">
+              {cidsBlock}
+            </div>
+          )}
 
-                  {cids.length === 0 ? (
-                    <p className="text-sm text-slate-400">Nenhum CID identificado</p>
-                  ) : (
-                    <div className="grid gap-2 grid-cols-1 sm:grid-cols-2">
-                      {cids.map((c, i) => (
-                        <div
-                          key={c.co_cid}
-                          className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm"
-                        >
-                          <div className="flex items-center gap-2">
-                            <span className="font-mono text-sm font-bold text-indigo-600">
-                              {c.co_cid}
-                            </span>
-                            {i === 0 && (
-                              <span className="rounded-full bg-indigo-600 px-2 py-0.5 text-[10px] font-bold text-white">
-                                Principal
-                              </span>
-                            )}
-                          </div>
-                          {c.no_cid ? (
-                            <p className="mt-0.5 text-xs font-medium text-slate-800 leading-snug">
-                              {c.no_cid}
-                            </p>
-                          ) : (
-                            <p className="mt-0.5 text-xs text-slate-400 italic">Não encontrado</p>
-                          )}
-                          {c.justificativa && (
-                            <p className="mt-1 text-xs leading-relaxed text-slate-500 line-clamp-2">
-                              {c.justificativa}
-                            </p>
-                          )}
-                          <button
-                            onClick={() => handleVerProcedimentos(c.co_cid)}
-                            className="mt-2 w-full rounded-lg border border-indigo-200 bg-indigo-50 py-1
-                                       text-xs font-medium text-indigo-600 transition hover:bg-indigo-100"
-                          >
-                            Ver procedimentos →
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* Procedimentos */}
-                <div>
-                  <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-600">
-                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 text-[10px] font-bold text-emerald-600">
-                      {procedimentos.length}
-                    </span>
-                    Procedimentos SIGTAP Sugeridos
-                  </h2>
-
-                  {procedimentos.length === 0 ? (
-                    <p className="text-sm text-slate-400">Nenhum procedimento encontrado</p>
-                  ) : (
-                    <div className="space-y-2">
-                      {procedimentos.map((p) => (
-                        <ProcedureRow key={p.co_procedimento} procedure={p} />
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </>
-            )}
-          </div>
+          {/* ── Col 3 (xl+) / Col 2 (lg): CIDs+Procs em mobile/tablet; só Procs em desktop ── */}
+          {analyzed && (
+            <div className="space-y-6">
+              {/* CIDs visíveis apenas em mobile/tablet (em desktop ficam na col 2) */}
+              <div className="xl:hidden">{cidsBlock}</div>
+              {procedimentosBlock}
+            </div>
+          )}
 
         </div>
       </main>
