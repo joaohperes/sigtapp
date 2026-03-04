@@ -458,6 +458,15 @@ export function Home() {
           </div>
         )}
 
+        {/* Skeleton loading — visível enquanto carrega a primeira busca */}
+        {loading && searched && results.length === 0 && (
+          <div className="grid gap-3 sm:grid-cols-2">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <ProcedureCardSkeleton key={i} />
+            ))}
+          </div>
+        )}
+
         {results.length > 0 && (cidResults.length === 0 || searchMode === null) && (
           <div className="flex gap-6">
 
@@ -640,15 +649,6 @@ export function Home() {
                       Limpar filtros
                     </button>
                   )}
-                </div>
-              )}
-
-              {/* Skeleton loading */}
-              {loading && searched && results.length === 0 && (
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {Array.from({ length: 6 }).map((_, i) => (
-                    <ProcedureCardSkeleton key={i} />
-                  ))}
                 </div>
               )}
 
