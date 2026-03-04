@@ -1,7 +1,14 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 import { supabase } from '../lib/supabase'
 import { ProcedureRow } from '../components/ProcedureCard'
+import { GRUPO_MAP } from '../data/grupos'
+import { formatBRL, formatCodigo, toSentenceCase } from '../utils/formatters'
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Badge } from '@/components/ui/badge'
+import { cn } from '@/lib/utils'
 
 const EXEMPLO = `Paciente masculino, 58 anos, hipertenso e diabético tipo 2. Queixa de dor torácica opressiva com irradiação para o membro superior esquerdo iniciada há 2 horas, associada a sudorese fria, náuseas e dispneia. Pressão arterial 160/100 mmHg, FC 98 bpm. ECG com supradesnivelamento de ST em V1-V4.`
 
@@ -47,6 +54,104 @@ function getSession() {
   try { return JSON.parse(sessionStorage.getItem('aih-session') || 'null') ?? {} } catch { return {} }
 }
 
+function ProcedureSheetContent({ procedure }) {
+  const { co_procedimento, no_procedimento, vl_sa, vl_sh, vl_sp, no_financiamento } = procedure
+  const total = (vl_sa || 0) + (vl_sh || 0) + (vl_sp || 0)
+  const estilo = GRUPO_MAP[co_procedimento?.slice(0, 2)]
+
+  const [descricao, setDescricao] = useState(null)
+  const [descLoading, setDescLoading] = useState(true)
+
+  useEffect(() => {
+    setDescricao(null)
+    setDescLoading(true)
+    supabase
+      .from('procedimentos')
+      .select('ds_procedimento')
+      .eq('co_procedimento', co_procedimento)
+      .single()
+      .then(({ data }) => {
+        setDescricao(data?.ds_procedimento || null)
+        setDescLoading(false)
+      })
+  }, [co_procedimento])
+
+  return (
+    <div className="flex flex-col gap-5 pt-2">
+      <SheetHeader>
+        <div className="flex items-start gap-3">
+          {estilo && (
+            <div className={cn('mt-1 h-10 w-1.5 shrink-0 rounded-full', estilo.dot)} />
+          )}
+          <div>
+            <p className="font-mono text-xs text-slate-400">{formatCodigo(co_procedimento)}</p>
+            <SheetTitle className="mt-1 text-left text-base font-semibold leading-snug text-slate-800">
+              {no_procedimento}
+            </SheetTitle>
+            {no_financiamento && (
+              <Badge variant="secondary" className="mt-2 rounded-full px-2 py-0.5 text-xs font-normal">
+                {no_financiamento}
+              </Badge>
+            )}
+          </div>
+        </div>
+      </SheetHeader>
+
+      {estilo && (
+        <div className={cn('rounded-lg px-3 py-2 text-xs font-medium', estilo.bg, estilo.text)}>
+          {estilo.no}
+        </div>
+      )}
+
+      {(descLoading || descricao) && (
+        <div>
+          <p className="mb-2 text-xs font-medium text-slate-400">Descrição</p>
+          {descLoading ? (
+            <div className="space-y-2">
+              <Skeleton className="h-3.5 w-full" />
+              <Skeleton className="h-3.5 w-5/6" />
+              <Skeleton className="h-3.5 w-4/6" />
+            </div>
+          ) : (
+            <p className="text-sm leading-relaxed text-slate-600">{toSentenceCase(descricao)}</p>
+          )}
+        </div>
+      )}
+
+      <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
+        <p className="mb-3 text-xs font-medium text-slate-400">Valores SUS</p>
+        <div className="space-y-2">
+          {[
+            { label: 'Ambulatorial (SA)', value: vl_sa },
+            { label: 'Hospitalar (SH)', value: vl_sh },
+            { label: 'Profissional (SP)', value: vl_sp },
+          ].map(({ label, value }) => (
+            <div key={label} className="flex items-center justify-between">
+              <span className="text-sm text-slate-500">{label}</span>
+              <span className="tabular-nums text-sm text-slate-700">{formatBRL(value)}</span>
+            </div>
+          ))}
+          <div className="flex items-center justify-between border-t border-slate-200 pt-2 mt-2">
+            <span className="text-sm font-semibold text-slate-700">Total</span>
+            <span className="tabular-nums text-base font-bold text-emerald-600">{formatBRL(total)}</span>
+          </div>
+        </div>
+      </div>
+
+      <Link
+        to={`/procedimento/${co_procedimento}`}
+        className="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5
+                   text-sm font-medium text-white transition hover:bg-blue-700"
+      >
+        Ver página completa
+        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+        </svg>
+      </Link>
+    </div>
+  )
+}
+
 export function AnamnesePage() {
   const navigate = useNavigate()
   const [anamnese, setAnamnese] = useState(() => getSession().anamnese || '')
@@ -56,7 +161,7 @@ export function AnamnesePage() {
   const [procedimentos, setProcedimentos] = useState(() => getSession().procedimentos || [])
   const [aih, setAih] = useState(() => getSession().aih || '')
   const [analyzed, setAnalyzed] = useState(() => getSession().analyzed || false)
-  const [aihCopied, setAihCopied] = useState(false)
+  const [sheetProc, setSheetProc] = useState(null)
 
   useEffect(() => {
     if (analyzed) {
@@ -180,9 +285,40 @@ export function AnamnesePage() {
 
   function handleCopyAih() {
     navigator.clipboard.writeText(aih)
-    setAihCopied(true)
-    setTimeout(() => setAihCopied(false), 2000)
+    toast.success('Texto copiado!', { duration: 2000 })
   }
+
+  /* ── Skeleton blocks ── */
+
+  const cidsSkeleton = (
+    <div>
+      <Skeleton className="mb-3 h-5 w-52" />
+      <div className="grid gap-2 grid-cols-1 sm:grid-cols-2 xl:grid-cols-1">
+        {[0, 1].map(i => (
+          <div key={i} className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm space-y-2">
+            <Skeleton className="h-4 w-14" />
+            <Skeleton className="h-3 w-full" />
+            <Skeleton className="h-3 w-4/6" />
+            <Skeleton className="mt-1 h-7 w-full rounded-lg" />
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+
+  const procsSkeleton = (
+    <div>
+      <Skeleton className="mb-3 h-5 w-60" />
+      <div className="space-y-2">
+        {[0, 1, 2, 3].map(i => (
+          <div key={i} className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm space-y-2">
+            <Skeleton className="h-3 w-24" />
+            <Skeleton className="h-4 w-3/4" />
+          </div>
+        ))}
+      </div>
+    </div>
+  )
 
   /* ── Blocos reutilizados em múltiplas colunas ── */
 
@@ -244,12 +380,14 @@ export function AnamnesePage() {
       ) : (
         <div className="space-y-2">
           {procedimentos.map((p) => (
-            <ProcedureRow key={p.co_procedimento} procedure={p} />
+            <ProcedureRow key={p.co_procedimento} procedure={p} onSelect={setSheetProc} />
           ))}
         </div>
       )}
     </div>
   )
+
+  const showResults = analyzed || loading
 
   /* ── Render ── */
 
@@ -279,10 +417,10 @@ export function AnamnesePage() {
         <div className="grid gap-6 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
 
           {/* ── Col 1: Input + AIH ──
-              Quando !analyzed: expande para ocupar todas as colunas e se centraliza */}
-          <div className={`space-y-4 ${!analyzed ? 'lg:col-span-2 xl:col-span-3' : ''}`}>
+              Quando !showResults: expande para ocupar todas as colunas e se centraliza */}
+          <div className={`space-y-4 ${!showResults ? 'lg:col-span-2 xl:col-span-3' : ''}`}>
 
-            <div className={!analyzed ? 'mx-auto max-w-2xl' : ''}>
+            <div className={!showResults ? 'mx-auto max-w-2xl' : ''}>
               <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
                 <div className="mb-3 flex items-center justify-between">
                   <label className="text-sm font-semibold text-slate-700">
@@ -357,22 +495,11 @@ export function AnamnesePage() {
                     className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5
                                text-xs text-slate-600 transition hover:bg-slate-50"
                   >
-                    {aihCopied ? (
-                      <>
-                        <svg className="h-3.5 w-3.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
-                        Copiado!
-                      </>
-                    ) : (
-                      <>
-                        <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                            d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                        </svg>
-                        Copiar texto
-                      </>
-                    )}
+                    <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                        d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                    Copiar texto
                   </button>
                 </div>
                 <div className="space-y-3">
@@ -389,18 +516,20 @@ export function AnamnesePage() {
           </div>
 
           {/* ── Col 2 (xl+): CIDs — oculta em mobile/tablet ── */}
-          {analyzed && (
+          {showResults && (
             <div className="hidden xl:block">
-              {cidsBlock}
+              {loading ? cidsSkeleton : cidsBlock}
             </div>
           )}
 
           {/* ── Col 3 (xl+) / Col 2 (lg): CIDs+Procs em mobile/tablet; só Procs em desktop ── */}
-          {analyzed && (
+          {showResults && (
             <div className="space-y-6">
               {/* CIDs visíveis apenas em mobile/tablet (em desktop ficam na col 2) */}
-              <div className="xl:hidden">{cidsBlock}</div>
-              {procedimentosBlock}
+              <div className="xl:hidden">
+                {loading ? cidsSkeleton : cidsBlock}
+              </div>
+              {loading ? procsSkeleton : procedimentosBlock}
             </div>
           )}
 
@@ -416,6 +545,12 @@ export function AnamnesePage() {
           {' '}<span className="font-medium text-orange-400">Claude</span>
         </p>
       </footer>
+
+      <Sheet open={!!sheetProc} onOpenChange={open => !open && setSheetProc(null)}>
+        <SheetContent className="w-full sm:max-w-md overflow-y-auto">
+          {sheetProc && <ProcedureSheetContent procedure={sheetProc} />}
+        </SheetContent>
+      </Sheet>
     </div>
   )
 }

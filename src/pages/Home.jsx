@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { SearchBar } from '../components/SearchBar'
 import { ProcedureCard, ProcedureCardSkeleton } from '../components/ProcedureCard'
@@ -212,6 +212,8 @@ export function Home() {
   const [subgroupProcs, setSubgroupProcs] = useState([])
   const [subgroupLoading, setSubgroupLoading] = useState(false)
   const [procsLoading, setProcsLoading] = useState(false)
+  const [procsAtBottom, setProcsAtBottom] = useState(false)
+  const procsListRef = useRef(null)
 
   // CID results para busca universal
   const [cidResults, setCidResults] = useState([])
@@ -347,6 +349,7 @@ export function Home() {
     }
     setSelectedSubgroup(s)
     setProcsLoading(true)
+    setProcsAtBottom(false)
     const { data } = await supabase.rpc('listar_procedimentos_grupo', {
       p_co_grupo: selectedGroup.co_grupo,
       p_co_subgrupo: s.co_subgrupo,
@@ -918,24 +921,36 @@ export function Home() {
                         <Spinner />
                       </div>
                     ) : (
-                      <div className="max-h-96 overflow-y-auto divide-y divide-slate-50">
-                        {subgroupProcs.map((p) => (
-                          <Link
-                            key={p.co_procedimento}
-                            to={`/procedimento/${p.co_procedimento}`}
-                            className="flex items-start gap-3 px-4 py-3 hover:bg-slate-50 transition"
-                          >
-                            <span className="mt-px shrink-0 font-mono text-[11px] text-slate-400">
-                              {p.co_procedimento}
-                            </span>
-                            <span className="flex-1 text-sm text-slate-800 leading-snug">
-                              {p.no_procedimento}
-                            </span>
-                            <svg className="mt-0.5 h-4 w-4 shrink-0 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                            </svg>
-                          </Link>
-                        ))}
+                      <div className="relative">
+                        <div
+                          ref={procsListRef}
+                          onScroll={e => {
+                            const { scrollTop, scrollHeight, clientHeight } = e.currentTarget
+                            setProcsAtBottom(scrollTop + clientHeight >= scrollHeight - 10)
+                          }}
+                          className="max-h-96 overflow-y-auto divide-y divide-slate-50"
+                        >
+                          {subgroupProcs.map((p) => (
+                            <button
+                              key={p.co_procedimento}
+                              onClick={() => setSheetProc(p)}
+                              className="flex w-full items-start gap-3 px-4 py-3 hover:bg-slate-50 transition text-left"
+                            >
+                              <span className="mt-px shrink-0 font-mono text-[11px] text-slate-400">
+                                {p.co_procedimento}
+                              </span>
+                              <span className="flex-1 text-sm text-slate-800 leading-snug">
+                                {p.no_procedimento}
+                              </span>
+                              <svg className="mt-0.5 h-4 w-4 shrink-0 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                              </svg>
+                            </button>
+                          ))}
+                        </div>
+                        {!procsAtBottom && subgroupProcs.length > 7 && (
+                          <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-14 bg-gradient-to-t from-white to-transparent" />
+                        )}
                       </div>
                     )}
 
