@@ -8,7 +8,7 @@ import { useGrupos } from '../hooks/useGrupos'
 import { GRUPO_MAP } from '../data/grupos'
 import { supabase } from '../lib/supabase'
 import { expandirSinonimos } from '../data/sinonimos'
-import { formatBRL, formatCodigo } from '../utils/formatters'
+import { formatBRL, formatCodigo, toSentenceCase } from '../utils/formatters'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Badge } from '@/components/ui/badge'
@@ -113,7 +113,7 @@ function ProcedureSheetContent({ procedure }) {
               <Skeleton className="h-3.5 w-4/6" />
             </div>
           ) : (
-            <p className="text-sm leading-relaxed text-slate-600">{descricao}</p>
+            <p className="text-sm leading-relaxed text-slate-600">{toSentenceCase(descricao)}</p>
           )}
         </div>
       )}
