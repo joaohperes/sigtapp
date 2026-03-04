@@ -3,7 +3,37 @@ import { formatBRL, formatCodigo } from '../utils/formatters'
 import { GRUPO_MAP } from '../data/grupos'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
+
+function PriceTooltip({ total, vl_sa, vl_sh, vl_sp, children }) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>{children}</TooltipTrigger>
+      <TooltipContent
+        side="left"
+        className="bg-slate-900 text-white px-3 py-2 rounded-lg shadow-xl text-xs space-y-1 min-w-[160px]"
+      >
+        <div className="flex justify-between gap-4">
+          <span className="text-slate-400">Ambulatorial</span>
+          <span className="tabular-nums">{formatBRL(vl_sa)}</span>
+        </div>
+        <div className="flex justify-between gap-4">
+          <span className="text-slate-400">Hospitalar</span>
+          <span className="tabular-nums">{formatBRL(vl_sh)}</span>
+        </div>
+        <div className="flex justify-between gap-4">
+          <span className="text-slate-400">Profissional</span>
+          <span className="tabular-nums">{formatBRL(vl_sp)}</span>
+        </div>
+        <div className="flex justify-between gap-4 border-t border-slate-700 pt-1 mt-1">
+          <span className="font-semibold text-white">Total</span>
+          <span className="tabular-nums font-semibold text-emerald-400">{formatBRL(total)}</span>
+        </div>
+      </TooltipContent>
+    </Tooltip>
+  )
+}
 
 export function ProcedureCard({ procedure }) {
   const { co_procedimento, no_procedimento, vl_sa, vl_sh, vl_sp, no_financiamento } = procedure
@@ -35,10 +65,12 @@ export function ProcedureCard({ procedure }) {
                 </Badge>
               )}
             </div>
-            <div className="shrink-0 text-right">
-              <p className="text-xs text-slate-400">Total SUS</p>
-              <p className="text-base font-bold text-emerald-600">{formatBRL(total)}</p>
-            </div>
+            <PriceTooltip total={total} vl_sa={vl_sa} vl_sh={vl_sh} vl_sp={vl_sp}>
+              <div className="shrink-0 text-right cursor-default">
+                <p className="text-xs text-slate-400">Total SUS</p>
+                <p className="text-base font-bold text-emerald-600">{formatBRL(total)}</p>
+              </div>
+            </PriceTooltip>
           </div>
 
           <div className="mt-3 grid grid-cols-3 gap-2 border-t border-slate-100 pt-3">
@@ -107,10 +139,12 @@ export function ProcedureRow({ procedure }) {
               </Badge>
             )}
           </div>
-          <div className="shrink-0 text-right">
-            <p className="text-xs text-slate-400">Total SUS</p>
-            <p className="text-sm font-bold text-emerald-600">{formatBRL(total)}</p>
-          </div>
+          <PriceTooltip total={total} vl_sa={vl_sa} vl_sh={vl_sh} vl_sp={vl_sp}>
+            <div className="shrink-0 text-right cursor-default">
+              <p className="text-xs text-slate-400">Total SUS</p>
+              <p className="text-sm font-bold text-emerald-600">{formatBRL(total)}</p>
+            </div>
+          </PriceTooltip>
         </CardContent>
       </Card>
     </Link>
