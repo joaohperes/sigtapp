@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { formatBRL, formatCodigo, exportCsv } from '../utils/formatters'
 
-export function ProcedureTable({ results }) {
+export function ProcedureTable({ results, onSelect }) {
   const navigate = useNavigate()
   if (!results.length) return null
 
@@ -40,7 +40,7 @@ export function ProcedureTable({ results }) {
               return (
                 <tr
                   key={p.co_procedimento}
-                  onClick={() => navigate(`/procedimento/${p.co_procedimento}`)}
+                  onClick={() => onSelect ? onSelect(p) : navigate(`/procedimento/${p.co_procedimento}`)}
                   className="cursor-pointer hover:bg-blue-50/50 transition-colors"
                 >
                   <td className="px-4 py-3 whitespace-nowrap">

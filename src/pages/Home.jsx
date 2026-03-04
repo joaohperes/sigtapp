@@ -1,13 +1,18 @@
 import { useState, useEffect } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { SearchBar } from '../components/SearchBar'
-import { ProcedureCard } from '../components/ProcedureCard'
+import { ProcedureCard, ProcedureCardSkeleton } from '../components/ProcedureCard'
 import { ProcedureTable } from '../components/ProcedureTable'
 import { useProcedures } from '../hooks/useProcedures'
 import { useGrupos } from '../hooks/useGrupos'
 import { GRUPO_MAP } from '../data/grupos'
 import { supabase } from '../lib/supabase'
 import { expandirSinonimos } from '../data/sinonimos'
+import { formatBRL, formatCodigo } from '../utils/formatters'
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import { Badge } from '@/components/ui/badge'
+import { cn } from '@/lib/utils'
 
 const VIEW_MODES = ['cards', 'tabela']
 const SORT_OPTIONS = [
@@ -46,6 +51,74 @@ function applySort(arr, key) {
   return [...arr].sort((a, b) => relevancePriority(a) - relevancePriority(b))
 }
 
+function ProcedureSheetContent({ procedure }) {
+  const { co_procedimento, no_procedimento, vl_sa, vl_sh, vl_sp, no_financiamento } = procedure
+  const total = (vl_sa || 0) + (vl_sh || 0) + (vl_sp || 0)
+  const estilo = GRUPO_MAP[co_procedimento?.slice(0, 2)]
+
+  return (
+    <div className="flex flex-col gap-5 pt-2">
+      <SheetHeader>
+        <div className="flex items-start gap-3">
+          {estilo && (
+            <div className={cn('mt-1 h-10 w-1.5 shrink-0 rounded-full', estilo.dot)} />
+          )}
+          <div>
+            <p className="font-mono text-xs text-slate-400">{formatCodigo(co_procedimento)}</p>
+            <SheetTitle className="mt-1 text-left text-base font-semibold leading-snug text-slate-800">
+              {no_procedimento}
+            </SheetTitle>
+            {no_financiamento && (
+              <Badge variant="secondary" className="mt-2 rounded-full px-2 py-0.5 text-xs font-normal">
+                {no_financiamento}
+              </Badge>
+            )}
+          </div>
+        </div>
+      </SheetHeader>
+
+      {estilo && (
+        <div className={cn('rounded-lg px-3 py-2 text-xs font-medium', estilo.bg, estilo.text)}>
+          {estilo.no}
+        </div>
+      )}
+
+      <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
+        <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">
+          Valores SUS
+        </p>
+        <div className="space-y-2">
+          {[
+            { label: 'Ambulatorial (SA)', value: vl_sa },
+            { label: 'Hospitalar (SH)', value: vl_sh },
+            { label: 'Profissional (SP)', value: vl_sp },
+          ].map(({ label, value }) => (
+            <div key={label} className="flex items-center justify-between">
+              <span className="text-sm text-slate-500">{label}</span>
+              <span className="tabular-nums text-sm text-slate-700">{formatBRL(value)}</span>
+            </div>
+          ))}
+          <div className="flex items-center justify-between border-t border-slate-200 pt-2 mt-2">
+            <span className="text-sm font-semibold text-slate-700">Total</span>
+            <span className="tabular-nums text-base font-bold text-emerald-600">{formatBRL(total)}</span>
+          </div>
+        </div>
+      </div>
+
+      <Link
+        to={`/procedimento/${co_procedimento}`}
+        className="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5
+                   text-sm font-medium text-white transition hover:bg-blue-700"
+      >
+        Ver página completa
+        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+        </svg>
+      </Link>
+    </div>
+  )
+}
+
 function Spinner() {
   return (
     <svg className="h-5 w-5 animate-spin text-slate-400" fill="none" viewBox="0 0 24 24">
@@ -82,6 +155,9 @@ export function Home() {
 
   // Ordenação
   const [sortKey, setSortKey] = useState('relevancia')
+
+  // Sheet (painel de detalhe rápido)
+  const [sheetProc, setSheetProc] = useState(null)
 
   // Paginação client-side
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
@@ -444,16 +520,18 @@ export function Home() {
                 </p>
 
                 <div className="flex items-center gap-2">
-                  <select
-                    value={sortKey}
-                    onChange={e => setSortKey(e.target.value)}
-                    className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs
-                               text-slate-600 shadow-sm focus:border-blue-400 focus:outline-none"
-                  >
-                    {SORT_OPTIONS.map(o => (
-                      <option key={o.value} value={o.value}>{o.label}</option>
-                    ))}
-                  </select>
+                  <Select value={sortKey} onValueChange={setSortKey}>
+                    <SelectTrigger className="h-8 w-36 text-xs text-slate-600">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {SORT_OPTIONS.map(o => (
+                        <SelectItem key={o.value} value={o.value} className="text-xs">
+                          {o.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
 
                   {(financiamentosPresentes.length > 1 || valorMin || valorMax || soComDescricao) && (
                     <button
@@ -565,16 +643,25 @@ export function Home() {
                 </div>
               )}
 
+              {/* Skeleton loading */}
+              {loading && searched && results.length === 0 && (
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <ProcedureCardSkeleton key={i} />
+                  ))}
+                </div>
+              )}
+
               {/* Results grid */}
               {visibleResults.length > 0 && (
                 view === 'cards' ? (
                   <div className="grid gap-3 sm:grid-cols-2">
                     {visibleResults.map((p) => (
-                      <ProcedureCard key={p.co_procedimento} procedure={p} />
+                      <ProcedureCard key={p.co_procedimento} procedure={p} onSelect={setSheetProc} />
                     ))}
                   </div>
                 ) : (
-                  <ProcedureTable results={visibleResults} />
+                  <ProcedureTable results={visibleResults} onSelect={setSheetProc} />
                 )
               )}
 
@@ -835,6 +922,13 @@ export function Home() {
           </div>
         )}
       </main>
+
+      {/* Sheet — painel de detalhe rápido */}
+      <Sheet open={!!sheetProc} onOpenChange={open => !open && setSheetProc(null)}>
+        <SheetContent className="w-full sm:max-w-md overflow-y-auto">
+          {sheetProc && <ProcedureSheetContent procedure={sheetProc} />}
+        </SheetContent>
+      </Sheet>
 
       <footer className="py-6 text-center">
         <p className="text-xs text-slate-400">
