@@ -103,7 +103,7 @@ function ProcedureSheetContent({ procedure }) {
 
       {(descLoading || descricao) && (
         <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
+          <p className="mb-2 text-xs font-medium text-slate-400">
             Descrição
           </p>
           {descLoading ? (
@@ -119,7 +119,7 @@ function ProcedureSheetContent({ procedure }) {
       )}
 
       <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
-        <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">
+        <p className="mb-3 text-xs font-medium text-slate-400">
           Valores SUS
         </p>
         <div className="space-y-2">
