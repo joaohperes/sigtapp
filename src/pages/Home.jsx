@@ -12,6 +12,7 @@ import { formatBRL, formatCodigo } from '../utils/formatters'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Badge } from '@/components/ui/badge'
+import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 
 const VIEW_MODES = ['cards', 'tabela']
@@ -56,6 +57,23 @@ function ProcedureSheetContent({ procedure }) {
   const total = (vl_sa || 0) + (vl_sh || 0) + (vl_sp || 0)
   const estilo = GRUPO_MAP[co_procedimento?.slice(0, 2)]
 
+  const [descricao, setDescricao] = useState(null)
+  const [descLoading, setDescLoading] = useState(true)
+
+  useEffect(() => {
+    setDescricao(null)
+    setDescLoading(true)
+    supabase
+      .from('procedimentos')
+      .select('ds_procedimento')
+      .eq('co_procedimento', co_procedimento)
+      .single()
+      .then(({ data }) => {
+        setDescricao(data?.ds_procedimento || null)
+        setDescLoading(false)
+      })
+  }, [co_procedimento])
+
   return (
     <div className="flex flex-col gap-5 pt-2">
       <SheetHeader>
@@ -80,6 +98,23 @@ function ProcedureSheetContent({ procedure }) {
       {estilo && (
         <div className={cn('rounded-lg px-3 py-2 text-xs font-medium', estilo.bg, estilo.text)}>
           {estilo.no}
+        </div>
+      )}
+
+      {(descLoading || descricao) && (
+        <div>
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
+            Descrição
+          </p>
+          {descLoading ? (
+            <div className="space-y-2">
+              <Skeleton className="h-3.5 w-full" />
+              <Skeleton className="h-3.5 w-5/6" />
+              <Skeleton className="h-3.5 w-4/6" />
+            </div>
+          ) : (
+            <p className="text-sm leading-relaxed text-slate-600">{descricao}</p>
+          )}
         </div>
       )}
 
