@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { formatBRL, formatCodigo, exportCsv } from '../utils/formatters'
 
-export function ProcedureTable({ results, onSelect }) {
+export function ProcedureTable({ results, onSelect, compareMode, compareSelection, onToggleCompare }) {
   const navigate = useNavigate()
   if (!results.length) return null
 
@@ -26,6 +26,7 @@ export function ProcedureTable({ results, onSelect }) {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-slate-100 bg-slate-50 text-left">
+              {compareMode && <th className="w-10 px-4 py-3" />}
               <th className="px-4 py-3 text-xs font-medium uppercase tracking-wide text-slate-500 whitespace-nowrap">Código</th>
               <th className="px-4 py-3 text-xs font-medium uppercase tracking-wide text-slate-500">Procedimento</th>
               <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wide text-slate-500 whitespace-nowrap">SA</th>
@@ -37,12 +38,27 @@ export function ProcedureTable({ results, onSelect }) {
           <tbody className="divide-y divide-slate-100">
             {results.map((p) => {
               const total = (p.vl_sa || 0) + (p.vl_sh || 0) + (p.vl_sp || 0)
+              const selected = compareSelection?.some(c => c.co_procedimento === p.co_procedimento)
+              const handleClick = compareMode
+                ? () => onToggleCompare?.(p)
+                : () => onSelect ? onSelect(p) : navigate(`/procedimento/${p.co_procedimento}`)
               return (
                 <tr
                   key={p.co_procedimento}
-                  onClick={() => onSelect ? onSelect(p) : navigate(`/procedimento/${p.co_procedimento}`)}
-                  className="cursor-pointer hover:bg-blue-50/50 transition-colors"
+                  onClick={handleClick}
+                  className={`cursor-pointer transition-colors ${selected ? 'bg-blue-50' : 'hover:bg-blue-50/50'}`}
                 >
+                  {compareMode && (
+                    <td className="px-4 py-3">
+                      <input
+                        type="checkbox"
+                        checked={!!selected}
+                        onChange={() => onToggleCompare?.(p)}
+                        onClick={e => e.stopPropagation()}
+                        className="h-4 w-4 rounded border-slate-300 text-blue-600 cursor-pointer"
+                      />
+                    </td>
+                  )}
                   <td className="px-4 py-3 whitespace-nowrap">
                     <span className="font-mono text-xs text-blue-600">
                       {formatCodigo(p.co_procedimento)}

@@ -2,11 +2,24 @@ import { Link } from 'react-router-dom'
 import { toast } from 'sonner'
 import { formatBRL, formatCodigo } from '../utils/formatters'
 import { GRUPO_MAP } from '../data/grupos'
+import { useFavoritos } from '../contexts/FavoritosContext'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
+
+function StarIcon({ filled }) {
+  return (
+    <svg
+      className={cn('h-4 w-4 transition', filled ? 'fill-amber-400 text-amber-400' : 'fill-none text-slate-300 hover:text-amber-400')}
+      stroke="currentColor" viewBox="0 0 24 24"
+    >
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+        d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+    </svg>
+  )
+}
 
 function PriceTooltip({ total, vl_sa, vl_sh, vl_sp, children }) {
   return (
@@ -37,15 +50,19 @@ function PriceTooltip({ total, vl_sa, vl_sh, vl_sp, children }) {
   )
 }
 
-export function ProcedureCard({ procedure, onSelect }) {
+export function ProcedureCard({ procedure, onSelect, compareMode, compareSelected, onToggleCompare }) {
   const { co_procedimento, no_procedimento, vl_sa, vl_sh, vl_sp, no_financiamento } = procedure
   const total = (vl_sa || 0) + (vl_sh || 0) + (vl_sp || 0)
   const estilo = GRUPO_MAP[co_procedimento?.slice(0, 2)]
+  const { isFavorito, toggleFavorito } = useFavoritos()
+  const fav = isFavorito(co_procedimento)
 
   const inner = (
-    <Card className="overflow-hidden shadow-sm transition group-hover:shadow-md">
+    <Card className={cn(
+      'overflow-hidden shadow-sm transition group-hover:shadow-md',
+      compareSelected && 'ring-2 ring-blue-500 ring-offset-1',
+    )}>
       {estilo && <div className={cn('h-1 w-full', estilo.dot)} />}
-
       <CardContent className="flex flex-1 flex-col p-4">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
@@ -54,10 +71,7 @@ export function ProcedureCard({ procedure, onSelect }) {
               {no_procedimento}
             </p>
             {no_financiamento && (
-              <Badge
-                variant="secondary"
-                className="mt-2 rounded-full px-2 py-0.5 text-xs font-normal"
-              >
+              <Badge variant="secondary" className="mt-2 rounded-full px-2 py-0.5 text-xs font-normal">
                 {no_financiamento}
               </Badge>
             )}
@@ -69,7 +83,6 @@ export function ProcedureCard({ procedure, onSelect }) {
             </div>
           </PriceTooltip>
         </div>
-
         <div className="mt-3 grid grid-cols-3 gap-2 border-t border-slate-100 pt-3">
           <ValueCell label="Ambulatorial" value={vl_sa} />
           <ValueCell label="Hospitalar" value={vl_sh} />
@@ -79,12 +92,47 @@ export function ProcedureCard({ procedure, onSelect }) {
     </Card>
   )
 
+  const starBtn = (
+    <button
+      onClick={(e) => { e.stopPropagation(); e.preventDefault(); toggleFavorito(procedure) }}
+      className={cn(
+        'absolute top-3 right-3 z-10 rounded-md p-1 transition hover:bg-white/80',
+        !fav && 'opacity-0 group-hover:opacity-100',
+      )}
+      title={fav ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+    >
+      <StarIcon filled={fav} />
+    </button>
+  )
+
+  if (compareMode) {
+    return (
+      <div
+        className="group relative block cursor-pointer transition hover:-translate-y-0.5"
+        onClick={() => onToggleCompare?.(procedure)}
+      >
+        <div className="absolute top-3 left-3 z-10">
+          <input
+            type="checkbox"
+            checked={!!compareSelected}
+            onChange={() => onToggleCompare?.(procedure)}
+            onClick={e => e.stopPropagation()}
+            className="h-4 w-4 rounded border-slate-300 text-blue-600 cursor-pointer"
+          />
+        </div>
+        {starBtn}
+        {inner}
+      </div>
+    )
+  }
+
   if (onSelect) {
     return (
       <div
-        className="group block cursor-pointer transition hover:-translate-y-0.5"
+        className="group relative block cursor-pointer transition hover:-translate-y-0.5"
         onClick={() => onSelect(procedure)}
       >
+        {starBtn}
         {inner}
       </div>
     )
@@ -93,8 +141,9 @@ export function ProcedureCard({ procedure, onSelect }) {
   return (
     <Link
       to={`/procedimento/${co_procedimento}`}
-      className="group block transition hover:-translate-y-0.5"
+      className="group relative block transition hover:-translate-y-0.5"
     >
+      {starBtn}
       {inner}
     </Link>
   )
@@ -139,10 +188,12 @@ function ValueCell({ label, value }) {
   )
 }
 
-export function ProcedureRow({ procedure, onSelect }) {
+export function ProcedureRow({ procedure, onSelect, compareMode, compareSelected, onToggleCompare }) {
   const { co_procedimento, no_procedimento, vl_sa, vl_sh, vl_sp, no_financiamento } = procedure
   const total = (vl_sa || 0) + (vl_sh || 0) + (vl_sp || 0)
   const estilo = GRUPO_MAP[co_procedimento?.slice(0, 2)]
+  const { isFavorito, toggleFavorito } = useFavoritos()
+  const fav = isFavorito(co_procedimento)
 
   function handleCopyCodigo(e) {
     e.preventDefault()
@@ -151,12 +202,28 @@ export function ProcedureRow({ procedure, onSelect }) {
     toast.success('Código copiado!', { duration: 1500 })
   }
 
+  const handleClick = compareMode
+    ? () => onToggleCompare?.(procedure)
+    : onSelect
+      ? () => onSelect(procedure)
+      : null
+
   const inner = (
-    <Card className="transition shadow-sm group-hover:border-slate-300 group-hover:shadow-md">
+    <Card className={cn(
+      'transition shadow-sm group-hover:border-slate-300 group-hover:shadow-md',
+      compareSelected && 'ring-2 ring-blue-500 ring-offset-1',
+    )}>
       <CardContent className="flex items-center gap-3 px-4 py-3">
-        {estilo && (
-          <div className={cn('h-8 w-1 shrink-0 rounded-full', estilo.dot)} />
+        {compareMode && (
+          <input
+            type="checkbox"
+            checked={!!compareSelected}
+            onChange={() => onToggleCompare?.(procedure)}
+            onClick={e => e.stopPropagation()}
+            className="h-4 w-4 shrink-0 rounded border-slate-300 text-blue-600 cursor-pointer"
+          />
         )}
+        {estilo && <div className={cn('h-8 w-1 shrink-0 rounded-full', estilo.dot)} />}
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1">
             <p className="font-mono text-xs text-slate-400">{formatCodigo(co_procedimento)}</p>
@@ -174,14 +241,22 @@ export function ProcedureRow({ procedure, onSelect }) {
           </div>
           <p className="text-sm font-medium leading-snug text-slate-800">{no_procedimento}</p>
           {no_financiamento && (
-            <Badge
-              variant="secondary"
-              className="mt-1 rounded-full px-2 py-0.5 text-xs font-normal"
-            >
+            <Badge variant="secondary" className="mt-1 rounded-full px-2 py-0.5 text-xs font-normal">
               {no_financiamento}
             </Badge>
           )}
         </div>
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); e.preventDefault(); toggleFavorito(procedure) }}
+          className={cn(
+            'shrink-0 rounded p-1 transition hover:bg-slate-100',
+            !fav && 'opacity-0 group-hover:opacity-100',
+          )}
+          title={fav ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+        >
+          <StarIcon filled={fav} />
+        </button>
         <PriceTooltip total={total} vl_sa={vl_sa} vl_sh={vl_sh} vl_sp={vl_sp}>
           <div className="shrink-0 text-right cursor-default">
             <p className="text-xs text-slate-400">Total SUS</p>
@@ -192,9 +267,9 @@ export function ProcedureRow({ procedure, onSelect }) {
     </Card>
   )
 
-  if (onSelect) {
+  if (handleClick) {
     return (
-      <div className="group block cursor-pointer" onClick={() => onSelect(procedure)}>
+      <div className="group block cursor-pointer" onClick={handleClick}>
         {inner}
       </div>
     )

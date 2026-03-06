@@ -3,6 +3,9 @@ import { useParams, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { formatBRL, formatCodigo, toSentenceCase } from '../utils/formatters'
 import { GRUPO_MAP } from '../data/grupos'
+import { useFavoritos } from '../contexts/FavoritosContext'
+import { Skeleton } from '@/components/ui/skeleton'
+import { cn } from '@/lib/utils'
 
 export function ProcedureDetail() {
   const { codigo } = useParams()
@@ -36,8 +39,29 @@ export function ProcedureDetail() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center text-slate-400 text-sm">
-        Carregando...
+      <div className="min-h-screen bg-slate-50">
+        <div className="bg-gradient-to-br from-blue-800 via-blue-700 to-blue-600">
+          <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
+            <Skeleton className="h-4 w-24 bg-blue-700" />
+            <div className="mt-4 space-y-2">
+              <Skeleton className="h-3 w-32 bg-blue-700" />
+              <Skeleton className="h-7 w-3/4 bg-blue-700" />
+              <Skeleton className="h-3 w-28 bg-blue-700" />
+            </div>
+          </div>
+        </div>
+        <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
+          <div className="grid gap-4 lg:grid-cols-[220px_1fr_1fr]">
+            <div className="space-y-3">
+              {[0, 1, 2, 3].map(i => <Skeleton key={i} className="h-20 rounded-xl" />)}
+            </div>
+            <div className="space-y-4">
+              <Skeleton className="h-40 rounded-xl" />
+              <Skeleton className="h-24 rounded-xl" />
+            </div>
+            <Skeleton className="h-64 rounded-xl" />
+          </div>
+        </main>
       </div>
     )
   }
@@ -53,6 +77,8 @@ export function ProcedureDetail() {
 
   const total = (data.vl_sa || 0) + (data.vl_sh || 0) + (data.vl_sp || 0)
   const estilo = GRUPO_MAP[data.co_grupo]
+  const { isFavorito, toggleFavorito } = useFavoritos()
+  const fav = isFavorito(data.co_procedimento)
   const cidsPrincipais = cids.filter((c) => c.st_principal === 'S')
   const cidsSecundarios = cids.filter((c) => c.st_principal !== 'S')
 
@@ -69,10 +95,27 @@ export function ProcedureDetail() {
           </Link>
 
           <div className="mt-4">
-            <p className="font-mono text-sm text-blue-300">{formatCodigo(data.co_procedimento)}</p>
-            <h1 className="mt-1 text-2xl font-bold leading-snug text-white">
-              {data.no_procedimento}
-            </h1>
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="font-mono text-sm text-blue-300">{formatCodigo(data.co_procedimento)}</p>
+                <h1 className="mt-1 text-2xl font-bold leading-snug text-white">
+                  {data.no_procedimento}
+                </h1>
+              </div>
+              <button
+                onClick={() => toggleFavorito(data)}
+                className="mt-1 shrink-0 rounded-xl bg-white/10 p-2.5 transition hover:bg-white/20"
+                title={fav ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+              >
+                <svg
+                  className={cn('h-5 w-5 transition', fav ? 'fill-amber-400 text-amber-400' : 'fill-none text-white')}
+                  stroke="currentColor" viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                    d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+                </svg>
+              </button>
+            </div>
             {data.dt_competencia && (
               <p className="mt-2 text-xs text-blue-300">
                 Competência {data.dt_competencia.slice(0, 4)}/{data.dt_competencia.slice(4)}

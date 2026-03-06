@@ -3,16 +3,17 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { SearchBar } from '../components/SearchBar'
 import { ProcedureCard, ProcedureCardSkeleton } from '../components/ProcedureCard'
 import { ProcedureTable } from '../components/ProcedureTable'
+import { ProcedureSheetContent } from '../components/ProcedureSheetContent'
 import { useProcedures } from '../hooks/useProcedures'
 import { useGrupos } from '../hooks/useGrupos'
+import { useFavoritos } from '../contexts/FavoritosContext'
 import { GRUPO_MAP } from '../data/grupos'
 import { supabase } from '../lib/supabase'
 import { expandirSinonimos } from '../data/sinonimos'
-import { formatBRL, formatCodigo, toSentenceCase } from '../utils/formatters'
+import { formatBRL, formatCodigo } from '../utils/formatters'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
-import { Badge } from '@/components/ui/badge'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Sheet, SheetContent } from '@/components/ui/sheet'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { cn } from '@/lib/utils'
 
 const VIEW_MODES = ['cards', 'tabela']
@@ -52,107 +53,6 @@ function applySort(arr, key) {
   return [...arr].sort((a, b) => relevancePriority(a) - relevancePriority(b))
 }
 
-function ProcedureSheetContent({ procedure }) {
-  const { co_procedimento, no_procedimento, vl_sa, vl_sh, vl_sp, no_financiamento } = procedure
-  const total = (vl_sa || 0) + (vl_sh || 0) + (vl_sp || 0)
-  const estilo = GRUPO_MAP[co_procedimento?.slice(0, 2)]
-
-  const [descricao, setDescricao] = useState(null)
-  const [descLoading, setDescLoading] = useState(true)
-
-  useEffect(() => {
-    setDescricao(null)
-    setDescLoading(true)
-    supabase
-      .from('procedimentos')
-      .select('ds_procedimento')
-      .eq('co_procedimento', co_procedimento)
-      .single()
-      .then(({ data }) => {
-        setDescricao(data?.ds_procedimento || null)
-        setDescLoading(false)
-      })
-  }, [co_procedimento])
-
-  return (
-    <div className="flex flex-col gap-5 pt-2">
-      <SheetHeader>
-        <div className="flex items-start gap-3">
-          {estilo && (
-            <div className={cn('mt-1 h-10 w-1.5 shrink-0 rounded-full', estilo.dot)} />
-          )}
-          <div>
-            <p className="font-mono text-xs text-slate-400">{formatCodigo(co_procedimento)}</p>
-            <SheetTitle className="mt-1 text-left text-base font-semibold leading-snug text-slate-800">
-              {no_procedimento}
-            </SheetTitle>
-            {no_financiamento && (
-              <Badge variant="secondary" className="mt-2 rounded-full px-2 py-0.5 text-xs font-normal">
-                {no_financiamento}
-              </Badge>
-            )}
-          </div>
-        </div>
-      </SheetHeader>
-
-      {estilo && (
-        <div className={cn('rounded-lg px-3 py-2 text-xs font-medium', estilo.bg, estilo.text)}>
-          {estilo.no}
-        </div>
-      )}
-
-      {(descLoading || descricao) && (
-        <div>
-          <p className="mb-2 text-xs font-medium text-slate-400">
-            Descrição
-          </p>
-          {descLoading ? (
-            <div className="space-y-2">
-              <Skeleton className="h-3.5 w-full" />
-              <Skeleton className="h-3.5 w-5/6" />
-              <Skeleton className="h-3.5 w-4/6" />
-            </div>
-          ) : (
-            <p className="text-sm leading-relaxed text-slate-600">{toSentenceCase(descricao)}</p>
-          )}
-        </div>
-      )}
-
-      <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
-        <p className="mb-3 text-xs font-medium text-slate-400">
-          Valores SUS
-        </p>
-        <div className="space-y-2">
-          {[
-            { label: 'Ambulatorial (SA)', value: vl_sa },
-            { label: 'Hospitalar (SH)', value: vl_sh },
-            { label: 'Profissional (SP)', value: vl_sp },
-          ].map(({ label, value }) => (
-            <div key={label} className="flex items-center justify-between">
-              <span className="text-sm text-slate-500">{label}</span>
-              <span className="tabular-nums text-sm text-slate-700">{formatBRL(value)}</span>
-            </div>
-          ))}
-          <div className="flex items-center justify-between border-t border-slate-200 pt-2 mt-2">
-            <span className="text-sm font-semibold text-slate-700">Total</span>
-            <span className="tabular-nums text-base font-bold text-emerald-600">{formatBRL(total)}</span>
-          </div>
-        </div>
-      </div>
-
-      <Link
-        to={`/procedimento/${co_procedimento}`}
-        className="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5
-                   text-sm font-medium text-white transition hover:bg-blue-700"
-      >
-        Ver página completa
-        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-        </svg>
-      </Link>
-    </div>
-  )
-}
 
 function Spinner() {
   return (
@@ -177,6 +77,7 @@ export function Home() {
 
   const { results, loading, error, search, searchMeta } = useProcedures()
   const { grupos } = useGrupos()
+  const { favoritos } = useFavoritos()
   const [view, setView] = useState('cards')
   const [searched, setSearched] = useState(!!initialQuery)
 
@@ -193,6 +94,11 @@ export function Home() {
 
   // Sheet (painel de detalhe rápido)
   const [sheetProc, setSheetProc] = useState(null)
+
+  // Modo comparação
+  const [compareMode, setCompareMode] = useState(false)
+  const [compareSelection, setCompareSelection] = useState([])
+  const [showCompare, setShowCompare] = useState(false)
 
   // Paginação client-side
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
@@ -243,6 +149,15 @@ export function Home() {
     setValorMin('')
     setValorMax('')
     setSoComDescricao(false)
+  }
+
+  function toggleCompareItem(procedure) {
+    setCompareSelection(prev => {
+      const exists = prev.some(p => p.co_procedimento === procedure.co_procedimento)
+      if (exists) return prev.filter(p => p.co_procedimento !== procedure.co_procedimento)
+      if (prev.length >= 3) return prev
+      return [...prev, procedure]
+    })
   }
 
   async function searchCids(query) {
@@ -602,6 +517,20 @@ export function Home() {
                     </button>
                   )}
 
+                  <button
+                    onClick={() => { setCompareMode(m => !m); setCompareSelection([]) }}
+                    className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition ${
+                      compareMode
+                        ? 'border-blue-300 bg-blue-50 text-blue-700'
+                        : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
+                    }`}
+                  >
+                    <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                    Comparar
+                  </button>
+
                   <div className="flex rounded-lg border border-slate-200 bg-white p-0.5 shadow-sm">
                     {VIEW_MODES.map((m) => (
                       <button
@@ -695,11 +624,24 @@ export function Home() {
                 view === 'cards' ? (
                   <div className="grid gap-3 sm:grid-cols-2">
                     {visibleResults.map((p) => (
-                      <ProcedureCard key={p.co_procedimento} procedure={p} onSelect={setSheetProc} />
+                      <ProcedureCard
+                        key={p.co_procedimento}
+                        procedure={p}
+                        onSelect={compareMode ? undefined : setSheetProc}
+                        compareMode={compareMode}
+                        compareSelected={compareSelection.some(c => c.co_procedimento === p.co_procedimento)}
+                        onToggleCompare={toggleCompareItem}
+                      />
                     ))}
                   </div>
                 ) : (
-                  <ProcedureTable results={visibleResults} onSelect={setSheetProc} />
+                  <ProcedureTable
+                    results={visibleResults}
+                    onSelect={compareMode ? undefined : setSheetProc}
+                    compareMode={compareMode}
+                    compareSelection={compareSelection}
+                    onToggleCompare={toggleCompareItem}
+                  />
                 )
               )}
 
@@ -737,6 +679,34 @@ export function Home() {
         {/* ── Estado inicial — grupos com drill-down ── */}
         {!searched && (
           <div>
+            {/* Favoritos */}
+            {favoritos.length > 0 && (
+              <div className="mb-8">
+                <div className="mb-3 flex items-center justify-between">
+                  <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                    <svg className="h-4 w-4 fill-amber-400 text-amber-400" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                        d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+                    </svg>
+                    Favoritos
+                  </h2>
+                  <span className="text-xs text-slate-400">
+                    {favoritos.length} procedimento{favoritos.length !== 1 ? 's' : ''}
+                  </span>
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {favoritos.slice(0, 6).map(p => (
+                    <ProcedureCard key={p.co_procedimento} procedure={p} onSelect={setSheetProc} />
+                  ))}
+                </div>
+                {favoritos.length > 6 && (
+                  <p className="mt-2 text-center text-xs text-slate-400">
+                    +{favoritos.length - 6} mais — busque pelo nome para ver todos
+                  </p>
+                )}
+              </div>
+            )}
+
             {/* Header / breadcrumb */}
             <div className="mb-4 flex items-center justify-between">
               {selectedGroup ? (
@@ -979,6 +949,75 @@ export function Home() {
           {sheetProc && <ProcedureSheetContent procedure={sheetProc} />}
         </SheetContent>
       </Sheet>
+
+      {/* Dialog — comparação de procedimentos */}
+      <Dialog open={showCompare} onOpenChange={setShowCompare}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Comparação de procedimentos</DialogTitle>
+          </DialogHeader>
+          <div className={`grid gap-4 mt-2 ${compareSelection.length === 3 ? 'grid-cols-3' : compareSelection.length === 2 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+            {compareSelection.map(p => {
+              const total = (p.vl_sa || 0) + (p.vl_sh || 0) + (p.vl_sp || 0)
+              const estilo = GRUPO_MAP[p.co_procedimento?.slice(0, 2)]
+              return (
+                <div key={p.co_procedimento} className="space-y-3">
+                  <div className={cn('rounded-lg p-3', estilo?.bg ?? 'bg-slate-100')}>
+                    <p className={cn('font-mono text-[11px]', estilo?.text ?? 'text-slate-400')}>
+                      {p.co_procedimento}
+                    </p>
+                    <p className={cn('mt-1 text-sm font-semibold leading-snug', estilo?.text ?? 'text-slate-800')}>
+                      {p.no_procedimento}
+                    </p>
+                  </div>
+                  <div className="space-y-2 rounded-xl border border-slate-100 bg-slate-50 p-3">
+                    {[
+                      { label: 'Ambulatorial (SA)', value: p.vl_sa },
+                      { label: 'Hospitalar (SH)', value: p.vl_sh },
+                      { label: 'Profissional (SP)', value: p.vl_sp },
+                    ].map(({ label, value }) => (
+                      <div key={label}>
+                        <p className="text-xs text-slate-400">{label}</p>
+                        <p className="tabular-nums text-sm font-medium text-slate-700">{formatBRL(value)}</p>
+                      </div>
+                    ))}
+                    <div className="border-t border-slate-200 pt-2">
+                      <p className="text-xs text-emerald-600">Total SUS</p>
+                      <p className="tabular-nums text-lg font-bold text-emerald-700">{formatBRL(total)}</p>
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Barra flutuante de comparação */}
+      {compareMode && compareSelection.length > 0 && (
+        <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2">
+          <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-5 py-3 shadow-xl">
+            <span className="text-sm text-slate-600">
+              {compareSelection.length}/3 selecionado{compareSelection.length > 1 ? 's' : ''}
+            </span>
+            <button
+              onClick={() => setShowCompare(true)}
+              disabled={compareSelection.length < 2}
+              className="rounded-lg bg-blue-600 px-4 py-1.5 text-sm font-medium text-white
+                         transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Comparar
+            </button>
+            <button
+              onClick={() => setCompareSelection([])}
+              className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-600
+                         transition hover:bg-slate-50"
+            >
+              Limpar
+            </button>
+          </div>
+        </div>
+      )}
 
       <footer className="py-6 text-center">
         <p className="text-xs text-slate-400">
