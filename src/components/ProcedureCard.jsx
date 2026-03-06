@@ -120,7 +120,6 @@ export function ProcedureCard({ procedure, onSelect, compareMode, compareSelecte
             className="h-4 w-4 rounded border-slate-300 text-blue-600 cursor-pointer"
           />
         </div>
-        {starBtn}
         {inner}
       </div>
     )

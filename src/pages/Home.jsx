@@ -690,9 +690,9 @@ export function Home() {
                     </svg>
                     Favoritos
                   </h2>
-                  <span className="text-xs text-slate-400">
-                    {favoritos.length} procedimento{favoritos.length !== 1 ? 's' : ''}
-                  </span>
+                  <Link to="/favoritos" className="text-xs text-slate-400 hover:text-blue-600 transition">
+                    {favoritos.length} procedimento{favoritos.length !== 1 ? 's' : ''} · Ver todos →
+                  </Link>
                 </div>
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   {favoritos.slice(0, 6).map(p => (
@@ -700,9 +700,11 @@ export function Home() {
                   ))}
                 </div>
                 {favoritos.length > 6 && (
-                  <p className="mt-2 text-center text-xs text-slate-400">
-                    +{favoritos.length - 6} mais — busque pelo nome para ver todos
-                  </p>
+                  <div className="mt-3 text-center">
+                    <Link to="/favoritos" className="text-xs text-blue-600 hover:underline">
+                      Ver todos os {favoritos.length} favoritos →
+                    </Link>
+                  </div>
                 )}
               </div>
             )}

@@ -4,6 +4,7 @@ import { ProcedureDetail } from './pages/ProcedureDetail'
 import { GroupPage } from './pages/GroupPage'
 import { CidSearch } from './pages/CidSearch'
 import { AnamnesePage } from './pages/AnamnesePage'
+import { FavoritosPage } from './pages/FavoritosPage'
 
 export default function App() {
   return (
@@ -14,6 +15,7 @@ export default function App() {
         <Route path="/procedimento/:codigo" element={<ProcedureDetail />} />
         <Route path="/cid" element={<CidSearch />} />
         <Route path="/anamnese" element={<AnamnesePage />} />
+        <Route path="/favoritos" element={<FavoritosPage />} />
       </Routes>
     </BrowserRouter>
   )
