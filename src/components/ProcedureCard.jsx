@@ -76,12 +76,21 @@ export function ProcedureCard({ procedure, onSelect, compareMode, compareSelecte
               </Badge>
             )}
           </div>
-          <PriceTooltip total={total} vl_sa={vl_sa} vl_sh={vl_sh} vl_sp={vl_sp}>
-            <div className="shrink-0 text-right cursor-default">
-              <p className="text-xs text-slate-400">Total SUS</p>
-              <p className="text-base font-bold text-emerald-600">{formatBRL(total)}</p>
-            </div>
-          </PriceTooltip>
+          <div className="shrink-0 flex flex-col items-end gap-1">
+            <button
+              onClick={(e) => { e.stopPropagation(); e.preventDefault(); toggleFavorito(procedure) }}
+              className={cn('rounded p-1 transition hover:bg-slate-100', !fav && 'opacity-0 group-hover:opacity-100')}
+              title={fav ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+            >
+              <StarIcon filled={fav} />
+            </button>
+            <PriceTooltip total={total} vl_sa={vl_sa} vl_sh={vl_sh} vl_sp={vl_sp}>
+              <div className="text-right cursor-default">
+                <p className="text-xs text-slate-400">Total SUS</p>
+                <p className="text-base font-bold text-emerald-600">{formatBRL(total)}</p>
+              </div>
+            </PriceTooltip>
+          </div>
         </div>
         <div className="mt-3 grid grid-cols-3 gap-2 border-t border-slate-100 pt-3">
           <ValueCell label="Ambulatorial" value={vl_sa} />
@@ -92,18 +101,7 @@ export function ProcedureCard({ procedure, onSelect, compareMode, compareSelecte
     </Card>
   )
 
-  const starBtn = (
-    <button
-      onClick={(e) => { e.stopPropagation(); e.preventDefault(); toggleFavorito(procedure) }}
-      className={cn(
-        'absolute top-3 right-3 z-10 rounded-md p-1 transition hover:bg-white/80',
-        !fav && 'opacity-0 group-hover:opacity-100',
-      )}
-      title={fav ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
-    >
-      <StarIcon filled={fav} />
-    </button>
-  )
+
 
   if (compareMode) {
     return (
@@ -131,7 +129,6 @@ export function ProcedureCard({ procedure, onSelect, compareMode, compareSelecte
         className="group relative block cursor-pointer transition hover:-translate-y-0.5"
         onClick={() => onSelect(procedure)}
       >
-        {starBtn}
         {inner}
       </div>
     )
@@ -142,7 +139,6 @@ export function ProcedureCard({ procedure, onSelect, compareMode, compareSelecte
       to={`/procedimento/${co_procedimento}`}
       className="group relative block transition hover:-translate-y-0.5"
     >
-      {starBtn}
       {inner}
     </Link>
   )
