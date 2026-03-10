@@ -17,7 +17,18 @@ const FTS_GENERICO = new Set(['tratamento', 'procedimento', 'realizacao', 'reali
 
 // Qualificadores que disqualificam um resultado quando NÃO estão no termo buscado
 // Ex: buscar "cateterismo cardiaco" NÃO deve retornar "CATETERISMO CARDIACO EM PEDIATRIA"
-const QUALIF_BLOQUEIO = ['PEDIATRIA', 'PEDIATRICO', 'PEDIATRICA', 'NEONATAL', 'RECEM-NASCIDO', 'RECEM NASCIDO', 'INFANTIL']
+const QUALIF_BLOQUEIO = [
+  // Faixa etária
+  'PEDIATRIA', 'PEDIATRICO', 'PEDIATRICA', 'NEONATAL', 'RECEM-NASCIDO', 'RECEM NASCIDO', 'INFANTIL',
+  // Doação de órgãos
+  'DOADOR', 'DOADORA',
+  // Modalidade de esforço/estresse (exame provocativo — não cabe em quadro agudo)
+  'ESTRESSE',
+  // Obstetrícia/gestação
+  'OBSTETRICO', 'OBSTETRICA', 'GESTANTE', 'GESTACAO', 'PARTO', 'PUERPERA', 'PUERPERAL',
+  // Cadáver/simulador
+  'CADAVER', 'CADAVERICO', 'CADAVERICA',
+]
 
 function temQualifNaoSolicitado(nomeProc, termo) {
   const nomeNorm = normalizarTexto(nomeProc)
