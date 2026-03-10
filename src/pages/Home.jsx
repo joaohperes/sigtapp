@@ -435,7 +435,7 @@ export function Home() {
                   <span className="w-12 shrink-0 font-mono text-sm font-bold text-indigo-700">
                     {cid.co_cid.trim()}
                   </span>
-                  <span className="flex-1 text-sm text-slate-700 truncate">{cid.no_cid?.trim()}</span>
+                  <span className="flex-1 text-sm text-slate-700 truncate" title={cid.no_cid?.trim()}>{cid.no_cid?.trim()}</span>
                   <button
                     onClick={() => handleCidSelect(cid.co_cid.trim())}
                     className="shrink-0 rounded-md border border-blue-200 bg-white px-2.5 py-1
