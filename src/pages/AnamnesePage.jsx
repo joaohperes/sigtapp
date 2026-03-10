@@ -6,6 +6,7 @@ import { ProcedureRow } from '../components/ProcedureCard'
 import { ProcedureSheetContent } from '../components/ProcedureSheetContent'
 import { Sheet, SheetContent } from '@/components/ui/sheet'
 import { Skeleton } from '@/components/ui/skeleton'
+import { cn } from '@/lib/utils'
 
 const EXEMPLO = `Paciente masculino, 58 anos, hipertenso e diabético tipo 2. Queixa de dor torácica opressiva com irradiação para o membro superior esquerdo iniciada há 2 horas, associada a sudorese fria, náuseas e dispneia. Pressão arterial 160/100 mmHg, FC 98 bpm. ECG com supradesnivelamento de ST em V1-V4.`
 
@@ -53,6 +54,7 @@ function getSession() {
 
 export function AnamnesePage() {
   const navigate = useNavigate()
+  const modoUE = (() => { try { return localStorage.getItem('sigtap-modo-ue') === '1' } catch { return false } })()
   const [anamnese, setAnamnese] = useState(() => getSession().anamnese || '')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -293,14 +295,14 @@ export function AnamnesePage() {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
-      <div className="bg-gradient-to-br from-blue-800 via-blue-700 to-blue-600">
+      <div className={modoUE ? "bg-gradient-to-br from-red-900 via-red-800 to-red-700" : "bg-gradient-to-br from-blue-800 via-blue-700 to-blue-600"}>
         <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
-          <Link to="/" className="text-sm text-blue-300 hover:text-white transition">
+          <Link to="/" className={cn("text-sm transition hover:text-white", modoUE ? "text-red-300" : "text-blue-300")}>
             ← Voltar
           </Link>
           <div className="mt-4">
             <h1 className="text-xl font-bold text-white sm:text-2xl">Análise de Anamnese</h1>
-            <p className="mt-1 text-sm text-blue-200">
+            <p className={cn("mt-1 text-sm", modoUE ? "text-red-200" : "text-blue-200")}>
               Cole o texto clínico e a IA identificará CIDs, procedimentos SIGTAP e gerará o texto para AIH
             </p>
           </div>
@@ -328,7 +330,7 @@ export function AnamnesePage() {
                   {!anamnese && (
                     <button
                       onClick={() => setAnamnese(EXEMPLO)}
-                      className="text-xs text-blue-500 hover:underline"
+                      className={cn("text-xs hover:underline", modoUE ? "text-red-500" : "text-blue-500")}
                     >
                       Usar exemplo
                     </button>
@@ -340,9 +342,10 @@ export function AnamnesePage() {
                   onChange={e => setAnamnese(e.target.value)}
                   placeholder="Descreva o quadro clínico do paciente: queixas, história, exame físico, hipóteses diagnósticas..."
                   rows={8}
-                  className="w-full resize-y rounded-lg border border-slate-200 p-3 text-sm leading-relaxed
-                             text-slate-700 placeholder:text-slate-400
-                             focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400/20"
+                  className={cn(
+                    "w-full resize-y rounded-lg border border-slate-200 p-3 text-sm leading-relaxed text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2",
+                    modoUE ? "focus:border-red-400 focus:ring-red-400/20" : "focus:border-blue-400 focus:ring-blue-400/20"
+                  )}
                 />
 
                 <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
@@ -352,9 +355,10 @@ export function AnamnesePage() {
                   <button
                     onClick={handleAnalyze}
                     disabled={loading || anamnese.trim().length < 20}
-                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm
-                               font-semibold text-white shadow-sm transition hover:bg-blue-700
-                               disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:justify-start"
+                    className={cn(
+                      "flex w-full items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:justify-start",
+                      modoUE ? "bg-red-700 hover:bg-red-800" : "bg-blue-600 hover:bg-blue-700"
+                    )}
                   >
                     {loading ? (
                       <>
