@@ -63,12 +63,12 @@ export function SearchBar({ onSearch, loading, initialValue = '', recentSearches
 
       {!value && recentSearches.length > 0 && (
         <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
-          <span className="text-[11px] text-blue-300/80">Recentes:</span>
+          <span className="text-[11px] text-white/60">Recentes:</span>
           {recentSearches.map((term) => (
             <button
               key={term}
               onClick={() => selectRecent(term)}
-              className="rounded-full bg-white/15 px-3 py-1 text-xs text-blue-100
+              className="rounded-full bg-white/15 px-3 py-1 text-xs text-white/90
                          hover:bg-white/25 transition"
             >
               {term}
