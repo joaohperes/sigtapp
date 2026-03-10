@@ -27,10 +27,18 @@ Analise o texto clínico abaixo e retorne APENAS JSON válido com três campos:
    - NÃO infira diagnósticos psiquiátricos (F00-F99) a partir de medicamentos de uso contínuo
    - NÃO inclua condições inferidas de medicamentos sem menção explícita no texto
 
-2. "termos": lista de 3 a 5 termos de busca em português para procedimentos SIGTAP. Regras para termos:
+2. "termos": lista de 4 a 6 termos de busca em português para procedimentos SIGTAP. Regras para termos:
    - O primeiro DEVE ser "tratamento de [diagnóstico principal COM qualificador anatômico]" (ex: "tratamento hemorragia digestiva alta", "tratamento infarto agudo miocardio", "tratamento pneumonia bacteriana", "tratamento avc isquemico")
-   - Os demais devem ser procedimentos ESPECÍFICOS ao sistema/órgão acometido, com qualificador anatômico obrigatório (ex: "endoscopia digestiva alta diagnostica", "transfusao concentrado hemacias", "cateterismo cardiaco", "tomografia cranio")
+   - PRIORIDADE MÁXIMA: se o quadro requer intervenção terapêutica específica, inclua OBRIGATORIAMENTE o termo dessa intervenção:
+     • IAM/SCA → "angioplastia coronariana" e/ou "trombolise coronariana"
+     • AVC isquêmico → "trombolise avc" e/ou "trombectomia cerebral"
+     • Hemorragia digestiva → "endoscopia digestiva alta terapeutica"
+     • Pneumotórax/derrame → "drenagem torax"
+     • Abdome agudo cirúrgico → "laparotomia exploradora"
+     • Fratura → "reducao cirurgica fratura [osso]"
+   - Os demais termos devem ser procedimentos DIAGNÓSTICOS ou COMPLEMENTARES específicos ao sistema/órgão (ex: "cateterismo cardiaco", "tomografia cranio", "transfusao concentrado hemacias")
    - NUNCA use termos genéricos sem qualificador anatômico (ex: ERRADO: "tratamento hemorragia"; CORRETO: "tratamento hemorragia digestiva alta")
+   - NUNCA gere termos para exames de esforço/estresse (ecocardiografia estresse, teste ergometrico) em quadros agudos
    - Use terminologia SUS/SIGTAP (ex: "hemacias" não "eritrócitos", "digestiva" não "gastrointestinal")
 3. "aih": texto estruturado em parágrafos para laudo de AIH. Separe os parágrafos com \n\n. Cada parágrafo é texto corrido, sem títulos, sem marcadores.
 
