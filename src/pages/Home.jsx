@@ -395,7 +395,9 @@ export function Home() {
                   key={mode ?? 'tudo'}
                   onClick={() => handleModeChange(mode)}
                   className={`relative z-10 rounded-full px-6 py-1.5 text-center text-xs font-semibold transition-colors duration-150 ${
-                    searchMode === mode ? 'text-blue-700' : 'text-blue-100 hover:text-white'
+                    searchMode === mode
+                      ? modoUE ? 'text-red-700' : 'text-blue-700'
+                      : 'text-white/70 hover:text-white'
                   }`}
                 >
                   {label}
