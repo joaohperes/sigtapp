@@ -15,6 +15,19 @@ const STOPWORDS = new Set(['de', 'do', 'da', 'dos', 'das', 'em', 'no', 'na', 'no
 // Palavras genéricas demais para o FTS do SIGTAP — removê-las da query melhora o ranking
 const FTS_GENERICO = new Set(['tratamento', 'procedimento', 'realizacao', 'realizacao'])
 
+// Qualificadores que disqualificam um resultado quando NÃO estão no termo buscado
+// Ex: buscar "cateterismo cardiaco" NÃO deve retornar "CATETERISMO CARDIACO EM PEDIATRIA"
+const QUALIF_BLOQUEIO = ['PEDIATRIA', 'PEDIATRICO', 'PEDIATRICA', 'NEONATAL', 'RECEM-NASCIDO', 'RECEM NASCIDO', 'INFANTIL']
+
+function temQualifNaoSolicitado(nomeProc, termo) {
+  const nomeNorm = normalizarTexto(nomeProc)
+  const termoNorm = normalizarTexto(termo)
+  return QUALIF_BLOQUEIO.some(q => {
+    const qNorm = normalizarTexto(q)
+    return nomeNorm.includes(qNorm) && !termoNorm.includes(qNorm)
+  })
+}
+
 function normalizarTexto(str) {
   return str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z\s]/g, '')
 }
@@ -138,12 +151,12 @@ export function AnamnesePage() {
       const procs = []
       const numTermos = buscas.length
 
-      // CID-based: TRATAMENTO → _src = -1 (mais alta prioridade no sort)
-      //            outros     → _src = numTermos (vai para o final)
+      // CID-based: apenas TRATAMENTO (outros procedimentos ligados ao CID tendem a ser
+      // irrelevantes e não passam por ehRelevante, gerando ruído nos resultados)
       for (const p of (cidResult.data || [])) {
+        if (!/^TRATAMENTO\b/i.test(p.no_procedimento || '')) continue
         seen.add(p.co_procedimento)
-        const isTrat = /^TRATAMENTO\b/i.test(p.no_procedimento || '')
-        procs.push({ ...p, _src: isTrat ? -1 : numTermos })
+        procs.push({ ...p, _src: -1 })
       }
 
       // Termos FTS: _src = índice do termo (0 = mais relevante)
@@ -152,6 +165,7 @@ export function AnamnesePage() {
         for (const p of (buscas[i].data || [])) {
           if (seen.has(p.co_procedimento)) continue
           if (!ehRelevante(p.no_procedimento, termo)) continue
+          if (temQualifNaoSolicitado(p.no_procedimento, termo)) continue
           seen.add(p.co_procedimento)
           procs.push({ ...p, _src: i })
         }
