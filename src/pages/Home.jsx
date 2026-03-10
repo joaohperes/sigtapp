@@ -100,6 +100,18 @@ export function Home() {
   const [compareSelection, setCompareSelection] = useState([])
   const [showCompare, setShowCompare] = useState(false)
 
+  // Modo Urgência/Emergência
+  const [modoUE, setModoUE] = useState(() => {
+    try { return localStorage.getItem('sigtap-modo-ue') === '1' } catch { return false }
+  })
+  function toggleModoUE() {
+    setModoUE(v => {
+      const next = !v
+      localStorage.setItem('sigtap-modo-ue', next ? '1' : '0')
+      return next
+    })
+  }
+
   // Paginação client-side
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
 
@@ -288,6 +300,7 @@ export function Home() {
   const filteredResults = results.filter(p => {
     const total = totalOf(p)
     const grupo = p.co_procedimento?.slice(0, 2)
+    if (modoUE && !['03', '04'].includes(grupo)) return false
     if (filtroGrupo && grupo !== filtroGrupo) return false
     if (filtroFinanciamento && p.tp_financiamento !== filtroFinanciamento) return false
     if (valorMin !== '' && total < parseFloat(valorMin)) return false
@@ -303,11 +316,12 @@ export function Home() {
   const activeModeIndex   = SEARCH_MODES.findIndex(m => m.mode === searchMode)
   const selectedEstilo    = selectedGroup ? GRUPO_MAP[selectedGroup.co_grupo] : null
   const totalProcedimentos = grupos.reduce((s, g) => s + Number(g.qt_procedimentos), 0)
+  const gruposVisiveis = modoUE ? grupos.filter(g => ['03', '04'].includes(g.co_grupo)) : grupos
 
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Hero */}
-      <div className="bg-gradient-to-br from-blue-800 via-blue-700 to-blue-600">
+      <div className={modoUE ? "bg-gradient-to-br from-red-900 via-red-800 to-red-700" : "bg-gradient-to-br from-blue-800 via-blue-700 to-blue-600"}>
         <div className="mx-auto max-w-3xl px-4 pb-12 pt-10 text-center">
           <p className="text-xs font-semibold uppercase tracking-widest text-blue-300">
             Ministério da Saúde · DATASUS
@@ -328,11 +342,15 @@ export function Home() {
             />
           </div>
 
-          <div className="mt-5">
+          <div className="mt-5 flex items-center justify-center gap-3">
             <Link
               to="/anamnese"
-              className="inline-flex items-center gap-1.5 rounded-full border border-blue-400/40
-                         bg-blue-900/30 px-4 py-1.5 text-xs text-blue-200 transition hover:bg-blue-900/50"
+              className={cn(
+                'inline-flex items-center gap-1.5 rounded-full border px-4 py-1.5 text-xs transition',
+                modoUE
+                  ? 'border-red-400/40 bg-red-900/30 text-red-200 hover:bg-red-900/50'
+                  : 'border-blue-400/40 bg-blue-900/30 text-blue-200 hover:bg-blue-900/50'
+              )}
             >
               <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -340,6 +358,22 @@ export function Home() {
               </svg>
               Analisar anamnese com IA
             </Link>
+            <button
+              onClick={toggleModoUE}
+              className={cn(
+                'inline-flex items-center gap-1.5 rounded-full border px-4 py-1.5 text-xs font-medium transition',
+                modoUE
+                  ? 'border-red-300/60 bg-red-500/30 text-red-100 hover:bg-red-500/40'
+                  : 'border-white/20 bg-white/10 text-white/70 hover:bg-white/20 hover:text-white'
+              )}
+              title="Filtrar somente grupos 03 e 04 (clínicos e cirúrgicos)"
+            >
+              <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+              {modoUE ? 'Modo UE ativo' : 'Modo UE'}
+            </button>
           </div>
 
           {/* Segmented control */}
@@ -759,7 +793,7 @@ export function Home() {
               }`}>
                 {!selectedGroup ? (
                   <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                    {grupos.map((g) => {
+                    {gruposVisiveis.map((g) => {
                       const estilo = GRUPO_MAP[g.co_grupo]
                       if (!estilo) return null
                       return (
@@ -788,7 +822,7 @@ export function Home() {
                   </div>
                 ) : (
                   <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-                    {grupos.map((g) => {
+                    {gruposVisiveis.map((g) => {
                       const estilo = GRUPO_MAP[g.co_grupo]
                       if (!estilo) return null
                       const isActive = g.co_grupo === selectedGroup.co_grupo

@@ -66,7 +66,18 @@ export function ProcedureCard({ procedure, onSelect, compareMode, compareSelecte
       <CardContent className="flex flex-1 flex-col p-4">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
-            <p className="font-mono text-xs text-slate-400">{formatCodigo(co_procedimento)}</p>
+            <div className="flex items-center gap-2">
+              {compareMode && (
+                <input
+                  type="checkbox"
+                  checked={!!compareSelected}
+                  onChange={() => onToggleCompare?.(procedure)}
+                  onClick={e => e.stopPropagation()}
+                  className="h-4 w-4 shrink-0 rounded border-slate-300 text-blue-600 cursor-pointer"
+                />
+              )}
+              <p className="font-mono text-xs text-slate-400">{formatCodigo(co_procedimento)}</p>
+            </div>
             <p className="mt-1 text-sm font-medium leading-snug text-slate-800 line-clamp-2">
               {no_procedimento}
             </p>
@@ -77,13 +88,15 @@ export function ProcedureCard({ procedure, onSelect, compareMode, compareSelecte
             )}
           </div>
           <div className="shrink-0 flex flex-col items-end gap-1">
-            <button
-              onClick={(e) => { e.stopPropagation(); e.preventDefault(); toggleFavorito(procedure) }}
-              className={cn('rounded p-1 transition hover:bg-slate-100', !fav && 'opacity-0 group-hover:opacity-100')}
-              title={fav ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
-            >
-              <StarIcon filled={fav} />
-            </button>
+            {!compareMode && (
+              <button
+                onClick={(e) => { e.stopPropagation(); e.preventDefault(); toggleFavorito(procedure) }}
+                className={cn('rounded p-1 transition hover:bg-slate-100', !fav && 'opacity-0 group-hover:opacity-100')}
+                title={fav ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+              >
+                <StarIcon filled={fav} />
+              </button>
+            )}
             <PriceTooltip total={total} vl_sa={vl_sa} vl_sh={vl_sh} vl_sp={vl_sp}>
               <div className="text-right cursor-default">
                 <p className="text-xs text-slate-400">Total SUS</p>
@@ -101,23 +114,12 @@ export function ProcedureCard({ procedure, onSelect, compareMode, compareSelecte
     </Card>
   )
 
-
-
   if (compareMode) {
     return (
       <div
         className="group relative block cursor-pointer transition hover:-translate-y-0.5"
         onClick={() => onToggleCompare?.(procedure)}
       >
-        <div className="absolute top-3 left-3 z-10">
-          <input
-            type="checkbox"
-            checked={!!compareSelected}
-            onChange={() => onToggleCompare?.(procedure)}
-            onClick={e => e.stopPropagation()}
-            className="h-4 w-4 rounded border-slate-300 text-blue-600 cursor-pointer"
-          />
-        </div>
         {inner}
       </div>
     )
