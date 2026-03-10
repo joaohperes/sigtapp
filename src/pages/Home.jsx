@@ -323,12 +323,14 @@ export function Home() {
       {/* Hero */}
       <div className={modoUE ? "bg-gradient-to-br from-red-900 via-red-800 to-red-700" : "bg-gradient-to-br from-blue-800 via-blue-700 to-blue-600"}>
         <div className="mx-auto max-w-3xl px-4 pb-12 pt-10 text-center">
-          <p className="text-xs font-semibold uppercase tracking-widest text-blue-300">
+          <p className={cn("text-xs font-semibold uppercase tracking-widest", modoUE ? "text-red-300" : "text-blue-300")}>
             Ministério da Saúde · DATASUS
           </p>
-          <h1 className="mt-2 text-5xl text-white"
-              style={{ fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '0.05em' }}>SIGTAPP</h1>
-          <p className="mt-1.5 text-sm text-blue-200">
+          <Link to="/" className="block mt-2 hover:opacity-80 transition-opacity">
+            <h1 className="text-5xl text-white"
+                style={{ fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '0.05em' }}>SIGTAPP</h1>
+          </Link>
+          <p className={cn("mt-1.5 text-sm", modoUE ? "text-red-200" : "text-blue-200")}>
             Procedimentos, Medicamentos e OPM do SUS · CID-10
           </p>
 
@@ -370,9 +372,9 @@ export function Home() {
             >
               <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                  d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
               </svg>
-              {modoUE ? 'Modo UE ativo' : 'Modo UE'}
+              {modoUE ? 'Modo emergência ativo' : 'Modo emergência'}
             </button>
           </div>
 
