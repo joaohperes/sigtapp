@@ -14,6 +14,8 @@ import { formatBRL, formatCodigo } from '../utils/formatters'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'
 import { Sheet, SheetContent } from '@/components/ui/sheet'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
 
 const VIEW_MODES = ['cards', 'tabela']
@@ -135,6 +137,7 @@ export function Home() {
 
   // CID results para busca universal
   const [cidResults, setCidResults] = useState([])
+  const [cidLoading, setCidLoading] = useState(false)
 
   // Busca inicial via URL
   useEffect(() => {
@@ -179,36 +182,38 @@ export function Home() {
 
     if (q.length < 2 || isNumericCode) { setCidResults([]); return }
 
-    if (isCidCode) {
-      // Busca todos os CIDs cujo código começa com o prefixo digitado (ex: "j1" → J10, J11...)
-      const { data } = await supabase
-        .from('cid')
-        .select('co_cid, no_cid, tp_sexo')
-        .ilike('co_cid', `${q.toUpperCase()}%`)
-        .order('co_cid')
-        .limit(200)
-      setCidResults(data || [])
-    } else {
-      // Busca por nome com unaccent
-      const { expanded } = expandirSinonimos(q)
-      const palavras = expanded.toLowerCase().split(/\s+/).filter(w => w.length >= 3)
-      const termos = palavras.length > 0 ? palavras : [expanded]
-      let { data } = await supabase.rpc('search_cid_unaccent', { search_terms: termos })
+    setCidLoading(true)
+    try {
+      if (isCidCode) {
+        const { data } = await supabase
+          .from('cid')
+          .select('co_cid, no_cid, tp_sexo')
+          .ilike('co_cid', `${q.toUpperCase()}%`)
+          .order('co_cid')
+          .limit(200)
+        setCidResults(data || [])
+      } else {
+        const { expanded } = expandirSinonimos(q)
+        const palavras = expanded.toLowerCase().split(/\s+/).filter(w => w.length >= 3)
+        const termos = palavras.length > 0 ? palavras : [expanded]
+        let { data } = await supabase.rpc('search_cid_unaccent', { search_terms: termos })
 
-      // Fallback: se não achou com todos os termos, busca cada um separado e une
-      if ((!data || data.length === 0) && termos.length > 1) {
-        const buscas = await Promise.all(
-          termos.map(t => supabase.rpc('search_cid_unaccent', { search_terms: [t] }))
-        )
-        const seen = new Set()
-        data = buscas.flatMap(r => r.data || []).filter(c => {
-          if (seen.has(c.co_cid)) return false
-          seen.add(c.co_cid)
-          return true
-        })
+        if ((!data || data.length === 0) && termos.length > 1) {
+          const buscas = await Promise.all(
+            termos.map(t => supabase.rpc('search_cid_unaccent', { search_terms: [t] }))
+          )
+          const seen = new Set()
+          data = buscas.flatMap(r => r.data || []).filter(c => {
+            if (seen.has(c.co_cid)) return false
+            seen.add(c.co_cid)
+            return true
+          })
+        }
+
+        setCidResults((data || []).slice(0, 200))
       }
-
-      setCidResults((data || []).slice(0, 200))
+    } finally {
+      setCidLoading(false)
     }
   }
 
@@ -417,7 +422,7 @@ export function Home() {
         )}
 
         {/* CID results — busca universal */}
-        {cidResults.length > 0 && (
+        {(cidLoading || cidResults.length > 0) && (
           <div className="mb-5 overflow-hidden rounded-xl border border-indigo-100 bg-indigo-50/60 p-4">
             <p className="mb-2.5 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-indigo-500">
               <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -427,24 +432,40 @@ export function Home() {
               Diagnósticos CID-10 relacionados
             </p>
             <div className="grid gap-x-4 gap-y-0.5 sm:grid-cols-2">
-              {cidResults.map((cid) => (
-                <div
-                  key={cid.co_cid}
-                  className="flex items-center gap-3 rounded-lg px-2 py-1.5 hover:bg-indigo-100/60 transition"
-                >
-                  <span className="w-12 shrink-0 font-mono text-sm font-bold text-indigo-700">
-                    {cid.co_cid.trim()}
-                  </span>
-                  <span className="flex-1 text-sm text-slate-700 truncate" title={cid.no_cid?.trim()}>{cid.no_cid?.trim()}</span>
-                  <button
-                    onClick={() => handleCidSelect(cid.co_cid.trim())}
-                    className="shrink-0 rounded-md border border-blue-200 bg-white px-2.5 py-1
-                               text-xs font-medium text-blue-600 hover:bg-blue-50 transition"
-                  >
-                    Procedimentos →
-                  </button>
-                </div>
-              ))}
+              {cidLoading
+                ? Array.from({ length: 6 }).map((_, i) => (
+                    <div key={i} className="flex items-center gap-3 px-2 py-1.5">
+                      <Skeleton className="h-4 w-10 shrink-0" />
+                      <Skeleton className="h-4 flex-1" />
+                      <Skeleton className="h-6 w-24 shrink-0 rounded-md" />
+                    </div>
+                  ))
+                : cidResults.map((cid) => (
+                    <TooltipProvider key={cid.co_cid} delayDuration={300}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="flex items-center gap-3 rounded-lg px-2 py-1.5 hover:bg-indigo-100/60 transition cursor-default">
+                            <span className="w-12 shrink-0 font-mono text-sm font-bold text-indigo-700">
+                              {cid.co_cid.trim()}
+                            </span>
+                            <span className="flex-1 text-sm text-slate-700 truncate">{cid.no_cid?.trim()}</span>
+                            <button
+                              onClick={() => handleCidSelect(cid.co_cid.trim())}
+                              className="shrink-0 rounded-md border border-blue-200 bg-white px-2.5 py-1
+                                         text-xs font-medium text-blue-600 hover:bg-blue-50 transition"
+                            >
+                              Procedimentos →
+                            </button>
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="max-w-xs text-center">
+                          <span className="font-mono font-bold mr-1">{cid.co_cid.trim()}</span>
+                          {cid.no_cid?.trim()}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  ))
+              }
             </div>
           </div>
         )}
