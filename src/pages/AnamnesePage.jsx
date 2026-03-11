@@ -261,8 +261,11 @@ export function AnamnesePage() {
           algumTermoPresente(nome, refTermo)
         )
       })
-      // ordena por valor total desc como desempate
+      // ordena: TRATAMENTO primeiro (código primário de internação), depois valor desc
       .sort((a, b) => {
+        const aTrat = /^TRATAMENTO\b/i.test(a.no_procedimento || '')
+        const bTrat = /^TRATAMENTO\b/i.test(b.no_procedimento || '')
+        if (aTrat !== bTrat) return aTrat ? -1 : 1
         const ta = (a.vl_sa || 0) + (a.vl_sh || 0) + (a.vl_sp || 0)
         const tb = (b.vl_sa || 0) + (b.vl_sh || 0) + (b.vl_sp || 0)
         return tb - ta
