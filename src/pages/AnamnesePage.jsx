@@ -73,8 +73,13 @@ function ehRelevante(nomeProc, termo) {
   return matches.length >= threshold
 }
 
+const SESSION_V = 3 // incrementar sempre que mudar o formato/filtros dos resultados
+
 function getSession() {
-  try { return JSON.parse(sessionStorage.getItem('aih-session') || 'null') ?? {} } catch { return {} }
+  try {
+    const s = JSON.parse(sessionStorage.getItem('aih-session') || 'null') ?? {}
+    return s.v === SESSION_V ? s : {}
+  } catch { return {} }
 }
 
 export function AnamnesePage() {
@@ -100,7 +105,7 @@ export function AnamnesePage() {
 
   useEffect(() => {
     if (analyzed) {
-      sessionStorage.setItem('aih-session', JSON.stringify({ anamnese, cids, procedimentos, aih, analyzed }))
+      sessionStorage.setItem('aih-session', JSON.stringify({ v: SESSION_V, anamnese, cids, procedimentos, aih, analyzed }))
     }
   }, [anamnese, cids, procedimentos, aih, analyzed])
 
@@ -233,8 +238,23 @@ export function AnamnesePage() {
     if (cur?.loading) return
     // primeira abertura — inicia fetch
     setCidProcs(prev => ({ ...prev, [co_cid]: { loading: true, data: null, open: true } }))
-    const { data } = await supabase.rpc('buscar_por_cid', { query: co_cid, limite: 5 })
-    setCidProcs(prev => ({ ...prev, [co_cid]: { loading: false, data: data || [], open: true } }))
+    const { data } = await supabase.rpc('buscar_por_cid', { query: co_cid, limite: 15 })
+
+    // Usa a descrição do CID como referência para o QUALIF_BLOQUEIO
+    const cid = cids.find(c => c.co_cid === co_cid)
+    const refTermo = cid?.no_cid?.toLowerCase() || co_cid
+
+    const filtered = (data || [])
+      .filter(p => !temQualifNaoSolicitado(p.no_procedimento || '', refTermo))
+      // ordena por valor total desc — tratamentos têm valores maiores que exames de apoio
+      .sort((a, b) => {
+        const ta = (a.vl_sa || 0) + (a.vl_sh || 0) + (a.vl_sp || 0)
+        const tb = (b.vl_sa || 0) + (b.vl_sh || 0) + (b.vl_sp || 0)
+        return tb - ta
+      })
+      .slice(0, 5)
+
+    setCidProcs(prev => ({ ...prev, [co_cid]: { loading: false, data: filtered, open: true } }))
   }
 
   function handleCopyAih() {
