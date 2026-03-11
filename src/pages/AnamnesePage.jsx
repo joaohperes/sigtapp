@@ -73,6 +73,15 @@ function ehRelevante(nomeProc, termo) {
   return matches.length >= threshold
 }
 
+// Verifica se ao menos uma palavra-chave da descrição do CID aparece no nome do procedimento.
+// Usado nos procedimentos inline do card de CID para descartar procedimentos de comorbidade
+// (ex: fístula AV para I10-hipertensão, amputação para E11-diabetes).
+function algumTermoPresente(nomeProc, descCid) {
+  const procNorm = normalizarTexto(nomeProc)
+  const palavras = normalizarTexto(descCid).split(/\s+/).filter(w => w.length >= 5 && !STOPWORDS.has(w))
+  return palavras.length === 0 || palavras.some(w => procNorm.includes(stem(w)))
+}
+
 const SESSION_V = 3 // incrementar sempre que mudar o formato/filtros dos resultados
 
 function getSession() {
@@ -245,8 +254,14 @@ export function AnamnesePage() {
     const refTermo = cid?.no_cid?.toLowerCase() || co_cid
 
     const filtered = (data || [])
-      .filter(p => !temQualifNaoSolicitado(p.no_procedimento || '', refTermo))
-      // ordena por valor total desc — tratamentos têm valores maiores que exames de apoio
+      .filter(p => {
+        const nome = p.no_procedimento || ''
+        return (
+          !temQualifNaoSolicitado(nome, refTermo) &&
+          algumTermoPresente(nome, refTermo)
+        )
+      })
+      // ordena por valor total desc como desempate
       .sort((a, b) => {
         const ta = (a.vl_sa || 0) + (a.vl_sh || 0) + (a.vl_sp || 0)
         const tb = (b.vl_sa || 0) + (b.vl_sh || 0) + (b.vl_sp || 0)
