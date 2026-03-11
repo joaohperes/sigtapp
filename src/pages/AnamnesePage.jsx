@@ -474,15 +474,15 @@ export function AnamnesePage() {
                     Copiar texto
                   </button>
                 </div>
-                <div className="space-y-3">
-                  {aih
-                    .split(/\n[\s.]*\n/)
-                    .map(p => p.replace(/^[\s.]+/, '').trim())
-                    .filter(p => p)
-                    .map((p, i) => (
-                      <p key={i} className="text-sm leading-relaxed text-slate-700">{p}</p>
-                    ))}
-                </div>
+                <textarea
+                  value={aih}
+                  onChange={e => setAih(e.target.value)}
+                  rows={10}
+                  className={cn(
+                    "w-full resize-y rounded-lg border border-slate-200 p-3 text-sm leading-relaxed text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2",
+                    modoUE ? "focus:border-red-400 focus:ring-red-400/20" : "focus:border-blue-400 focus:ring-blue-400/20"
+                  )}
+                />
               </div>
             )}
           </div>
