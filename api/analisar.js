@@ -27,7 +27,8 @@ Analise o texto clínico abaixo e retorne APENAS JSON válido com três campos:
    - Prefira SEMPRE o CID mais específico disponível: se o texto descreve uma manifestação clínica precisa (ex: melena → K921, hematêmese → K920, dispneia → J069, edema agudo pulmão → J810), use esse código em vez do genérico "sem outra especificação"
    - AVC: use I63 (isquêmico) se o texto diz "AVC isquêmico" OU TC sem sangramento; use I61 (hemorrágico) se TC confirma hemorragia; use I64 APENAS se o tipo for verdadeiramente desconhecido (sem TC e sem lateralização)
    - NÃO infira diagnósticos psiquiátricos (F00-F99) a partir de medicamentos de uso contínuo
-   - NÃO inclua condições inferidas de medicamentos sem menção explícita no texto — warfarina/anticoagulantes NÃO geram E79 (E79 = gota/purina); INR coletado sem resultado alterado NÃO é um diagnóstico adicional; AAS/aspirina NÃO gera I10 (hipertensão) sem diagnóstico explícito; metformina/insulina NÃO geram E11 (diabetes) sem diagnóstico explícito
+   - NÃO inclua condições inferidas de medicamentos sem menção explícita no texto — warfarina/anticoagulantes NÃO geram E79 (E79 = gota/purina); INR coletado sem resultado alterado NÃO é um diagnóstico adicional; AAS/aspirina NÃO gera I10 sem diagnóstico explícito; metformina/insulina NÃO geram E11 sem diagnóstico explícito
+   - TESTE OBRIGATÓRIO antes de incluir cada CID: "o texto nomeia EXPLICITAMENTE este diagnóstico?" — se a resposta for NÃO (mesmo que seja clinicamente provável), EXCLUA o CID
    - NÃO repita o mesmo grupo CID duas vezes: se o paciente tem hematêmese (K920) E melena (K921), retorne APENAS o subcódigo mais grave como diagnóstico principal — não liste ambos separadamente; se necessário mencionar a segunda manifestação, inclua-a na justificativa do CID principal
 
 2. "termos": lista de 4 a 6 termos de busca em português para procedimentos SIGTAP. Regras para termos:
@@ -57,8 +58,9 @@ PARÁGRAFO 2 — EXAME FÍSICO ESPECÍFICO (inclua SOMENTE se houver achados esp
 Modelo: "Exame físico [com/evidenciando] [achado específico mais relevante ao diagnóstico]."
 Regras do P2:
   • Foque no achado mais importante e diagnóstico — NÃO repita sinais vitais nem achados genéricos
-  • NÃO repita nenhum achado já descrito no P1 — se o P1 já mencionou "dor epigástrica" e "fezes enegrecidas ao toque retal", o P2 deve trazer apenas achados ADICIONAIS não citados no P1
-  • Se todos os achados do exame físico já foram cobertos no P1, OMITA o P2 completamente
+  • NÃO repita nenhum achado já descrito no P1 — se o P1 já mencionou "dor epigástrica" e "fezes enegrecidas ao toque retal", NÃO os cite novamente no P2
+  • TESTE OBRIGATÓRIO: releia mentalmente o P1 antes de escrever o P2 — se o achado já aparece no P1, não o inclua no P2
+  • Se todos os achados relevantes já estão no P1, OMITA o P2 completamente — um P2 repetitivo é PIOR do que omiti-lo
 
 PARÁGRAFO 3 — EXAMES COMPLEMENTARES (inclua SOMENTE se houver VALORES NUMÉRICOS de exames no texto):
 Modelo: "Provas diagnósticas realizadas na admissão: hemograma completo (Hb X g/dL; Ht X%; leucócitos X/mm³; plaquetas X/mm³), coagulograma (TP X s; RNI X,X; TTPa X,X s), PCR X mg/L, ureia X mg/dL, creatinina X mg/dL."
@@ -117,13 +119,23 @@ ${anamnese}`
     const raw = JSON.parse(text)
 
     // Normaliza nomes de campos — Llama pode retornar variações como "code", "cid", "codigo"
-    const cids = (raw.cids || raw.diagnoses || raw.diagnosticos || []).map(c => ({
+    const cidsRaw = (raw.cids || raw.diagnoses || raw.diagnosticos || []).map(c => ({
       co_cid: (c.co_cid || c.code || c.cid || c.codigo || '')
         .replace(/\./g, '')
         .toUpperCase()
         .trim(),
       justificativa: c.justificativa || c.justification || c.rationale || c.description || '',
     })).filter(c => c.co_cid)
+
+    // Deduplica por grupo de 3 chars: se o modelo retornar K920 + K921, mantém apenas o primeiro.
+    // Isso evita dois cards idênticos na UI quando o paciente tem hematêmese E melena (mesmo grupo K92).
+    const seenPrefixes = new Set()
+    const cids = cidsRaw.filter(c => {
+      const prefix = c.co_cid.slice(0, 3)
+      if (seenPrefixes.has(prefix)) return false
+      seenPrefixes.add(prefix)
+      return true
+    })
 
     // Normaliza separadores de parágrafo — o modelo às vezes usa ". . " (ponto espaço ponto espaço)
     // em vez de "\n\n", especialmente em respostas compactas.
