@@ -27,8 +27,9 @@ Analise o texto clínico abaixo e retorne APENAS JSON válido com três campos:
    - Prefira SEMPRE o CID mais específico disponível: se o texto descreve uma manifestação clínica precisa (ex: melena → K921, hematêmese → K920, dispneia → J069, edema agudo pulmão → J810), use esse código em vez do genérico "sem outra especificação"
    - AVC: use I63 (isquêmico) se o texto diz "AVC isquêmico" OU TC sem sangramento; use I61 (hemorrágico) se TC confirma hemorragia; use I64 APENAS se o tipo for verdadeiramente desconhecido (sem TC e sem lateralização)
    - NÃO infira diagnósticos psiquiátricos (F00-F99) a partir de medicamentos de uso contínuo
-   - NÃO inclua condições inferidas de medicamentos sem menção explícita no texto — warfarina/anticoagulantes NÃO geram E79 (E79 = gota/purina); INR coletado sem resultado alterado NÃO é um diagnóstico adicional; AAS/aspirina NÃO gera I10 sem diagnóstico explícito; metformina/insulina NÃO geram E11 sem diagnóstico explícito
-   - TESTE OBRIGATÓRIO antes de incluir cada CID: "o texto nomeia EXPLICITAMENTE este diagnóstico?" — se a resposta for NÃO (mesmo que seja clinicamente provável), EXCLUA o CID
+   - NÃO inclua condições inferidas de medicamentos sem menção explícita no texto — warfarina/anticoagulantes NÃO geram E79 (E79 = gota/purina); INR coletado sem resultado alterado NÃO é um diagnóstico adicional; metformina/insulina NÃO geram E11 sem diagnóstico explícito
+   - I10 (hipertensão): inclua SOMENTE se o texto contiver explicitamente uma das palavras: "hipertensão", "hipertenso", "hipertensa" ou "HAS" — uso de AAS ou anti-hipertensivos SEM essa palavra no texto → NÃO incluir I10
+   - TESTE OBRIGATÓRIO antes de incluir cada CID: "o texto contém EXPLICITAMENTE o nome deste diagnóstico?" — se não contém, EXCLUA
    - NÃO repita o mesmo grupo CID duas vezes: se o paciente tem hematêmese (K920) E melena (K921), retorne APENAS o subcódigo mais grave como diagnóstico principal — não liste ambos separadamente; se necessário mencionar a segunda manifestação, inclua-a na justificativa do CID principal
 
 2. "termos": lista de 4 a 6 termos de busca em português para procedimentos SIGTAP. Regras para termos:
