@@ -25,14 +25,15 @@ Analise o texto clínico abaixo e retorne APENAS JSON válido com três campos:
    - O PRIMEIRO CID deve ser o diagnóstico principal (motivo da internação)
    - Inclua também: comorbidades ativas que impactam o quadro, complicações evidentes, condições associadas relevantes para o manejo (ex: IAM + I10-hipertensão + E11-diabetes + R00.0-taquicardia + J96-insuficiência respiratória se presente)
    - Prefira SEMPRE o CID mais específico disponível: se o texto descreve uma manifestação clínica precisa (ex: melena → K921, hematêmese → K920, dispneia → J069, edema agudo pulmão → J810), use esse código em vez do genérico "sem outra especificação"
+   - AVC: use I63 (isquêmico) se o texto diz "AVC isquêmico" OU TC sem sangramento; use I61 (hemorrágico) se TC confirma hemorragia; use I64 APENAS se o tipo for verdadeiramente desconhecido (sem TC e sem lateralização)
    - NÃO infira diagnósticos psiquiátricos (F00-F99) a partir de medicamentos de uso contínuo
-   - NÃO inclua condições inferidas de medicamentos sem menção explícita no texto
+   - NÃO inclua condições inferidas de medicamentos sem menção explícita no texto — warfarina/anticoagulantes NÃO geram E79 (E79 = gota/purina); INR coletado sem resultado alterado NÃO é um diagnóstico adicional
 
 2. "termos": lista de 4 a 6 termos de busca em português para procedimentos SIGTAP. Regras para termos:
    - O primeiro DEVE ser "tratamento de [diagnóstico principal COM qualificador anatômico]" (ex: "tratamento hemorragia digestiva alta", "tratamento infarto agudo miocardio", "tratamento pneumonia bacteriana", "tratamento avc isquemico")
    - PRIORIDADE MÁXIMA: se o quadro requer intervenção terapêutica específica, inclua OBRIGATORIAMENTE o termo dessa intervenção:
      • IAM/SCA → "angioplastia coronariana" e/ou "trombolise coronariana"
-     • AVC isquêmico → "trombolise avc" e/ou "trombectomia cerebral"
+     • AVC isquêmico → "trombolítico avc isquêmico" e/ou "trombectomia cerebral" (SIGTAP usa "trombolítico", não "trombolise")
      • Hemorragia digestiva → "endoscopia digestiva alta terapeutica"
      • Pneumotórax/derrame → "drenagem torax"
      • Abdome agudo cirúrgico → "laparotomia exploradora"
