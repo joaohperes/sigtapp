@@ -82,7 +82,13 @@ function algumTermoPresente(nomeProc, descCid) {
   return palavras.length === 0 || palavras.some(w => procNorm.includes(stem(w)))
 }
 
-const SESSION_V = 3 // incrementar sempre que mudar o formato/filtros dos resultados
+// Formata código CID: "I210" → "I21.0", "K920" → "K92.0"
+function formatCidCode(code) {
+  if (!code || code.length <= 3) return code
+  return `${code.slice(0, 3)}.${code.slice(3)}`
+}
+
+const SESSION_V = 4 // incrementar sempre que mudar o formato/filtros dos resultados
 
 function getSession() {
   try {
@@ -111,6 +117,7 @@ export function AnamnesePage() {
   const [analyzed, setAnalyzed] = useState(() => getSession().analyzed || false)
   const [sheetProc, setSheetProc] = useState(null)
   const [cidProcs, setCidProcs] = useState({}) // { [co_cid]: { loading, data, open } }
+  const [cidSiblings, setCidSiblings] = useState({}) // { [co_cid_pai]: { loading, data, open } }
 
   useEffect(() => {
     if (analyzed) {
@@ -145,31 +152,26 @@ export function AnamnesePage() {
       let cidsEnriquecidos = cidsSugeridos
 
       if (cidCodes.length > 0) {
+        // Busca tanto os códigos específicos quanto os pais (3 chars) em uma query
+        const codigosPaiUnicos = [...new Set(cidCodes.map(c => c.length > 3 ? c.slice(0, 3) : c))]
+        const todosOsCodigos = [...new Set([...cidCodes, ...codigosPaiUnicos])]
+
         const { data: cidRows } = await supabase
           .from('cid')
           .select('co_cid, no_cid')
-          .in('co_cid', cidCodes)
+          .in('co_cid', todosOsCodigos)
 
         const cidMap = Object.fromEntries((cidRows || []).map(r => [r.co_cid, r.no_cid]))
 
-        const naoEncontrados = cidCodes.filter(c => !cidMap[c])
-        if (naoEncontrados.length > 0) {
-          const codigosPai = [...new Set(naoEncontrados.map(c => c.slice(0, 3)))]
-          const { data: paiRows } = await supabase
-            .from('cid')
-            .select('co_cid, no_cid')
-            .in('co_cid', codigosPai)
-          for (const r of (paiRows || [])) {
-            for (const code of naoEncontrados) {
-              if (code.startsWith(r.co_cid) && !cidMap[code]) cidMap[code] = r.no_cid
-            }
+        cidsEnriquecidos = cidsSugeridos.map(c => {
+          const co_cid_pai = c.co_cid.length > 3 ? c.co_cid.slice(0, 3) : c.co_cid
+          return {
+            ...c,
+            no_cid: cidMap[c.co_cid] ?? cidMap[co_cid_pai] ?? null,
+            co_cid_pai,
+            no_cid_pai: cidMap[co_cid_pai] ?? null,
           }
-        }
-
-        cidsEnriquecidos = cidsSugeridos.map(c => ({
-          ...c,
-          no_cid: cidMap[c.co_cid] ?? null,
-        }))
+        })
       }
 
       // Fallback: se a IA não retornou termos, gera um a partir do nome do CID principal
@@ -247,11 +249,12 @@ export function AnamnesePage() {
     if (cur?.loading) return
     // primeira abertura — inicia fetch
     setCidProcs(prev => ({ ...prev, [co_cid]: { loading: true, data: null, open: true } }))
-    const { data } = await supabase.rpc('buscar_por_cid', { query: co_cid, limite: 15 })
-
-    // Usa a descrição do CID como referência para o QUALIF_BLOQUEIO
     const cid = cids.find(c => c.co_cid === co_cid)
-    const refTermo = cid?.no_cid?.toLowerCase() || co_cid
+    const queryCode = cid?.co_cid_pai || co_cid
+    const { data } = await supabase.rpc('buscar_por_cid', { query: queryCode, limite: 15 })
+
+    // Usa a descrição do grupo pai como referência para o QUALIF_BLOQUEIO
+    const refTermo = (cid?.no_cid_pai || cid?.no_cid)?.toLowerCase() || co_cid
 
     const filtered = (data || [])
       .filter(p => {
@@ -273,6 +276,24 @@ export function AnamnesePage() {
       .slice(0, 5)
 
     setCidProcs(prev => ({ ...prev, [co_cid]: { loading: false, data: filtered, open: true } }))
+  }
+
+  async function toggleCidSiblings(co_cid_pai) {
+    const cur = cidSiblings[co_cid_pai]
+    if (cur?.data) {
+      setCidSiblings(prev => ({ ...prev, [co_cid_pai]: { ...cur, open: !cur.open } }))
+      return
+    }
+    if (cur?.loading) return
+    setCidSiblings(prev => ({ ...prev, [co_cid_pai]: { loading: true, data: null, open: true } }))
+    const { data } = await supabase
+      .from('cid')
+      .select('co_cid, no_cid')
+      .like('co_cid', `${co_cid_pai}%`)
+      .neq('co_cid', co_cid_pai)
+      .order('co_cid')
+      .limit(20)
+    setCidSiblings(prev => ({ ...prev, [co_cid_pai]: { loading: false, data: data || [], open: true } }))
   }
 
   function handleCopyAih() {
@@ -329,21 +350,81 @@ export function AnamnesePage() {
         <div className="grid gap-2 grid-cols-1 sm:grid-cols-2 xl:grid-cols-1">
           {cids.map((c, i) => (
             <div key={c.co_cid} className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+              {/* Header: código pai + badge */}
               <div className="flex items-center gap-2">
-                <span className="font-mono text-sm font-bold text-indigo-600">{c.co_cid}</span>
+                <span className="font-mono text-sm font-bold text-indigo-600">
+                  {c.co_cid_pai || c.co_cid}
+                </span>
                 {i === 0 && (
                   <span className="rounded-full bg-indigo-600 px-2 py-0.5 text-[10px] font-bold text-white">
                     Principal
                   </span>
                 )}
               </div>
-              {c.no_cid ? (
-                <p className="mt-0.5 text-xs font-medium text-slate-800 leading-snug">{c.no_cid}</p>
+              {/* Descrição do grupo pai */}
+              {(c.no_cid_pai || c.no_cid) ? (
+                <p className="mt-0.5 text-xs font-medium text-slate-800 leading-snug">
+                  {c.no_cid_pai || c.no_cid}
+                </p>
               ) : (
                 <p className="mt-0.5 text-xs text-slate-400 italic">Não encontrado</p>
               )}
+              {/* Subcódigo sugerido pela IA (quando diferente do pai) */}
+              {c.co_cid.length > 3 && c.no_cid && c.no_cid !== c.no_cid_pai && (
+                <p className="mt-1 flex items-baseline gap-1 text-[11px]">
+                  <span className="font-mono text-indigo-400 shrink-0">{formatCidCode(c.co_cid)}</span>
+                  <span className="text-slate-500 leading-snug">{c.no_cid}</span>
+                </p>
+              )}
               {c.justificativa && (
                 <p className="mt-1 text-xs leading-relaxed text-slate-500 line-clamp-2">{c.justificativa}</p>
+              )}
+              {/* Ver subcódigos (só quando o CID tem subcódigos, i.e., código pai ≠ código específico) */}
+              {c.co_cid.length > 3 && (
+                <>
+                  <button
+                    onClick={() => toggleCidSiblings(c.co_cid_pai || c.co_cid.slice(0, 3))}
+                    className="mt-2 w-full rounded-lg border border-slate-200 bg-slate-50 py-1
+                               text-xs font-medium text-slate-500 transition hover:bg-slate-100 flex items-center justify-center gap-1"
+                  >
+                    {cidSiblings[c.co_cid_pai || c.co_cid.slice(0, 3)]?.open ? 'Ocultar subcódigos' : 'Ver subcódigos'}
+                    <svg
+                      className={cn('h-3 w-3 transition-transform', cidSiblings[c.co_cid_pai || c.co_cid.slice(0, 3)]?.open ? 'rotate-180' : '')}
+                      fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  {cidSiblings[c.co_cid_pai || c.co_cid.slice(0, 3)]?.open && (
+                    <div className="mt-2 space-y-1">
+                      {cidSiblings[c.co_cid_pai || c.co_cid.slice(0, 3)].loading ? (
+                        [0, 1, 2].map(k => (
+                          <div key={k} className="rounded-lg border border-slate-100 bg-slate-50 px-3 py-1.5">
+                            <Skeleton className="h-3 w-full" />
+                          </div>
+                        ))
+                      ) : (
+                        (cidSiblings[c.co_cid_pai || c.co_cid.slice(0, 3)].data || []).map(s => (
+                          <div
+                            key={s.co_cid}
+                            className={cn(
+                              'rounded-lg border px-3 py-1.5 text-[11px] leading-snug',
+                              s.co_cid === c.co_cid
+                                ? 'border-indigo-200 bg-indigo-50'
+                                : 'border-slate-100 bg-slate-50'
+                            )}
+                          >
+                            <span className="font-mono text-indigo-500 mr-1.5">{formatCidCode(s.co_cid)}</span>
+                            <span className="text-slate-600">{s.no_cid}</span>
+                            {s.co_cid === c.co_cid && (
+                              <span className="ml-1 text-[10px] text-indigo-400 font-medium">← sugerido</span>
+                            )}
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  )}
+                </>
               )}
               <button
                 onClick={() => toggleCidProcs(c.co_cid)}
