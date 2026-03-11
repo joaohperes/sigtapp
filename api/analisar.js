@@ -25,6 +25,8 @@ Analise o texto clínico abaixo e retorne APENAS JSON válido com três campos:
    - O PRIMEIRO CID deve ser o diagnóstico principal (motivo da internação)
    - Inclua também: comorbidades ativas que impactam o quadro, complicações evidentes, condições associadas relevantes para o manejo (ex: IAM + I10-hipertensão + E11-diabetes + R00.0-taquicardia + J96-insuficiência respiratória se presente)
    - Prefira SEMPRE o CID mais específico disponível: se o texto descreve uma manifestação clínica precisa (ex: melena → K921, hematêmese → K920, dispneia → J069, edema agudo pulmão → J810), use esse código em vez do genérico "sem outra especificação"
+   - Instabilidade hemodinâmica mantida (hipotensão + taquicardia sem resolução espontânea) → use R570 (choque hipovolêmico) ou R579 (choque NE), NÃO R55 (R55 = síncope — episódio transitório com recuperação)
+   - Etilismo crônico → use K70 (doença alcoólica do fígado) se há evidência clínica de hepatopatia; use F102 apenas para síndrome de dependência alcoólica explicitamente mencionada
    - AVC: use I63 (isquêmico) se o texto diz "AVC isquêmico" OU TC sem sangramento; use I61 (hemorrágico) se TC confirma hemorragia; use I64 APENAS se o tipo for verdadeiramente desconhecido (sem TC e sem lateralização)
    - NÃO infira diagnósticos psiquiátricos (F00-F99) a partir de medicamentos de uso contínuo
    - NÃO inclua condições inferidas de medicamentos sem menção explícita no texto — warfarina/anticoagulantes NÃO geram E79 (E79 = gota/purina); INR coletado sem resultado alterado NÃO é um diagnóstico adicional; metformina/insulina NÃO geram E11 sem diagnóstico explícito
@@ -128,10 +130,22 @@ ${anamnese}`
       justificativa: c.justificativa || c.justification || c.rationale || c.description || '',
     })).filter(c => c.co_cid)
 
+    // Guarda de CIDs que requerem palavra-chave explícita no texto clínico.
+    // O modelo frequentemente infere esses diagnósticos de medicamentos ou contexto — bloqueamos aqui.
+    const anamneseLower = anamnese.toLowerCase()
+    const CID_GUARDS = [
+      { prefix: 'I10', pattern: /hipertens|has\b|pressão alta/ },  // hipertensão só se mencionada
+      { prefix: 'E11', pattern: /diabet/                        },  // diabetes só se mencionado
+    ]
+    const cidsGuardados = cidsRaw.filter(c => {
+      const guard = CID_GUARDS.find(g => c.co_cid.startsWith(g.prefix))
+      return !guard || guard.pattern.test(anamneseLower)
+    })
+
     // Deduplica por grupo de 3 chars: se o modelo retornar K920 + K921, mantém apenas o primeiro.
     // Isso evita dois cards idênticos na UI quando o paciente tem hematêmese E melena (mesmo grupo K92).
     const seenPrefixes = new Set()
-    const cids = cidsRaw.filter(c => {
+    const cids = cidsGuardados.filter(c => {
       const prefix = c.co_cid.slice(0, 3)
       if (seenPrefixes.has(prefix)) return false
       seenPrefixes.add(prefix)
