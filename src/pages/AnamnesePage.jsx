@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { toast } from 'sonner'
 import { supabase } from '../lib/supabase'
+import { formatBRL, formatCodigo } from '../utils/formatters'
 import { ProcedureRow } from '../components/ProcedureCard'
 import { ProcedureSheetContent } from '../components/ProcedureSheetContent'
 import { Sheet, SheetContent } from '@/components/ui/sheet'
@@ -77,7 +78,6 @@ function getSession() {
 }
 
 export function AnamnesePage() {
-  const navigate = useNavigate()
   const [modoUE, setModoUE] = useState(() => {
     try { return localStorage.getItem('sigtap-modo-ue') === '1' } catch { return false }
   })
@@ -96,6 +96,7 @@ export function AnamnesePage() {
   const [aih, setAih] = useState(() => getSession().aih || '')
   const [analyzed, setAnalyzed] = useState(() => getSession().analyzed || false)
   const [sheetProc, setSheetProc] = useState(null)
+  const [cidProcs, setCidProcs] = useState({}) // { [co_cid]: { loading, data, open } }
 
   useEffect(() => {
     if (analyzed) {
@@ -221,8 +222,19 @@ export function AnamnesePage() {
     }
   }
 
-  function handleVerProcedimentos(co_cid) {
-    navigate(`/?q=${co_cid}`)
+  async function toggleCidProcs(co_cid) {
+    const cur = cidProcs[co_cid]
+    // já tem dados — apenas abre/fecha
+    if (cur?.data) {
+      setCidProcs(prev => ({ ...prev, [co_cid]: { ...cur, open: !cur.open } }))
+      return
+    }
+    // já está carregando — ignora clique duplo
+    if (cur?.loading) return
+    // primeira abertura — inicia fetch
+    setCidProcs(prev => ({ ...prev, [co_cid]: { loading: true, data: null, open: true } }))
+    const { data } = await supabase.rpc('buscar_por_cid', { query: co_cid, limite: 5 })
+    setCidProcs(prev => ({ ...prev, [co_cid]: { loading: false, data: data || [], open: true } }))
   }
 
   function handleCopyAih() {
@@ -296,12 +308,55 @@ export function AnamnesePage() {
                 <p className="mt-1 text-xs leading-relaxed text-slate-500 line-clamp-2">{c.justificativa}</p>
               )}
               <button
-                onClick={() => handleVerProcedimentos(c.co_cid)}
+                onClick={() => toggleCidProcs(c.co_cid)}
                 className="mt-2 w-full rounded-lg border border-indigo-200 bg-indigo-50 py-1
-                           text-xs font-medium text-indigo-600 transition hover:bg-indigo-100"
+                           text-xs font-medium text-indigo-600 transition hover:bg-indigo-100 flex items-center justify-center gap-1"
               >
-                Ver procedimentos →
+                {cidProcs[c.co_cid]?.open ? 'Ocultar procedimentos' : 'Ver procedimentos'}
+                <svg
+                  className={cn('h-3 w-3 transition-transform', cidProcs[c.co_cid]?.open ? 'rotate-180' : '')}
+                  fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
               </button>
+              {cidProcs[c.co_cid]?.open && (
+                <div className="mt-2 space-y-1">
+                  {cidProcs[c.co_cid].loading ? (
+                    [0, 1, 2].map(k => (
+                      <div key={k} className="rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 space-y-1">
+                        <Skeleton className="h-2.5 w-16" />
+                        <Skeleton className="h-3 w-full" />
+                      </div>
+                    ))
+                  ) : cidProcs[c.co_cid].data?.length === 0 ? (
+                    <p className="text-xs text-slate-400 px-1">Nenhum procedimento vinculado</p>
+                  ) : (
+                    <>
+                      {cidProcs[c.co_cid].data.slice(0, 3).map(p => {
+                        const total = (p.vl_sa || 0) + (p.vl_sh || 0) + (p.vl_sp || 0)
+                        return (
+                          <button
+                            key={p.co_procedimento}
+                            onClick={() => setSheetProc(p)}
+                            className="w-full rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-left transition hover:border-indigo-200 hover:bg-indigo-50"
+                          >
+                            <p className="font-mono text-[10px] text-slate-400">{formatCodigo(p.co_procedimento)}</p>
+                            <p className="mt-0.5 text-xs font-medium leading-snug text-slate-700 line-clamp-2">{p.no_procedimento}</p>
+                            <p className="mt-0.5 text-xs font-semibold text-emerald-600">{formatBRL(total)}</p>
+                          </button>
+                        )
+                      })}
+                      <Link
+                        to={`/?q=${c.co_cid}`}
+                        className="block pt-0.5 text-center text-[11px] font-medium text-indigo-500 hover:underline"
+                      >
+                        Ver todos →
+                      </Link>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
           ))}
         </div>
