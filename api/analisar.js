@@ -27,7 +27,8 @@ Analise o texto clínico abaixo e retorne APENAS JSON válido com três campos:
    - Prefira SEMPRE o CID mais específico disponível: se o texto descreve uma manifestação clínica precisa (ex: melena → K921, hematêmese → K920, dispneia → J069, edema agudo pulmão → J810), use esse código em vez do genérico "sem outra especificação"
    - AVC: use I63 (isquêmico) se o texto diz "AVC isquêmico" OU TC sem sangramento; use I61 (hemorrágico) se TC confirma hemorragia; use I64 APENAS se o tipo for verdadeiramente desconhecido (sem TC e sem lateralização)
    - NÃO infira diagnósticos psiquiátricos (F00-F99) a partir de medicamentos de uso contínuo
-   - NÃO inclua condições inferidas de medicamentos sem menção explícita no texto — warfarina/anticoagulantes NÃO geram E79 (E79 = gota/purina); INR coletado sem resultado alterado NÃO é um diagnóstico adicional
+   - NÃO inclua condições inferidas de medicamentos sem menção explícita no texto — warfarina/anticoagulantes NÃO geram E79 (E79 = gota/purina); INR coletado sem resultado alterado NÃO é um diagnóstico adicional; AAS/aspirina NÃO gera I10 (hipertensão) sem diagnóstico explícito; metformina/insulina NÃO geram E11 (diabetes) sem diagnóstico explícito
+   - NÃO repita o mesmo grupo CID duas vezes: se o paciente tem hematêmese (K920) E melena (K921), retorne APENAS o subcódigo mais grave como diagnóstico principal — não liste ambos separadamente; se necessário mencionar a segunda manifestação, inclua-a na justificativa do CID principal
 
 2. "termos": lista de 4 a 6 termos de busca em português para procedimentos SIGTAP. Regras para termos:
    - O primeiro DEVE ser "tratamento de [diagnóstico principal COM qualificador anatômico]" (ex: "tratamento hemorragia digestiva alta", "tratamento infarto agudo miocardio", "tratamento pneumonia bacteriana", "tratamento avc isquemico")
@@ -54,7 +55,10 @@ Regras obrigatórias do P1:
 
 PARÁGRAFO 2 — EXAME FÍSICO ESPECÍFICO (inclua SOMENTE se houver achados específicos relevantes ao diagnóstico — ex: toque retal, ausculta pulmonar, déficit neurológico focal, abdome agudo):
 Modelo: "Exame físico [com/evidenciando] [achado específico mais relevante ao diagnóstico]."
-Regra: foque no achado mais importante e diagnóstico — não repita sinais vitais nem achados genéricos.
+Regras do P2:
+  • Foque no achado mais importante e diagnóstico — NÃO repita sinais vitais nem achados genéricos
+  • NÃO repita nenhum achado já descrito no P1 — se o P1 já mencionou "dor epigástrica" e "fezes enegrecidas ao toque retal", o P2 deve trazer apenas achados ADICIONAIS não citados no P1
+  • Se todos os achados do exame físico já foram cobertos no P1, OMITA o P2 completamente
 
 PARÁGRAFO 3 — EXAMES COMPLEMENTARES (inclua SOMENTE se houver VALORES NUMÉRICOS de exames no texto):
 Modelo: "Provas diagnósticas realizadas na admissão: hemograma completo (Hb X g/dL; Ht X%; leucócitos X/mm³; plaquetas X/mm³), coagulograma (TP X s; RNI X,X; TTPa X,X s), PCR X mg/L, ureia X mg/dL, creatinina X mg/dL."
