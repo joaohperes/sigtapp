@@ -195,7 +195,7 @@ export function ProcedureRow({ procedure, onSelect, compareMode, compareSelected
   function handleCopyCodigo(e) {
     e.preventDefault()
     e.stopPropagation()
-    navigator.clipboard.writeText(co_procedimento.replace(/\D/g, ''))
+    navigator.clipboard.writeText(co_procedimento)
     toast.success('Código copiado!', { duration: 1500 })
   }
 

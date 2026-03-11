@@ -157,12 +157,19 @@ export function AnamnesePage() {
         }))
       }
 
+      // Fallback: se a IA não retornou termos, gera um a partir do nome do CID principal
+      const termosEfetivos = termos.length > 0
+        ? termos.slice(0, 5)
+        : cidsEnriquecidos[0]?.no_cid
+          ? [cidsEnriquecidos[0].no_cid.toLowerCase()]
+          : []
+
       // Todas as buscas em paralelo: CID primeiro + FTS por termos
       const [cidResult, ...buscas] = await Promise.all([
         cidsSugeridos.length > 0
           ? supabase.rpc('buscar_por_cid', { query: cidsSugeridos[0].co_cid, limite: 10 })
           : Promise.resolve({ data: [] }),
-        ...termos.slice(0, 5).map(t =>
+        ...termosEfetivos.map(t =>
           supabase.rpc('buscar_procedimentos', { query: ftsQuery(t), limite: 20 })
         ),
       ])
@@ -181,7 +188,7 @@ export function AnamnesePage() {
 
       // Termos FTS: _src = índice do termo (0 = mais relevante)
       for (let i = 0; i < buscas.length; i++) {
-        const termo = termos[i] ?? ''
+        const termo = termosEfetivos[i] ?? ''
         for (const p of (buscas[i].data || [])) {
           if (seen.has(p.co_procedimento)) continue
           if (!ehRelevante(p.no_procedimento, termo)) continue

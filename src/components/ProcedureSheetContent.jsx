@@ -21,6 +21,9 @@ function StarIcon({ filled }) {
   )
 }
 
+// Cache de descrições para evitar re-fetch ao reabrir o sheet
+const descCache = new Map()
+
 export function ProcedureSheetContent({ procedure }) {
   const { co_procedimento, no_procedimento, vl_sa, vl_sh, vl_sp, no_financiamento } = procedure
   const total = (vl_sa || 0) + (vl_sh || 0) + (vl_sp || 0)
@@ -28,10 +31,11 @@ export function ProcedureSheetContent({ procedure }) {
   const { isFavorito, toggleFavorito } = useFavoritos()
   const fav = isFavorito(co_procedimento)
 
-  const [descricao, setDescricao] = useState(null)
-  const [descLoading, setDescLoading] = useState(true)
+  const [descricao, setDescricao] = useState(() => descCache.get(co_procedimento) ?? null)
+  const [descLoading, setDescLoading] = useState(!descCache.has(co_procedimento))
 
   useEffect(() => {
+    if (descCache.has(co_procedimento)) return
     setDescricao(null)
     setDescLoading(true)
     supabase
@@ -40,7 +44,9 @@ export function ProcedureSheetContent({ procedure }) {
       .eq('co_procedimento', co_procedimento)
       .single()
       .then(({ data }) => {
-        setDescricao(data?.ds_procedimento || null)
+        const desc = data?.ds_procedimento || null
+        descCache.set(co_procedimento, desc)
+        setDescricao(desc)
         setDescLoading(false)
       })
   }, [co_procedimento])
