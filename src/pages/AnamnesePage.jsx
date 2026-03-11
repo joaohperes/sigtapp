@@ -31,6 +31,14 @@ const QUALIF_BLOQUEIO = [
   'CADAVER', 'CADAVERICO', 'CADAVERICA',
 ]
 
+// Qualificadores adicionais bloqueados quando o CID é comorbidade (não é o diagnóstico principal).
+// Evita mostrar procedimentos eletivos (ex: ablação de FA) para pacientes admitidos por outro motivo.
+const QUALIF_BLOQUEIO_COMORBIDADE = [
+  ...QUALIF_BLOQUEIO,
+  'ABLACAO', 'ELETROFISIOLOGICO', 'ELETROFISIOLOGICA',
+  'TRANSPLANTE', 'IMPLANTE', 'IMPLANTACAO',
+]
+
 function temQualifNaoSolicitado(nomeProc, termo) {
   const nomeNorm = normalizarTexto(nomeProc)
   const termoNorm = normalizarTexto(termo)
@@ -88,7 +96,7 @@ function formatCidCode(code) {
   return `${code.slice(0, 3)}.${code.slice(3)}`
 }
 
-const SESSION_V = 4 // incrementar sempre que mudar o formato/filtros dos resultados
+const SESSION_V = 5 // incrementar sempre que mudar o formato/filtros dos resultados
 
 function getSession() {
   try {
@@ -238,7 +246,7 @@ export function AnamnesePage() {
     }
   }
 
-  async function toggleCidProcs(co_cid) {
+  async function toggleCidProcs(co_cid, isPrincipal = false) {
     const cur = cidProcs[co_cid]
     // já tem dados — apenas abre/fecha
     if (cur?.data) {
@@ -253,14 +261,21 @@ export function AnamnesePage() {
     const queryCode = cid?.co_cid_pai || co_cid
     const { data } = await supabase.rpc('buscar_por_cid', { query: queryCode, limite: 15 })
 
-    // Usa a descrição do grupo pai como referência para o QUALIF_BLOQUEIO
+    // Usa a descrição do grupo pai como referência para o filtro de qualificadores
     const refTermo = (cid?.no_cid_pai || cid?.no_cid)?.toLowerCase() || co_cid
+    // CIDs comorbidade usam lista de bloqueio estendida (impede ablação, transplante, etc.)
+    const bloqueio = isPrincipal ? QUALIF_BLOQUEIO : QUALIF_BLOQUEIO_COMORBIDADE
 
     const filtered = (data || [])
       .filter(p => {
         const nome = p.no_procedimento || ''
+        const nomeNorm = normalizarTexto(nome)
+        const termoNorm = normalizarTexto(refTermo)
         return (
-          !temQualifNaoSolicitado(nome, refTermo) &&
+          !bloqueio.some(q => {
+            const qNorm = normalizarTexto(q)
+            return nomeNorm.includes(qNorm) && !termoNorm.includes(qNorm)
+          }) &&
           algumTermoPresente(nome, refTermo)
         )
       })
@@ -427,7 +442,7 @@ export function AnamnesePage() {
                 </>
               )}
               <button
-                onClick={() => toggleCidProcs(c.co_cid)}
+                onClick={() => toggleCidProcs(c.co_cid, i === 0)}
                 className="mt-2 w-full rounded-lg border border-indigo-200 bg-indigo-50 py-1
                            text-xs font-medium text-indigo-600 transition hover:bg-indigo-100 flex items-center justify-center gap-1"
               >

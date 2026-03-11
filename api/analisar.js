@@ -60,7 +60,7 @@ PARÁGRAFO 3 — EXAMES COMPLEMENTARES (inclua SOMENTE se houver VALORES NUMÉRI
 Modelo: "Provas diagnósticas realizadas na admissão: hemograma completo (Hb X g/dL; Ht X%; leucócitos X/mm³; plaquetas X/mm³), coagulograma (TP X s; RNI X,X; TTPa X,X s), PCR X mg/L, ureia X mg/dL, creatinina X mg/dL."
 Regras obrigatórias do P3:
   • NUNCA liste apenas o nome do exame — inclua SEMPRE o valor numérico e a unidade (ex: "Hb 9,6 g/dL", não "hemoglobina")
-  • Se um exame foi solicitado mas o resultado não consta no texto, OMITA-O completamente
+  • Se um exame foi solicitado mas o resultado não consta no texto, OMITA-O completamente — ex: "INR colhido" sem valor numérico → NÃO mencionar; "hemograma solicitado" sem resultado → NÃO mencionar; "TC realizada" sem laudo → NÃO mencionar
   • Agrupe em subconjuntos quando pertinente: hemograma, coagulograma, função renal, etc.
   • Unidades corretas: g/dL para hemoglobina, % para hematócrito, /mm³ para leucócitos e plaquetas, s para tempos de coagulação, mg/L para PCR, mg/dL para ureia/creatinina, mmol/L para eletrólitos, U/L para enzimas
 
