@@ -235,6 +235,8 @@ export function AnamnesePage() {
         for (const p of (buscas[i].data || [])) {
           if (seen.has(p.co_procedimento)) continue
           if (p.no_financiamento?.includes('PAB')) continue
+          // Modo emergência: exclui diagnósticos (grupo 02.xx) de Principais
+          if (modoUE && p.co_procedimento?.startsWith('02')) continue
           if (!ehRelevante(p.no_procedimento, termo)) continue
           if (temQualifNaoSolicitado(p.no_procedimento, termo)) continue
           seen.add(p.co_procedimento)
