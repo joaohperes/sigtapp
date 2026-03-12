@@ -29,8 +29,8 @@ const QUALIF_BLOQUEIO = [
   'OBSTETRICO', 'OBSTETRICA', 'GESTANTE', 'GESTACAO', 'PARTO', 'PUERPERA', 'PUERPERAL',
   // Cadáver/simulador
   'CADAVER', 'CADAVERICO', 'CADAVERICA',
-  // Tipo etiológico de choque — bloqueia "cardiogênico/séptico" se não está no refTermo
-  'CARDIOGENICO', 'SEPTICO', 'SEPTICA',
+  // Tipo etiológico de choque — bloqueia "cardiogênico" em quadros não cardíacos
+  'CARDIOGENICO',
 ]
 
 // Qualificadores adicionais bloqueados quando o CID é comorbidade (não é o diagnóstico principal).

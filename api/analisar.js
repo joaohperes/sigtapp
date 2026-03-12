@@ -22,10 +22,13 @@ export default async function handler(req, res) {
 Analise o texto clínico abaixo e retorne APENAS JSON válido com três campos:
 
 1. "cids": lista dos CIDs-10 mais prováveis (máximo 8) relacionados ao quadro atual, código SEM ponto (ex: "K920") e justificativa breve. Regras para CIDs:
-   - O PRIMEIRO CID deve ser o diagnóstico principal (motivo da internação)
+   - O PRIMEIRO CID deve ser o diagnóstico PRIMÁRIO (condição clínica que motivou a internação) — NUNCA use sintoma/sinal como diagnóstico principal quando há diagnóstico etiológico disponível: ex: pneumonia + sepse → J18 ou A41 como principal, NÃO R40 (rebaixamento) ou R50 (febre); AVC → I63/I64, NÃO R55; IAM → I21, NÃO R07
    - Inclua também: comorbidades ativas que impactam o quadro, complicações evidentes, condições associadas relevantes para o manejo (ex: IAM + I10-hipertensão + E11-diabetes + R00.0-taquicardia + J96-insuficiência respiratória se presente)
    - Prefira SEMPRE o CID mais específico disponível: se o texto descreve uma manifestação clínica precisa (ex: melena → K921, hematêmese → K920, dispneia → J069, edema agudo pulmão → J810), use esse código em vez do genérico "sem outra especificação"
-   - Instabilidade hemodinâmica mantida (hipotensão + taquicardia sem resolução espontânea) → use R570 (choque hipovolêmico) ou R579 (choque NE), NÃO R55 (R55 = síncope — episódio transitório com recuperação)
+   - Instabilidade hemodinâmica mantida (hipotensão + taquicardia sem resolução espontânea) → use R570 (choque hipovolêmico), R572 (choque séptico — quando há sepse explícita no texto) ou R579 (choque NE), NÃO R55 (R55 = síncope — episódio transitório com recuperação)
+   - Sepse: use A41 (septicemia NE) quando o texto mencionar explicitamente "sepse" ou "septicemia" — A41 deve ser incluído SEMPRE que "sepse" aparecer no texto
+   - E11 (diabetes): inclua quando o texto contiver explicitamente "diabetes", "diabético", "diabética" ou "DM" — glicemia alterada SEM menção explícita a diabetes NÃO gera E11
+   - R50 (febre): inclua APENAS quando a causa da febre for desconhecida — quando há diagnóstico infeccioso explícito (pneumonia, sepse, ITU etc.), NÃO incluir R50 separadamente
    - Etilismo crônico → use K70 (doença alcoólica do fígado) se há evidência clínica de hepatopatia; use F102 apenas para síndrome de dependência alcoólica explicitamente mencionada
    - AVC: use I63 (isquêmico) se o texto diz "AVC isquêmico" OU TC sem sangramento; use I61 (hemorrágico) se TC confirma hemorragia; use I64 APENAS se o tipo for verdadeiramente desconhecido (sem TC e sem lateralização)
    - NÃO infira diagnósticos psiquiátricos (F00-F99) a partir de medicamentos de uso contínuo
