@@ -257,13 +257,19 @@ export function AnamnesePage() {
       // Pré-carrega procedimentos de todos os CIDs em paralelo para exibição imediata na coluna 3
       const seenInMain = new Set(procs.map(p => p.co_procedimento))
       const cidProcsResults = await Promise.all(
-        cidsEnriquecidos.map((cid, idx) =>
-          supabase.rpc('buscar_por_cid', { query: cid.co_cid_pai || cid.co_cid, limite: 15 })
-            .then(({ data }) => {
-              const refTermo = (cid.no_cid_pai || cid.no_cid)?.toLowerCase() || cid.co_cid
-              const isPrincipal = idx === 0
-              const bloqueio = isPrincipal ? QUALIF_BLOQUEIO : QUALIF_BLOQUEIO_COMORBIDADE
-              const filtered = (data || [])
+        cidsEnriquecidos.map(async (cid, idx) => {
+          const queryCode = cid.co_cid_pai || cid.co_cid
+          let { data } = await supabase.rpc('buscar_por_cid', { query: queryCode, limite: 15 })
+          // Fallback: SIGTAP às vezes linka procedimentos ao subcódigo (ex: J189) e não ao pai (J18).
+          // Se código 3-char retorna vazio, tenta o subcódigo NE (X9) como fallback.
+          if (!data?.length && queryCode.length === 3) {
+            const { data: fb } = await supabase.rpc('buscar_por_cid', { query: queryCode + '9', limite: 15 })
+            if (fb?.length) data = fb
+          }
+          const refTermo = (cid.no_cid_pai || cid.no_cid)?.toLowerCase() || cid.co_cid
+          const isPrincipal = idx === 0
+          const bloqueio = isPrincipal ? QUALIF_BLOQUEIO : QUALIF_BLOQUEIO_COMORBIDADE
+          const filtered = (data || [])
                 .filter(p => {
                   // Para o CID principal não desduplicamos: o usuário quer ver os procs do diagnóstico primário
                   // mesmo que já apareçam em Principais. Para comorbidades, evita repetição.
@@ -289,9 +295,8 @@ export function AnamnesePage() {
                   return tb - ta
                 })
                 .slice(0, 5)
-              return { co_cid: cid.co_cid, data: filtered }
-            })
-        )
+          return { co_cid: cid.co_cid, data: filtered }
+        })
       )
       const newCidProcs = Object.fromEntries(
         cidProcsResults.map(({ co_cid, data }) => [co_cid, { loading: false, data, open: false }])

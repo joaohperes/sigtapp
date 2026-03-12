@@ -143,6 +143,7 @@ ${anamnese}`
       { prefix: 'K91', pattern: /pós.?operat|pós.?cirúrg|pós.?procedim/ }, // pós-procedimento digestivo
       { prefix: 'E87', pattern: /desidrat|eletrólito|eletroli|hiponatremi|hipocalemi|hipernatremi/ },
       { prefix: 'R50', pattern: /febre.{0,60}(desconhec|unknown|origem|sem causa)|fuo\b/ }, // R50 só para febre sem diagnóstico etiológico
+      { prefix: 'G93', pattern: /encefalopatia|encefalit|encefal\b/               }, // encefalopatia só se mencionada explicitamente
       { prefix: 'R68', pattern: null },  // "outros sinais gerais" — genérico demais, nunca incluir
     ]
     const cidsGuardados = cidsRaw.filter(c => {
