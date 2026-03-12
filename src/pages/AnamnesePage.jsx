@@ -111,7 +111,7 @@ function formatCidCode(code) {
   return `${code.slice(0, 3)}.${code.slice(3)}`
 }
 
-const SESSION_V = 6 // incrementar sempre que mudar o formato/filtros dos resultados
+const SESSION_V = 7 // incrementar sempre que mudar o formato/filtros dos resultados
 
 function getSession() {
   try {
@@ -545,7 +545,7 @@ export function AnamnesePage() {
                       </div>
                     ))
                   ) : cidProcs[c.co_cid].data?.length === 0 ? (
-                    <p className="text-xs text-slate-400 px-1">Nenhum procedimento vinculado</p>
+                    <p className="text-xs text-slate-400 px-1">{i === 0 ? 'Procedimentos incluídos em Principais ↑' : 'Nenhum procedimento vinculado'}</p>
                   ) : (
                     <>
                       {cidProcs[c.co_cid].data.slice(0, 3).map(p => {

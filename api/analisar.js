@@ -45,7 +45,8 @@ Analise o texto clínico abaixo e retorne APENAS JSON válido com três campos:
      • AVC isquêmico → "trombolítico avc isquêmico" e/ou "trombectomia cerebral" (SIGTAP usa "trombolítico", não "trombolise")
      • Hemorragia digestiva → "endoscopia digestiva alta" (sem "terapeutica" — o SIGTAP nomeia por intervenção, não por modalidade)
      • Pneumotórax/derrame → "drenagem torax"
-     • Abdome agudo cirúrgico → "laparotomia exploradora"
+     • Apendicite → "apendicectomia" e "tratamento cirurgico intestino"
+     • Abdome agudo cirúrgico (não apendicite) → "laparotomia exploradora"
      • Fratura → "reducao cirurgica fratura [osso]"
    - Os demais termos devem ser procedimentos DIAGNÓSTICOS ou COMPLEMENTARES específicos ao sistema/órgão (ex: "cateterismo cardiaco", "tomografia cranio", "transfusao concentrado hemacias")
    - NUNCA use termos genéricos sem qualificador anatômico (ex: ERRADO: "tratamento hemorragia"; CORRETO: "tratamento hemorragia digestiva alta")
