@@ -34,7 +34,7 @@ const QUALIF_BLOQUEIO = [
   // Oncologia — procedimentos específicos para paciente oncológico
   'ONCOLOGICO', 'ONCOLOGICA',
   // Fisioterapia/reabilitação — não pertence a internação aguda
-  'FISIOTERAPICO', 'FISIOTERAPICA', 'FISIOTERAPIA',
+  'FISIOTERAPICO', 'FISIOTERAPICA', 'FISIOTERAPIA', 'FISIOTERAPEUTICO', 'FISIOTERAPEUTICA',
 ]
 
 // Qualificadores adicionais bloqueados quando o CID é comorbidade (não é o diagnóstico principal).
@@ -102,7 +102,7 @@ function formatCidCode(code) {
   return `${code.slice(0, 3)}.${code.slice(3)}`
 }
 
-const SESSION_V = 5 // incrementar sempre que mudar o formato/filtros dos resultados
+const SESSION_V = 6 // incrementar sempre que mudar o formato/filtros dos resultados
 
 function getSession() {
   try {
@@ -216,8 +216,15 @@ export function AnamnesePage() {
 
       // CID-based: apenas TRATAMENTO (outros procedimentos ligados ao CID tendem a ser
       // irrelevantes e não passam por ehRelevante, gerando ruído nos resultados)
+      const refTermoPrincipal = normalizarTexto(cidsEnriquecidos[0]?.no_cid_pai || cidsEnriquecidos[0]?.no_cid || '')
       for (const p of (cidResult.data || [])) {
         if (!/^TRATAMENTO\b/i.test(p.no_procedimento || '')) continue
+        if (p.no_financiamento?.includes('PAB')) continue
+        const nomeNorm = normalizarTexto(p.no_procedimento || '')
+        if (QUALIF_BLOQUEIO.some(q => {
+          const qNorm = normalizarTexto(q)
+          return nomeNorm.includes(qNorm) && !refTermoPrincipal.includes(qNorm)
+        })) continue
         seen.add(p.co_procedimento)
         procs.push({ ...p, _src: -1 })
       }
@@ -227,6 +234,7 @@ export function AnamnesePage() {
         const termo = termosEfetivos[i] ?? ''
         for (const p of (buscas[i].data || [])) {
           if (seen.has(p.co_procedimento)) continue
+          if (p.no_financiamento?.includes('PAB')) continue
           if (!ehRelevante(p.no_procedimento, termo)) continue
           if (temQualifNaoSolicitado(p.no_procedimento, termo)) continue
           seen.add(p.co_procedimento)
@@ -258,6 +266,7 @@ export function AnamnesePage() {
               const filtered = (data || [])
                 .filter(p => {
                   if (seenInMain.has(p.co_procedimento)) return false
+                  if (p.no_financiamento?.includes('PAB')) return false
                   const nome = p.no_procedimento || ''
                   const nomeNorm = normalizarTexto(nome)
                   const termoNorm = normalizarTexto(refTermo)
