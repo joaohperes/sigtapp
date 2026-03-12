@@ -265,7 +265,9 @@ export function AnamnesePage() {
               const bloqueio = isPrincipal ? QUALIF_BLOQUEIO : QUALIF_BLOQUEIO_COMORBIDADE
               const filtered = (data || [])
                 .filter(p => {
-                  if (seenInMain.has(p.co_procedimento)) return false
+                  // Para o CID principal não desduplicamos: o usuário quer ver os procs do diagnóstico primário
+                  // mesmo que já apareçam em Principais. Para comorbidades, evita repetição.
+                  if (!isPrincipal && seenInMain.has(p.co_procedimento)) return false
                   if (p.no_financiamento?.includes('PAB')) return false
                   const nome = p.no_procedimento || ''
                   const nomeNorm = normalizarTexto(nome)
@@ -455,52 +457,48 @@ export function AnamnesePage() {
               {c.justificativa && (
                 <p className="mt-1 text-xs leading-relaxed text-slate-500 line-clamp-2">{c.justificativa}</p>
               )}
-              {/* Ver subcódigos (só quando o CID tem subcódigos, i.e., código pai ≠ código específico) */}
-              {c.co_cid.length > 3 && (
-                <>
-                  <button
-                    onClick={() => toggleCidSiblings(c.co_cid_pai || c.co_cid.slice(0, 3))}
-                    className="mt-2 w-full rounded-lg border border-slate-200 bg-slate-50 py-1
-                               text-xs font-medium text-slate-500 transition hover:bg-slate-100 flex items-center justify-center gap-1"
-                  >
-                    {cidSiblings[c.co_cid_pai || c.co_cid.slice(0, 3)]?.open ? 'Ocultar subcódigos' : 'Ver subcódigos'}
-                    <svg
-                      className={cn('h-3 w-3 transition-transform', cidSiblings[c.co_cid_pai || c.co_cid.slice(0, 3)]?.open ? 'rotate-180' : '')}
-                      fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
-                  {cidSiblings[c.co_cid_pai || c.co_cid.slice(0, 3)]?.open && (
-                    <div className="mt-2 space-y-1">
-                      {cidSiblings[c.co_cid_pai || c.co_cid.slice(0, 3)].loading ? (
-                        [0, 1, 2].map(k => (
-                          <div key={k} className="rounded-lg border border-slate-100 bg-slate-50 px-3 py-1.5">
-                            <Skeleton className="h-3 w-full" />
-                          </div>
-                        ))
-                      ) : (
-                        (cidSiblings[c.co_cid_pai || c.co_cid.slice(0, 3)].data || []).map(s => (
-                          <div
-                            key={s.co_cid}
-                            className={cn(
-                              'rounded-lg border px-3 py-1.5 text-[11px] leading-snug',
-                              s.co_cid === c.co_cid
-                                ? 'border-indigo-200 bg-indigo-50'
-                                : 'border-slate-100 bg-slate-50'
-                            )}
-                          >
-                            <span className="font-mono text-indigo-500 mr-1.5">{formatCidCode(s.co_cid)}</span>
-                            <span className="text-slate-600">{s.no_cid}</span>
-                            {s.co_cid === c.co_cid && (
-                              <span className="ml-1 text-[10px] text-indigo-400 font-medium">← sugerido</span>
-                            )}
-                          </div>
-                        ))
-                      )}
-                    </div>
+              {/* Ver subcódigos — disponível para todo CID; mostra subcategorias da mesma família */}
+              <button
+                onClick={() => toggleCidSiblings(c.co_cid_pai || c.co_cid.slice(0, 3))}
+                className="mt-2 w-full rounded-lg border border-slate-200 bg-slate-50 py-1
+                           text-xs font-medium text-slate-500 transition hover:bg-slate-100 flex items-center justify-center gap-1"
+              >
+                {cidSiblings[c.co_cid_pai || c.co_cid.slice(0, 3)]?.open ? 'Ocultar subcódigos' : 'Ver subcódigos'}
+                <svg
+                  className={cn('h-3 w-3 transition-transform', cidSiblings[c.co_cid_pai || c.co_cid.slice(0, 3)]?.open ? 'rotate-180' : '')}
+                  fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {cidSiblings[c.co_cid_pai || c.co_cid.slice(0, 3)]?.open && (
+                <div className="mt-2 space-y-1">
+                  {cidSiblings[c.co_cid_pai || c.co_cid.slice(0, 3)].loading ? (
+                    [0, 1, 2].map(k => (
+                      <div key={k} className="rounded-lg border border-slate-100 bg-slate-50 px-3 py-1.5">
+                        <Skeleton className="h-3 w-full" />
+                      </div>
+                    ))
+                  ) : (
+                    (cidSiblings[c.co_cid_pai || c.co_cid.slice(0, 3)].data || []).map(s => (
+                      <div
+                        key={s.co_cid}
+                        className={cn(
+                          'rounded-lg border px-3 py-1.5 text-[11px] leading-snug',
+                          s.co_cid === c.co_cid
+                            ? 'border-indigo-200 bg-indigo-50'
+                            : 'border-slate-100 bg-slate-50'
+                        )}
+                      >
+                        <span className="font-mono text-indigo-500 mr-1.5">{formatCidCode(s.co_cid)}</span>
+                        <span className="text-slate-600">{s.no_cid}</span>
+                        {s.co_cid === c.co_cid && (
+                          <span className="ml-1 text-[10px] text-indigo-400 font-medium">← sugerido</span>
+                        )}
+                      </div>
+                    ))
                   )}
-                </>
+                </div>
               )}
               <button
                 onClick={() => toggleCidProcs(c.co_cid, i === 0)}
