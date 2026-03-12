@@ -39,7 +39,7 @@ Analise o texto clínico abaixo e retorne APENAS JSON válido com três campos:
    - PRIORIDADE MÁXIMA: se o quadro requer intervenção terapêutica específica, inclua OBRIGATORIAMENTE o termo dessa intervenção:
      • IAM/SCA → "angioplastia coronariana" e/ou "trombolise coronariana"
      • AVC isquêmico → "trombolítico avc isquêmico" e/ou "trombectomia cerebral" (SIGTAP usa "trombolítico", não "trombolise")
-     • Hemorragia digestiva → "endoscopia digestiva alta terapeutica"
+     • Hemorragia digestiva → "endoscopia digestiva alta" (sem "terapeutica" — o SIGTAP nomeia por intervenção, não por modalidade)
      • Pneumotórax/derrame → "drenagem torax"
      • Abdome agudo cirúrgico → "laparotomia exploradora"
      • Fratura → "reducao cirurgica fratura [osso]"
@@ -134,12 +134,17 @@ ${anamnese}`
     // O modelo frequentemente infere esses diagnósticos de medicamentos ou contexto — bloqueamos aqui.
     const anamneseLower = anamnese.toLowerCase()
     const CID_GUARDS = [
-      { prefix: 'I10', pattern: /hipertens|has\b|pressão alta/ },  // hipertensão só se mencionada
-      { prefix: 'E11', pattern: /diabet/                        },  // diabetes só se mencionado
+      { prefix: 'I10', pattern: /hipertens|has\b|pressão alta/          },  // hipertensão só se mencionada
+      { prefix: 'E11', pattern: /diabet/                                },  // diabetes só se mencionado
+      { prefix: 'K91', pattern: /pós.?operat|pós.?cirúrg|pós.?procedim/ }, // pós-procedimento digestivo
+      { prefix: 'E87', pattern: /desidrat|eletrólito|eletroli|hiponatremi|hipocalemi|hipernatremi/ },
+      { prefix: 'R68', pattern: null },  // "outros sinais gerais" — genérico demais, nunca incluir
     ]
     const cidsGuardados = cidsRaw.filter(c => {
       const guard = CID_GUARDS.find(g => c.co_cid.startsWith(g.prefix))
-      return !guard || guard.pattern.test(anamneseLower)
+      if (!guard) return true
+      if (guard.pattern === null) return false
+      return guard.pattern.test(anamneseLower)
     })
 
     // Deduplica por grupo de 3 chars: se o modelo retornar K920 + K921, mantém apenas o primeiro.
