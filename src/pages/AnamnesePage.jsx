@@ -31,6 +31,10 @@ const QUALIF_BLOQUEIO = [
   'CADAVER', 'CADAVERICO', 'CADAVERICA',
   // Tipo etiológico de choque — bloqueia "cardiogênico" em quadros não cardíacos
   'CARDIOGENICO',
+  // Oncologia — procedimentos específicos para paciente oncológico
+  'ONCOLOGICO', 'ONCOLOGICA',
+  // Fisioterapia/reabilitação — não pertence a internação aguda
+  'FISIOTERAPICO', 'FISIOTERAPICA', 'FISIOTERAPIA',
 ]
 
 // Qualificadores adicionais bloqueados quando o CID é comorbidade (não é o diagnóstico principal).
