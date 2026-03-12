@@ -124,14 +124,18 @@ export function AnamnesePage() {
   const [aih, setAih] = useState(() => getSession().aih || '')
   const [analyzed, setAnalyzed] = useState(() => getSession().analyzed || false)
   const [sheetProc, setSheetProc] = useState(null)
-  const [cidProcs, setCidProcs] = useState({}) // { [co_cid]: { loading, data, open } }
+  const [cidProcs, setCidProcs] = useState(() => {  // { [co_cid]: { loading, data, open } }
+    const saved = getSession().cidProcsData || {}
+    return Object.fromEntries(Object.entries(saved).map(([k, v]) => [k, { loading: false, data: v, open: false }]))
+  })
   const [cidSiblings, setCidSiblings] = useState({}) // { [co_cid_pai]: { loading, data, open } }
 
   useEffect(() => {
     if (analyzed) {
-      sessionStorage.setItem('aih-session', JSON.stringify({ v: SESSION_V, anamnese, cids, procedimentos, aih, analyzed }))
+      const cidProcsData = Object.fromEntries(Object.entries(cidProcs).map(([k, v]) => [k, v.data || []]))
+      sessionStorage.setItem('aih-session', JSON.stringify({ v: SESSION_V, anamnese, cids, procedimentos, aih, analyzed, cidProcsData }))
     }
-  }, [anamnese, cids, procedimentos, aih, analyzed])
+  }, [anamnese, cids, procedimentos, aih, analyzed, cidProcs])
 
   async function handleAnalyze() {
     if (anamnese.trim().length < 20) return
@@ -141,6 +145,7 @@ export function AnamnesePage() {
     setProcedimentos([])
     setAih('')
     setAnalyzed(false)
+    setCidProcs({})
 
     try {
       const res = await fetch('/api/analisar', {
@@ -235,9 +240,50 @@ export function AnamnesePage() {
 
       procs.splice(12)
 
+      // Pré-carrega procedimentos de todos os CIDs em paralelo para exibição imediata na coluna 3
+      const seenInMain = new Set(procs.map(p => p.co_procedimento))
+      const cidProcsResults = await Promise.all(
+        cidsEnriquecidos.map((cid, idx) =>
+          supabase.rpc('buscar_por_cid', { query: cid.co_cid_pai || cid.co_cid, limite: 15 })
+            .then(({ data }) => {
+              const refTermo = (cid.no_cid_pai || cid.no_cid)?.toLowerCase() || cid.co_cid
+              const isPrincipal = idx === 0
+              const bloqueio = isPrincipal ? QUALIF_BLOQUEIO : QUALIF_BLOQUEIO_COMORBIDADE
+              const filtered = (data || [])
+                .filter(p => {
+                  if (seenInMain.has(p.co_procedimento)) return false
+                  const nome = p.no_procedimento || ''
+                  const nomeNorm = normalizarTexto(nome)
+                  const termoNorm = normalizarTexto(refTermo)
+                  return (
+                    !bloqueio.some(q => {
+                      const qNorm = normalizarTexto(q)
+                      return nomeNorm.includes(qNorm) && !termoNorm.includes(qNorm)
+                    }) &&
+                    algumTermoPresente(nome, refTermo)
+                  )
+                })
+                .sort((a, b) => {
+                  const aTrat = /^TRATAMENTO\b/i.test(a.no_procedimento || '')
+                  const bTrat = /^TRATAMENTO\b/i.test(b.no_procedimento || '')
+                  if (aTrat !== bTrat) return aTrat ? -1 : 1
+                  const ta = (a.vl_sa || 0) + (a.vl_sh || 0) + (a.vl_sp || 0)
+                  const tb = (b.vl_sa || 0) + (b.vl_sh || 0) + (b.vl_sp || 0)
+                  return tb - ta
+                })
+                .slice(0, 5)
+              return { co_cid: cid.co_cid, data: filtered }
+            })
+        )
+      )
+      const newCidProcs = Object.fromEntries(
+        cidProcsResults.map(({ co_cid, data }) => [co_cid, { loading: false, data, open: false }])
+      )
+
       setCids(cidsEnriquecidos)
       setProcedimentos(procs)
       setAih(aihTexto)
+      setCidProcs(newCidProcs)
       setAnalyzed(true)
     } catch (err) {
       setError(err.message)
@@ -498,20 +544,47 @@ export function AnamnesePage() {
     </div>
   )
 
+  const cidProcsSecundarios = cids.flatMap(c => cidProcs[c.co_cid]?.data?.length ? [{ cid: c, data: cidProcs[c.co_cid].data }] : [])
+  const totalProcCount = procedimentos.length + cidProcsSecundarios.reduce((s, e) => s + e.data.length, 0)
+
   const procedimentosBlock = (
     <div>
       <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-600">
         <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 text-[10px] font-bold text-emerald-600">
-          {procedimentos.length}
+          {totalProcCount}
         </span>
         Procedimentos SIGTAP Sugeridos
       </h2>
-      {procedimentos.length === 0 ? (
+      {totalProcCount === 0 ? (
         <p className="text-sm text-slate-400">Nenhum procedimento encontrado</p>
       ) : (
-        <div className="space-y-2">
-          {procedimentos.map((p) => (
-            <ProcedureRow key={p.co_procedimento} procedure={p} onSelect={setSheetProc} />
+        <div className="space-y-4">
+          {/* Seção principal: procedimentos da busca FTS */}
+          {procedimentos.length > 0 && (
+            <div>
+              <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                Principais
+              </p>
+              <div className="space-y-2">
+                {procedimentos.map((p) => (
+                  <ProcedureRow key={p.co_procedimento} procedure={p} onSelect={setSheetProc} />
+                ))}
+              </div>
+            </div>
+          )}
+          {/* Seção por CID: procedimentos vinculados diretamente a cada diagnóstico */}
+          {cidProcsSecundarios.map(({ cid, data }) => (
+            <div key={cid.co_cid}>
+              <p className="mb-1.5 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                <span className="font-mono text-indigo-400">{cid.co_cid_pai || cid.co_cid}</span>
+                <span className="normal-case font-normal text-slate-400 truncate">{cid.no_cid_pai || cid.no_cid}</span>
+              </p>
+              <div className="space-y-2">
+                {data.map((p) => (
+                  <ProcedureRow key={p.co_procedimento} procedure={p} onSelect={setSheetProc} />
+                ))}
+              </div>
+            </div>
           ))}
         </div>
       )}
