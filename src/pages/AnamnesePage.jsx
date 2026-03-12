@@ -87,13 +87,22 @@ function ehRelevante(nomeProc, termo) {
   return matches.length >= threshold
 }
 
+// Raiz mais agressiva para algumTermoPresente: tolera variações morfológicas entre
+// diagnóstico e procedimento (ex: "apendicite" → "apendic" casa com "apendicectomia").
+// Stem padrão daria "apendici" que não está em "apendicectomia".
+function raiz(w) {
+  if (w.length >= 8) return w.slice(0, -3)
+  if (w.length >= 6) return w.slice(0, -2)
+  return w
+}
+
 // Verifica se ao menos uma palavra-chave da descrição do CID aparece no nome do procedimento.
 // Usado nos procedimentos inline do card de CID para descartar procedimentos de comorbidade
 // (ex: fístula AV para I10-hipertensão, amputação para E11-diabetes).
 function algumTermoPresente(nomeProc, descCid) {
   const procNorm = normalizarTexto(nomeProc)
   const palavras = normalizarTexto(descCid).split(/\s+/).filter(w => w.length >= 5 && !STOPWORDS.has(w))
-  return palavras.length === 0 || palavras.some(w => procNorm.includes(stem(w)))
+  return palavras.length === 0 || palavras.some(w => procNorm.includes(raiz(w)))
 }
 
 // Formata código CID: "I210" → "I21.0", "K920" → "K92.0"
@@ -262,11 +271,17 @@ export function AnamnesePage() {
         cidsEnriquecidos.map(async (cid, idx) => {
           const queryCode = cid.co_cid_pai || cid.co_cid
           let { data } = await supabase.rpc('buscar_por_cid', { query: queryCode, limite: 15 })
-          // Fallback: SIGTAP às vezes linka procedimentos ao subcódigo (ex: J189) e não ao pai (J18).
-          // Se código 3-char retorna vazio, tenta o subcódigo NE (X9) como fallback.
+          // Fallback: SIGTAP às vezes linka procs ao subcódigo específico (K350) e não ao pai (K35).
+          // 1º: tenta o subcódigo sugerido pela IA (ex: K350); 2º: tenta subcódigo NE (X9).
           if (!data?.length && queryCode.length === 3) {
-            const { data: fb } = await supabase.rpc('buscar_por_cid', { query: queryCode + '9', limite: 15 })
-            if (fb?.length) data = fb
+            if (cid.co_cid !== queryCode) {
+              const { data: fb1 } = await supabase.rpc('buscar_por_cid', { query: cid.co_cid, limite: 15 })
+              if (fb1?.length) data = fb1
+            }
+            if (!data?.length) {
+              const { data: fb2 } = await supabase.rpc('buscar_por_cid', { query: queryCode + '9', limite: 15 })
+              if (fb2?.length) data = fb2
+            }
           }
           const refTermo = (cid.no_cid_pai || cid.no_cid)?.toLowerCase() || cid.co_cid
           const isPrincipal = idx === 0
