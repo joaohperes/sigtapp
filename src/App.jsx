@@ -19,6 +19,15 @@ export default function App() {
         <Route path="/anamnese" element={<AnamnesePage />} />
         <Route path="/favoritos" element={<FavoritosPage />} />
       </Routes>
+      <footer className="border-t border-slate-100 bg-white py-5 text-center">
+        <p className="text-xs text-slate-400">
+          Desenvolvido por{' '}
+          <span className="font-medium text-blue-400">@joaohperes</span>
+          {' '}com{' '}
+          <img src="/claude-icon.ico" alt="Claude" className="mb-0.5 inline h-3.5 w-3.5" />
+          {' '}<span className="font-medium text-orange-400">Claude</span>
+        </p>
+      </footer>
     </BrowserRouter>
   )
 }

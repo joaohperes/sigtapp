@@ -319,19 +319,21 @@ export function Home() {
     <div className="min-h-screen bg-slate-50">
       {/* Hero */}
       <div className={modoUE ? "bg-gradient-to-br from-red-900 via-red-800 to-red-700" : "bg-gradient-to-br from-blue-800 via-blue-700 to-blue-600"}>
-        <div className="mx-auto max-w-3xl px-4 pb-12 pt-10 text-center">
-          <p className={cn("text-xs font-semibold uppercase tracking-widest", modoUE ? "text-red-300" : "text-blue-300")}>
-            Ministério da Saúde · DATASUS
-          </p>
-          <Link to="/" className="block mt-2 hover:opacity-80 transition-opacity">
+        <div className="mx-auto max-w-3xl px-4 pb-8 pt-5 text-center">
+          <Link to="/" className="block hover:opacity-80 transition-opacity">
             <h1 className="text-5xl text-white"
                 style={{ fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '0.05em' }}>SIGTAPP</h1>
           </Link>
           <p className={cn("mt-1.5 text-sm", modoUE ? "text-red-200" : "text-blue-200")}>
             Procedimentos, Medicamentos e OPM do SUS · CID-10
           </p>
+          {totalProcedimentos > 0 && (
+            <p className={cn("mt-1 text-xs tabular-nums", modoUE ? "text-red-300/80" : "text-blue-300/80")}>
+              {totalProcedimentos.toLocaleString('pt-BR')} procedimentos disponíveis
+            </p>
+          )}
 
-          <div className="mt-8">
+          <div className="mt-6">
             <SearchBar
               onSearch={handleSearch}
               loading={loading}
@@ -443,7 +445,7 @@ export function Home() {
             {/* Sidebar — grupos presentes nos resultados */}
             {gruposPresentes.length > 1 && (
               <aside className="hidden lg:block w-56 shrink-0">
-                <div className="sticky top-6 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+                <div className="sticky top-[60px] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
                   <div className="border-b border-slate-100 px-4 py-3">
                     <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Grupos</p>
                   </div>
@@ -1040,15 +1042,7 @@ export function Home() {
         </div>
       )}
 
-      <footer className="py-6 text-center">
-        <p className="text-xs text-slate-400">
-          Desenvolvido por{' '}
-          <span className="font-medium text-blue-400">@joaohperes</span>
-          {' '}com{' '}
-          <img src="/claude-icon.ico" alt="Claude" className="mb-0.5 inline h-3.5 w-3.5" />
-          {' '}<span className="font-medium text-orange-400">Claude</span>
-        </p>
-      </footer>
+
     </div>
   )
 }

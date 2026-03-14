@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import { formatBRL, formatCodigo, toSentenceCase } from '../utils/formatters'
 import { GRUPO_MAP } from '../data/grupos'
 import { useFavoritos } from '../contexts/FavoritosContext'
+import { useModoUE } from '../contexts/ModoUEContext'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 
@@ -41,7 +42,7 @@ export function ProcedureDetail() {
     return (
       <div className="min-h-screen bg-slate-50">
         <div className="bg-gradient-to-br from-blue-800 via-blue-700 to-blue-600">
-          <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
+          <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6">
             <Skeleton className="h-4 w-24 bg-blue-700" />
             <div className="mt-4 space-y-2">
               <Skeleton className="h-3 w-32 bg-blue-700" />
@@ -78,6 +79,7 @@ export function ProcedureDetail() {
   const total = (data.vl_sa || 0) + (data.vl_sh || 0) + (data.vl_sp || 0)
   const estilo = GRUPO_MAP[data.co_grupo]
   const { isFavorito, toggleFavorito } = useFavoritos()
+  const { modoUE } = useModoUE()
   const fav = isFavorito(data.co_procedimento)
   const cidsPrincipais = cids.filter((c) => c.st_principal === 'S')
   const cidsSecundarios = cids.filter((c) => c.st_principal !== 'S')
@@ -85,20 +87,31 @@ export function ProcedureDetail() {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
-      <div className="bg-gradient-to-br from-blue-800 via-blue-700 to-blue-600">
-        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
-          <Link
-            to={data.co_grupo ? `/grupo/${data.co_grupo}` : '/'}
-            className="text-sm text-blue-300 hover:text-white transition"
-          >
-            ← {data.no_grupo ?? 'Voltar'}
-          </Link>
+      <div className={modoUE ? "bg-gradient-to-br from-red-900 via-red-800 to-red-700" : "bg-gradient-to-br from-blue-800 via-blue-700 to-blue-600"}>
+        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6">
+          {/* Breadcrumb */}
+          <nav className="flex items-center gap-1.5 text-xs">
+            <Link to="/" className={cn("transition", modoUE ? "text-red-300 hover:text-white" : "text-blue-300 hover:text-white")}>
+              Busca
+            </Link>
+            {data.co_grupo && (
+              <>
+                <span className={modoUE ? "text-red-600" : "text-blue-600"}>/</span>
+                <Link
+                  to={`/grupo/${data.co_grupo}`}
+                  className={cn("transition", modoUE ? "text-red-300 hover:text-white" : "text-blue-300 hover:text-white")}
+                >
+                  {data.no_grupo}
+                </Link>
+              </>
+            )}
+          </nav>
 
-          <div className="mt-4">
+          <div className="mt-2">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="font-mono text-sm text-blue-300">{formatCodigo(data.co_procedimento)}</p>
-                <h1 className="mt-1 text-2xl font-bold leading-snug text-white">
+                <p className={cn("font-mono text-xs", modoUE ? "text-red-300" : "text-blue-300")}>{formatCodigo(data.co_procedimento)}</p>
+                <h1 className="mt-0.5 text-xl font-bold leading-snug text-white">
                   {data.no_procedimento}
                 </h1>
               </div>
@@ -117,15 +130,9 @@ export function ProcedureDetail() {
               </button>
             </div>
             {data.dt_competencia && (
-              <p className="mt-2 text-xs text-blue-300">
+              <p className={cn("mt-1.5 text-xs", modoUE ? "text-red-300" : "text-blue-300")}>
                 Competência {data.dt_competencia.slice(0, 4)}/{data.dt_competencia.slice(4)}
               </p>
-            )}
-            {estilo && (
-              <span className="mt-3 inline-block rounded-full border border-white/20 bg-white/15
-                               px-3 py-1 text-xs font-medium text-white/90">
-                {data.no_grupo}
-              </span>
             )}
           </div>
         </div>

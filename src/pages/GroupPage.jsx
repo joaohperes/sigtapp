@@ -124,13 +124,15 @@ export function GroupPage() {
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
       <div className="bg-gradient-to-br from-blue-800 via-blue-700 to-blue-600">
-        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
-          <Link to="/" className="text-sm text-blue-300 hover:text-white transition">
-            ← Todos os grupos
-          </Link>
-          <div className="mt-4 flex items-center gap-3">
-            <span className={`rounded-lg px-3 py-1.5 text-sm font-bold ${grupo.bg} ${grupo.text}`}>
-              Grupo {grupo.co}
+        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6">
+          <nav className="flex items-center gap-1.5 text-xs text-blue-300">
+            <Link to="/" className="hover:text-white transition">Busca</Link>
+            <span className="text-blue-600">/</span>
+            <span className="text-white/80">Grupos</span>
+          </nav>
+          <div className="mt-2 flex items-center gap-3">
+            <span className={`rounded-lg px-2.5 py-1 text-sm font-bold ${grupo.bg} ${grupo.text}`}>
+              {grupo.co}
             </span>
             <h1 className="text-xl font-semibold text-white">{grupo.no}</h1>
           </div>
@@ -143,7 +145,7 @@ export function GroupPage() {
           {/* Sidebar — subgrupos */}
           {subgrupos.length > 0 && (
             <aside className="hidden lg:block w-56 shrink-0">
-              <div className="sticky top-6 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+              <div className="sticky top-[60px] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
                 <div className="border-b border-slate-100 px-4 py-3">
                   <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Subgrupos</p>
                 </div>

@@ -650,9 +650,9 @@ export function AnamnesePage() {
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
       <div className={modoUE ? "bg-gradient-to-br from-red-900 via-red-800 to-red-700" : "bg-gradient-to-br from-blue-800 via-blue-700 to-blue-600"}>
-        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
-          <h1 className="text-xl font-bold text-white sm:text-2xl">Análise de Anamnese</h1>
-          <p className={cn("mt-1 text-sm", modoUE ? "text-red-200" : "text-blue-200")}>
+        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6">
+          <h1 className="text-lg font-bold text-white sm:text-xl">Análise de Anamnese</h1>
+          <p className={cn("mt-0.5 text-sm", modoUE ? "text-red-200" : "text-blue-200")}>
             Cole o texto clínico e a IA identificará CIDs, procedimentos SIGTAP e gerará o texto para AIH
           </p>
         </div>
@@ -818,15 +818,7 @@ export function AnamnesePage() {
         </div>
       </main>
 
-      <footer className="py-6 text-center">
-        <p className="text-xs text-slate-400">
-          Desenvolvido por{' '}
-          <span className="font-medium text-blue-400">@joaohperes</span>
-          {' '}com{' '}
-          <img src="/claude-icon.ico" alt="Claude" className="mb-0.5 inline h-3.5 w-3.5" />
-          {' '}<span className="font-medium text-orange-400">Claude</span>
-        </p>
-      </footer>
+
 
       <Sheet open={!!sheetProc} onOpenChange={open => !open && setSheetProc(null)}>
         <SheetContent className="w-full sm:max-w-md overflow-y-auto">
