@@ -7,6 +7,7 @@ import { ProcedureSheetContent } from '../components/ProcedureSheetContent'
 import { useProcedures } from '../hooks/useProcedures'
 import { useGrupos } from '../hooks/useGrupos'
 import { useFavoritos } from '../contexts/FavoritosContext'
+import { useModoUE } from '../contexts/ModoUEContext'
 import { GRUPO_MAP } from '../data/grupos'
 import { supabase } from '../lib/supabase'
 import { expandirSinonimos } from '../data/sinonimos'
@@ -102,17 +103,8 @@ export function Home() {
   const [compareSelection, setCompareSelection] = useState([])
   const [showCompare, setShowCompare] = useState(false)
 
-  // Modo Urgência/Emergência
-  const [modoUE, setModoUE] = useState(() => {
-    try { return localStorage.getItem('sigtap-modo-ue') === '1' } catch { return false }
-  })
-  function toggleModoUE() {
-    setModoUE(v => {
-      const next = !v
-      localStorage.setItem('sigtap-modo-ue', next ? '1' : '0')
-      return next
-    })
-  }
+  // Modo Urgência/Emergência (global via contexto)
+  const { modoUE } = useModoUE()
 
   // Paginação client-side
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
@@ -347,40 +339,6 @@ export function Home() {
               recentSearches={recentSearches}
               onSelectRecent={saveRecentSearch}
             />
-          </div>
-
-          <div className="mt-5 flex items-center justify-center gap-3">
-            <Link
-              to="/anamnese"
-              className={cn(
-                'inline-flex items-center gap-1.5 rounded-full border px-4 py-1.5 text-xs transition',
-                modoUE
-                  ? 'border-red-400/40 bg-red-900/30 text-red-200 hover:bg-red-900/50'
-                  : 'border-blue-400/40 bg-blue-900/30 text-blue-200 hover:bg-blue-900/50'
-              )}
-            >
-              <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                  d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-              </svg>
-              Analisar anamnese com IA
-            </Link>
-            <button
-              onClick={toggleModoUE}
-              className={cn(
-                'inline-flex items-center gap-1.5 rounded-full border px-4 py-1.5 text-xs font-medium transition',
-                modoUE
-                  ? 'border-red-300/60 bg-red-500/30 text-red-100 hover:bg-red-500/40'
-                  : 'border-white/20 bg-white/10 text-white/70 hover:bg-white/20 hover:text-white'
-              )}
-              title="Filtrar somente grupos 03 e 04 (clínicos e cirúrgicos)"
-            >
-              <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                  d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-              </svg>
-              {modoUE ? 'Modo emergência ativo' : 'Modo emergência'}
-            </button>
           </div>
 
           {/* Segmented control */}
@@ -825,20 +783,22 @@ export function Home() {
                         <button
                           key={g.co_grupo}
                           onClick={() => handleGroupClick(g)}
-                          className="group relative flex items-start overflow-hidden rounded-xl
-                                     border border-slate-200 bg-white p-5 shadow-sm text-left transition
+                          className="group relative flex flex-col overflow-hidden rounded-xl
+                                     border border-slate-200 bg-white shadow-sm text-left transition
                                      hover:shadow-md hover:-translate-y-0.5 active:translate-y-0"
                         >
-                          <div className={`absolute left-0 top-0 h-full w-1 ${estilo.dot}`} />
-                          <div className="pl-2">
-                            <span className={`inline-block rounded-full px-2 py-0.5 text-xs font-semibold ${estilo.bg} ${estilo.text}`}>
-                              {g.co_grupo}
-                            </span>
-                            <p className="mt-2 text-sm font-medium leading-snug text-slate-800">
+                          <div className={`h-1.5 w-full ${estilo.dot}`} />
+                          <div className="flex-1 p-4">
+                            <div className="flex items-center justify-between gap-2">
+                              <span className={`inline-block rounded-full px-2 py-0.5 text-xs font-bold ${estilo.bg} ${estilo.text}`}>
+                                {g.co_grupo}
+                              </span>
+                              <span className="text-[11px] text-slate-400">
+                                {Number(g.qt_procedimentos).toLocaleString('pt-BR')} proc.
+                              </span>
+                            </div>
+                            <p className="mt-2 text-sm font-semibold leading-snug text-slate-800 group-hover:text-slate-900">
                               {g.no_grupo}
-                            </p>
-                            <p className="mt-2 text-xs text-slate-400">
-                              {Number(g.qt_procedimentos).toLocaleString('pt-BR')} procedimentos
                             </p>
                           </div>
                         </button>

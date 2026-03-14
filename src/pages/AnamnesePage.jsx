@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
 import { toast } from 'sonner'
 import { supabase } from '../lib/supabase'
 import { formatBRL, formatCodigo } from '../utils/formatters'
 import { ProcedureRow } from '../components/ProcedureCard'
 import { ProcedureSheetContent } from '../components/ProcedureSheetContent'
+import { useModoUE } from '../contexts/ModoUEContext'
 import { Sheet, SheetContent } from '@/components/ui/sheet'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
@@ -144,16 +144,7 @@ function getSession() {
 }
 
 export function AnamnesePage() {
-  const [modoUE, setModoUE] = useState(() => {
-    try { return localStorage.getItem('sigtap-modo-ue') === '1' } catch { return false }
-  })
-  function toggleModoUE() {
-    setModoUE(v => {
-      const next = !v
-      localStorage.setItem('sigtap-modo-ue', next ? '1' : '0')
-      return next
-    })
-  }
+  const { modoUE } = useModoUE()
   const [anamnese, setAnamnese] = useState(() => getSession().anamnese || '')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -660,43 +651,10 @@ export function AnamnesePage() {
       {/* Header */}
       <div className={modoUE ? "bg-gradient-to-br from-red-900 via-red-800 to-red-700" : "bg-gradient-to-br from-blue-800 via-blue-700 to-blue-600"}>
         <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
-          <div className="flex flex-wrap items-center gap-2">
-            <Link
-              to="/"
-              className={cn(
-                'inline-flex items-center gap-1.5 rounded-full border px-4 py-1.5 text-xs font-medium transition',
-                modoUE
-                  ? 'border-red-300/60 bg-red-900/30 text-red-100 hover:bg-red-900/50'
-                  : 'border-white/30 bg-white/15 text-white hover:bg-white/25'
-              )}
-            >
-              <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-              </svg>
-              Início
-            </Link>
-            <button
-              onClick={toggleModoUE}
-              className={cn(
-                'inline-flex items-center gap-1.5 rounded-full border px-4 py-1.5 text-xs font-medium transition',
-                modoUE
-                  ? 'border-red-300/60 bg-red-500/30 text-red-100 hover:bg-red-500/40'
-                  : 'border-white/20 bg-white/10 text-white/70 hover:bg-white/20 hover:text-white'
-              )}
-            >
-              <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                  d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-              </svg>
-              {modoUE ? 'Modo emergência ativo' : 'Modo emergência'}
-            </button>
-          </div>
-          <div className="mt-4">
-            <h1 className="text-xl font-bold text-white sm:text-2xl">Análise de Anamnese</h1>
-            <p className={cn("mt-1 text-sm", modoUE ? "text-red-200" : "text-blue-200")}>
-              Cole o texto clínico e a IA identificará CIDs, procedimentos SIGTAP e gerará o texto para AIH
-            </p>
-          </div>
+          <h1 className="text-xl font-bold text-white sm:text-2xl">Análise de Anamnese</h1>
+          <p className={cn("mt-1 text-sm", modoUE ? "text-red-200" : "text-blue-200")}>
+            Cole o texto clínico e a IA identificará CIDs, procedimentos SIGTAP e gerará o texto para AIH
+          </p>
         </div>
       </div>
 

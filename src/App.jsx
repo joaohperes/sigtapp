@@ -5,10 +5,12 @@ import { GroupPage } from './pages/GroupPage'
 import { CidSearch } from './pages/CidSearch'
 import { AnamnesePage } from './pages/AnamnesePage'
 import { FavoritosPage } from './pages/FavoritosPage'
+import { AppNav } from './components/AppNav'
 
 export default function App() {
   return (
     <BrowserRouter>
+      <AppNav />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/grupo/:co" element={<GroupPage />} />
