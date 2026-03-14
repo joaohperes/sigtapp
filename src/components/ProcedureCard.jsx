@@ -220,7 +220,7 @@ export function ProcedureRow({ procedure, onSelect, compareMode, compareSelected
             className="h-4 w-4 shrink-0 rounded border-slate-300 text-blue-600 cursor-pointer"
           />
         )}
-        {estilo && <div className={cn('h-8 w-1 shrink-0 rounded-full', estilo.dot)} />}
+        {estilo && <div className={cn('self-stretch w-[3px] shrink-0 rounded-sm', estilo.dot)} />}
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1">
             <p className="font-mono text-xs text-slate-400">{formatCodigo(co_procedimento)}</p>

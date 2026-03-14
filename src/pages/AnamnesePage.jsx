@@ -9,7 +9,30 @@ import { Sheet, SheetContent } from '@/components/ui/sheet'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 
-const EXEMPLO = `Paciente masculino, 58 anos, hipertenso e diabético tipo 2. Queixa de dor torácica opressiva com irradiação para o membro superior esquerdo iniciada há 2 horas, associada a sudorese fria, náuseas e dispneia. Pressão arterial 160/100 mmHg, FC 98 bpm. ECG com supradesnivelamento de ST em V1-V4.`
+const EXEMPLOS = [
+  {
+    titulo: 'IAM com supra de ST',
+    subtitulo: 'Dor torácica + ECG com supra',
+    texto: 'Paciente masculino, 58 anos, hipertenso e diabético tipo 2. Queixa de dor torácica opressiva com irradiação para o membro superior esquerdo iniciada há 2 horas, associada a sudorese fria, náuseas e dispneia. Pressão arterial 160/100 mmHg, FC 98 bpm. ECG com supradesnivelamento de ST em V1-V4.',
+  },
+  {
+    titulo: 'AVC isquêmico',
+    subtitulo: 'Hemiplegia + afasia súbita',
+    texto: 'Paciente feminina, 72 anos, hipertensa em uso de AAS, trazida por familiares com hemiplegia direita e afasia de início súbito há 3 horas. Exame neurológico: NIHSS 14, GCS 13. TC crânio sem contraste: sem hemorragia. Admitida para avaliação de trombólise endovenosa.',
+  },
+  {
+    titulo: 'Pneumonia com sepse',
+    subtitulo: 'Febre + consolidação bilateral',
+    texto: 'Paciente feminina, 78 anos, diabética e hipertensa, trazida por rebaixamento de consciência e febre há 2 dias. Admissão em sepse: PA 96/62 mmHg, FC 108 bpm, SpO₂ 88% em ar ambiente → cateter O₂ 5L/min. Leucócitos 18.400 com 22% bastões, PCR 184 mg/L, lactato 3,1 mmol/L. Radiografia: consolidação lobar bilateral. Prescrito ceftriaxona + azitromicina EV.',
+  },
+  {
+    titulo: 'Apendicite aguda',
+    subtitulo: 'Dor FID + Blumberg positivo',
+    texto: 'Paciente masculino, 22 anos, previamente hígido, admitido com dor abdominal em fossa ilíaca direita há 18 horas, início periumbilical com migração para FID, náuseas, vômitos e febre 38,2°C. Blumberg e Rovsing positivos, defesa muscular localizada. Leucócitos 14.800. TC de abdome confirmou apendicite aguda sem perfuração. Encaminhado para apendicectomia.',
+  },
+]
+
+const EXEMPLO = EXEMPLOS[0].texto
 
 const STOPWORDS = new Set(['de', 'do', 'da', 'dos', 'das', 'em', 'no', 'na', 'nos', 'nas', 'e', 'ou', 'um', 'uma', 'para', 'com', 'por', 'a', 'o', 'as', 'os', 'ao', 'aos'])
 
@@ -479,20 +502,35 @@ export function AnamnesePage() {
               {c.justificativa && (
                 <p className="mt-1 text-xs leading-relaxed text-slate-500 line-clamp-2">{c.justificativa}</p>
               )}
-              {/* Ver subcódigos — disponível para todo CID; mostra subcategorias da mesma família */}
-              <button
-                onClick={() => toggleCidSiblings(c.co_cid_pai || c.co_cid.slice(0, 3))}
-                className="mt-2 w-full rounded-lg border border-slate-200 bg-slate-50 py-1
-                           text-xs font-medium text-slate-500 transition hover:bg-slate-100 flex items-center justify-center gap-1"
-              >
-                {cidSiblings[c.co_cid_pai || c.co_cid.slice(0, 3)]?.open ? 'Ocultar subcódigos' : 'Ver subcódigos'}
-                <svg
-                  className={cn('h-3 w-3 transition-transform', cidSiblings[c.co_cid_pai || c.co_cid.slice(0, 3)]?.open ? 'rotate-180' : '')}
-                  fill="none" stroke="currentColor" viewBox="0 0 24 24"
+              {/* 2 pills lado a lado: subcódigos | procedimentos */}
+              <div className="mt-2 grid grid-cols-2 gap-1.5">
+                <button
+                  onClick={() => toggleCidSiblings(c.co_cid_pai || c.co_cid.slice(0, 3))}
+                  className="rounded-lg border border-slate-200 bg-slate-50 py-1 px-2
+                             text-xs font-medium text-slate-500 transition hover:bg-slate-100 flex items-center justify-center gap-1"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
+                  Subcódigos
+                  <svg
+                    className={cn('h-3 w-3 transition-transform shrink-0', cidSiblings[c.co_cid_pai || c.co_cid.slice(0, 3)]?.open ? 'rotate-180' : '')}
+                    fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                <button
+                  onClick={() => toggleCidProcs(c.co_cid, i === 0)}
+                  className="rounded-lg border border-indigo-200 bg-indigo-50 py-1 px-2
+                             text-xs font-medium text-indigo-600 transition hover:bg-indigo-100 flex items-center justify-center gap-1"
+                >
+                  Procedimentos
+                  <svg
+                    className={cn('h-3 w-3 transition-transform shrink-0', cidProcs[c.co_cid]?.open ? 'rotate-180' : '')}
+                    fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+              </div>
               {cidSiblings[c.co_cid_pai || c.co_cid.slice(0, 3)]?.open && (
                 <div className="mt-2 space-y-1">
                   {cidSiblings[c.co_cid_pai || c.co_cid.slice(0, 3)].loading ? (
@@ -522,19 +560,6 @@ export function AnamnesePage() {
                   )}
                 </div>
               )}
-              <button
-                onClick={() => toggleCidProcs(c.co_cid, i === 0)}
-                className="mt-2 w-full rounded-lg border border-indigo-200 bg-indigo-50 py-1
-                           text-xs font-medium text-indigo-600 transition hover:bg-indigo-100 flex items-center justify-center gap-1"
-              >
-                {cidProcs[c.co_cid]?.open ? 'Ocultar procedimentos' : 'Ver procedimentos'}
-                <svg
-                  className={cn('h-3 w-3 transition-transform', cidProcs[c.co_cid]?.open ? 'rotate-180' : '')}
-                  fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
               {cidProcs[c.co_cid]?.open && (
                 <div className="mt-2 space-y-1">
                   {cidProcs[c.co_cid].loading ? (
@@ -609,7 +634,7 @@ export function AnamnesePage() {
           )}
           {/* Seção por CID: procedimentos vinculados diretamente a cada diagnóstico */}
           {cidProcsSecundarios.map(({ cid, data }) => (
-            <div key={cid.co_cid}>
+            <div key={cid.co_cid} className="border-t border-slate-100 pt-3">
               <p className="mb-1.5 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
                 <span className="font-mono text-indigo-400">{cid.co_cid_pai || cid.co_cid}</span>
                 <span className="normal-case font-normal text-slate-400 truncate">{cid.no_cid_pai || cid.no_cid}</span>
@@ -752,17 +777,47 @@ export function AnamnesePage() {
                   </div>
                 )}
               </div>
+            {/* Cards de exemplo — visíveis apenas antes da análise */}
+            {!showResults && (
+              <div className="mt-4">
+                <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+                  Exemplos clínicos
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  {EXEMPLOS.map(ex => (
+                    <button
+                      key={ex.titulo}
+                      onClick={() => setAnamnese(ex.texto)}
+                      className={cn(
+                        'rounded-xl border bg-white p-3 text-left shadow-sm transition hover:shadow',
+                        modoUE
+                          ? 'border-slate-200 hover:border-red-300'
+                          : 'border-slate-200 hover:border-blue-300'
+                      )}
+                    >
+                      <p className="text-xs font-semibold text-slate-700">{ex.titulo}</p>
+                      <p className="mt-0.5 text-[11px] text-slate-400 leading-snug">{ex.subtitulo}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
             </div>
 
             {/* AIH — só aparece após análise */}
             {analyzed && aih && (
               <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                 <div className="mb-3 flex items-center justify-between">
-                  <h2 className="text-sm font-semibold text-slate-700">Texto para AIH</h2>
+                  <div>
+                    <h2 className="text-sm font-semibold text-slate-700">Texto para AIH</h2>
+                    <p className="text-[11px] text-slate-400 mt-0.5">{aih.length} caracteres</p>
+                  </div>
                   <button
                     onClick={handleCopyAih}
-                    className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5
-                               text-xs text-slate-600 transition hover:bg-slate-50"
+                    className={cn(
+                      "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-white transition",
+                      modoUE ? "bg-red-600 hover:bg-red-700" : "bg-blue-600 hover:bg-blue-700"
+                    )}
                   >
                     <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
