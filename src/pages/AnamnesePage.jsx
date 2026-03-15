@@ -58,6 +58,8 @@ const QUALIF_BLOQUEIO = [
   'ONCOLOGICO', 'ONCOLOGICA',
   // Fisioterapia/reabilitação — não pertence a internação aguda
   'FISIOTERAPICO', 'FISIOTERAPICA', 'FISIOTERAPIA', 'FISIOTERAPEUTICO', 'FISIOTERAPEUTICA',
+  // Rotação intestinal — malformação congênita, não pertence a quadros abdominais agudos comuns
+  'ROTACAO',
 ]
 
 // Qualificadores adicionais bloqueados quando o CID é comorbidade (não é o diagnóstico principal).
@@ -134,7 +136,7 @@ function formatCidCode(code) {
   return `${code.slice(0, 3)}.${code.slice(3)}`
 }
 
-const SESSION_V = 7 // incrementar sempre que mudar o formato/filtros dos resultados
+const SESSION_V = 8 // incrementar sempre que mudar o formato/filtros dos resultados
 
 function getSession() {
   try {
