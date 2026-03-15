@@ -136,7 +136,7 @@ function formatCidCode(code) {
   return `${code.slice(0, 3)}.${code.slice(3)}`
 }
 
-const SESSION_V = 9 // incrementar sempre que mudar o formato/filtros dos resultados
+const SESSION_V = 10 // incrementar sempre que mudar o formato/filtros dos resultados
 
 function getSession() {
   try {
