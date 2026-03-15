@@ -45,7 +45,7 @@ Analise o texto clínico abaixo e retorne APENAS JSON válido com três campos:
      • AVC isquêmico → "trombolítico avc isquêmico" e/ou "trombectomia cerebral" (SIGTAP usa "trombolítico", não "trombolise")
      • Hemorragia digestiva → "endoscopia digestiva alta" (sem "terapeutica" — o SIGTAP nomeia por intervenção, não por modalidade)
      • Pneumotórax/derrame → "drenagem torax"
-     • Apendicite → "apendicectomia" e "tratamento cirurgico intestino"
+     • Apendicite → "apendicectomia"
      • Abdome agudo cirúrgico (não apendicite) → "laparotomia exploradora"
      • Fratura → "reducao cirurgica fratura [osso]"
    - Os demais termos devem ser procedimentos DIAGNÓSTICOS ou COMPLEMENTARES específicos ao sistema/órgão (ex: "cateterismo cardiaco", "tomografia cranio", "transfusao concentrado hemacias")
@@ -145,6 +145,7 @@ ${anamnese}`
       { prefix: 'E87', pattern: /desidrat|eletrólito|eletroli|hiponatremi|hipocalemi|hipernatremi/ },
       { prefix: 'R50', pattern: /febre.{0,60}(desconhec|unknown|origem|sem causa)|fuo\b/ }, // R50 só para febre sem diagnóstico etiológico
       { prefix: 'G93', pattern: /encefalopatia|encefalit|encefal\b/               }, // encefalopatia só se mencionada explicitamente
+      { prefix: 'R10', pattern: null },  // dor abdominal — sintoma, não diagnóstico quando há causa etiológica
       { prefix: 'R11', pattern: null },  // náusea/vômito — sintoma, não diagnóstico para AIH
       { prefix: 'R68', pattern: null },  // "outros sinais gerais" — genérico demais, nunca incluir
     ]
