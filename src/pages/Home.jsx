@@ -722,14 +722,12 @@ export function Home() {
               </div>
             )}
 
-            {/* Header / breadcrumb */}
-            <div className={cn(
-              "mb-4 flex items-center justify-between rounded-xl px-4 py-2.5 border transition-colors",
-              selectedGroup
-                ? cn(selectedEstilo?.bg, selectedEstilo?.border)
-                : "bg-white border-slate-200"
-            )}>
-              {selectedGroup ? (
+            {/* Breadcrumb — só aparece quando um grupo está selecionado */}
+            {selectedGroup && (
+              <div className={cn(
+                "mb-4 flex items-center rounded-xl px-4 py-2.5 border transition-colors",
+                cn(selectedEstilo?.bg, selectedEstilo?.border)
+              )}>
                 <nav className="flex items-center gap-1.5 text-sm">
                   <button
                     onClick={() => {
@@ -763,10 +761,8 @@ export function Home() {
                     </>
                   )}
                 </nav>
-              ) : (
-                <h2 className="text-sm font-semibold text-slate-600">Navegar por grupo</h2>
-              )}
-            </div>
+              </div>
+            )}
 
             {/* Painéis */}
             <div className="flex flex-col md:flex-row items-start gap-3">
