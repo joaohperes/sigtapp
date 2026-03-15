@@ -327,12 +327,6 @@ export function Home() {
           <p className={cn("mt-1.5 text-sm", modoUE ? "text-red-200" : "text-blue-200")}>
             Procedimentos, Medicamentos e OPM do SUS · CID-10
           </p>
-          {totalProcedimentos > 0 && (
-            <p className={cn("mt-1 text-xs tabular-nums", modoUE ? "text-red-300/80" : "text-blue-300/80")}>
-              {totalProcedimentos.toLocaleString('pt-BR')} procedimentos disponíveis
-            </p>
-          )}
-
           <div className="mt-6">
             <SearchBar
               onSearch={handleSearch}
@@ -772,9 +766,6 @@ export function Home() {
               ) : (
                 <h2 className="text-sm font-semibold text-slate-600">Navegar por grupo</h2>
               )}
-              <span className={cn("text-xs tabular-nums", selectedGroup ? cn(selectedEstilo?.text, "opacity-70") : "text-slate-400")}>
-                {totalProcedimentos.toLocaleString('pt-BR')} procedimentos
-              </span>
             </div>
 
             {/* Painéis */}
@@ -793,24 +784,16 @@ export function Home() {
                         <button
                           key={g.co_grupo}
                           onClick={() => handleGroupClick(g)}
-                          className="group relative flex flex-col overflow-hidden rounded-xl
-                                     border border-slate-200 bg-white shadow-sm text-left transition
+                          className="group flex items-center gap-3 overflow-hidden rounded-xl
+                                     border border-slate-200 bg-white p-4 shadow-sm text-left transition
                                      hover:shadow-md hover:-translate-y-0.5 active:translate-y-0"
                         >
-                          <div className={`h-1.5 w-full ${estilo.dot}`} />
-                          <div className="flex-1 p-4">
-                            <div className="flex items-center justify-between gap-2">
-                              <span className={`inline-block rounded-full px-2 py-0.5 text-xs font-bold ${estilo.bg} ${estilo.text}`}>
-                                {g.co_grupo}
-                              </span>
-                              <span className="text-[11px] text-slate-400">
-                                {Number(g.qt_procedimentos).toLocaleString('pt-BR')} proc.
-                              </span>
-                            </div>
-                            <p className="mt-2 text-sm font-semibold leading-snug text-slate-800 group-hover:text-slate-900">
-                              {g.no_grupo}
-                            </p>
-                          </div>
+                          <span className={`shrink-0 flex h-8 w-8 items-center justify-center rounded-lg text-sm font-bold ${estilo.bg} ${estilo.text}`}>
+                            {g.co_grupo}
+                          </span>
+                          <p className="text-sm font-semibold leading-snug text-slate-800 group-hover:text-slate-900">
+                            {g.no_grupo}
+                          </p>
                         </button>
                       )
                     })}
@@ -854,13 +837,9 @@ export function Home() {
                   }`}
                 >
                   <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-                    <div className={cn("flex items-center justify-between gap-2 border-b px-4 py-3", selectedEstilo?.bg, selectedEstilo?.border ?? "border-slate-100")}>
-                      <span className={cn("text-xs font-bold", selectedEstilo?.text ?? "text-slate-700")}>
-                        {selectedGroup.no_grupo}
-                      </span>
-                      <span className={cn("text-[10px] tabular-nums opacity-70", selectedEstilo?.text)}>
-                        {subgroups.reduce((s, g) => s + Number(g.qt_procedimentos), 0).toLocaleString('pt-BR')}
-                      </span>
+                    <div className="flex items-center gap-2 border-b border-slate-100 px-4 py-3">
+                      <div className={cn("h-2.5 w-2.5 shrink-0 rounded-sm", selectedEstilo?.dot)} />
+                      <span className="text-xs font-semibold text-slate-700">{selectedGroup.no_grupo}</span>
                     </div>
 
                     {subgroupLoading ? (
@@ -898,10 +877,10 @@ export function Home() {
                       </div>
                     )}
 
-                    <div className={cn("border-t px-4 py-2.5", selectedEstilo?.border ?? "border-slate-100")}>
+                    <div className="border-t border-slate-100 px-4 py-2.5">
                       <Link
                         to={`/grupo/${selectedGroup.co_grupo}`}
-                        className={cn("text-xs font-medium hover:underline", selectedEstilo?.text ?? "text-blue-600")}
+                        className="text-xs font-medium text-blue-600 hover:underline"
                       >
                         Ver todos os procedimentos →
                       </Link>
@@ -917,13 +896,9 @@ export function Home() {
                   className="w-full md:flex-1 animate-slide-right"
                 >
                   <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-                    <div className={cn("flex items-center justify-between gap-2 border-b px-4 py-3", selectedEstilo?.bg, selectedEstilo?.border ?? "border-slate-100")}>
-                      <p className={cn("text-xs font-bold leading-snug", selectedEstilo?.text ?? "text-slate-700")}>
-                        {selectedSubgroup.no_subgrupo}
-                      </p>
-                      <span className={cn("shrink-0 text-[10px] tabular-nums opacity-70", selectedEstilo?.text)}>
-                        {Number(selectedSubgroup.qt_procedimentos).toLocaleString('pt-BR')}
-                      </span>
+                    <div className="flex items-center gap-2 border-b border-slate-100 px-4 py-3">
+                      <div className={cn("h-2.5 w-2.5 shrink-0 rounded-sm", selectedEstilo?.dot)} />
+                      <p className="text-xs font-semibold leading-snug text-slate-700">{selectedSubgroup.no_subgrupo}</p>
                     </div>
 
                     {procsLoading ? (
@@ -966,10 +941,10 @@ export function Home() {
                     )}
 
                     {subgroupProcs.length >= 50 && (
-                      <div className={cn("border-t px-4 py-2.5", selectedEstilo?.border ?? "border-slate-100")}>
+                      <div className="border-t border-slate-100 px-4 py-2.5">
                         <Link
                           to={`/grupo/${selectedGroup.co_grupo}`}
-                          className={cn("text-xs font-medium hover:underline", selectedEstilo?.text ?? "text-blue-600")}
+                          className="text-xs font-medium text-blue-600 hover:underline"
                         >
                           Ver todos os {Number(selectedSubgroup.qt_procedimentos).toLocaleString('pt-BR')} procedimentos →
                         </Link>
