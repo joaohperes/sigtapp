@@ -136,7 +136,7 @@ function formatCidCode(code) {
   return `${code.slice(0, 3)}.${code.slice(3)}`
 }
 
-const SESSION_V = 10 // incrementar sempre que mudar o formato/filtros dos resultados
+const SESSION_V = 11 // incrementar sempre que mudar o formato/filtros dos resultados
 
 function getSession() {
   try {
@@ -257,6 +257,8 @@ export function AnamnesePage() {
       for (const p of (cidResult.data || [])) {
         if (!/^TRATAMENTO\b/i.test(p.no_procedimento || '')) continue
         if (p.no_financiamento?.includes('PAB')) continue
+        // Modo emergência: apenas clínicos (03) e cirúrgicos (04)
+        if (modoUE && !/^0[34]/.test(p.co_procedimento || '')) continue
         const nomeNorm = normalizarTexto(p.no_procedimento || '')
         if (QUALIF_BLOQUEIO.some(q => {
           const qNorm = normalizarTexto(q)
@@ -272,8 +274,8 @@ export function AnamnesePage() {
         for (const p of (buscas[i].data || [])) {
           if (seen.has(p.co_procedimento)) continue
           if (p.no_financiamento?.includes('PAB')) continue
-          // Modo emergência: exclui diagnósticos (grupo 02.xx) de Principais
-          if (modoUE && p.co_procedimento?.startsWith('02')) continue
+          // Modo emergência: apenas clínicos (03) e cirúrgicos (04)
+          if (modoUE && !/^0[34]/.test(p.co_procedimento || '')) continue
           if (!ehRelevante(p.no_procedimento, termo)) continue
           if (temQualifNaoSolicitado(p.no_procedimento, termo)) continue
           seen.add(p.co_procedimento)
