@@ -729,7 +729,12 @@ export function Home() {
             )}
 
             {/* Header / breadcrumb */}
-            <div className="mb-4 flex items-center justify-between">
+            <div className={cn(
+              "mb-4 flex items-center justify-between rounded-xl px-4 py-2.5 border transition-colors",
+              selectedGroup
+                ? cn(selectedEstilo?.bg, selectedEstilo?.border)
+                : "bg-white border-slate-200"
+            )}>
               {selectedGroup ? (
                 <nav className="flex items-center gap-1.5 text-sm">
                   <button
@@ -737,34 +742,37 @@ export function Home() {
                       setSelectedGroup(null); setSelectedSubgroup(null)
                       setSubgroups([]); setSubgroupProcs([])
                     }}
-                    className="text-blue-600 hover:underline"
+                    className={cn("font-medium hover:underline", selectedEstilo?.text ?? "text-blue-600")}
                   >
                     Grupos
                   </button>
-                  <Chevron />
+                  <svg className={cn("h-3.5 w-3.5 opacity-50", selectedEstilo?.text ?? "text-slate-400")} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
                   <button
                     onClick={() => { setSelectedSubgroup(null); setSubgroupProcs([]) }}
-                    className={`font-medium ${
-                      selectedSubgroup
-                        ? 'text-blue-600 hover:underline'
-                        : selectedEstilo?.text ?? 'text-slate-700'
-                    }`}
+                    className={cn(
+                      "font-medium",
+                      selectedSubgroup ? cn(selectedEstilo?.text, "hover:underline") : cn(selectedEstilo?.text, "cursor-default")
+                    )}
                   >
                     {selectedGroup.no_grupo}
                   </button>
                   {selectedSubgroup && (
                     <>
-                      <Chevron />
-                      <span className={`font-medium ${selectedEstilo?.text ?? 'text-slate-700'}`}>
+                      <svg className={cn("h-3.5 w-3.5 opacity-50", selectedEstilo?.text ?? "text-slate-400")} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                      <span className={cn("font-semibold", selectedEstilo?.text ?? "text-slate-700")}>
                         {selectedSubgroup.no_subgrupo}
                       </span>
                     </>
                   )}
                 </nav>
               ) : (
-                <h2 className="text-sm font-semibold text-slate-700">Navegar por grupo</h2>
+                <h2 className="text-sm font-semibold text-slate-600">Navegar por grupo</h2>
               )}
-              <span className="text-xs text-slate-400">
+              <span className={cn("text-xs tabular-nums", selectedGroup ? cn(selectedEstilo?.text, "opacity-70") : "text-slate-400")}>
                 {totalProcedimentos.toLocaleString('pt-BR')} procedimentos
               </span>
             </div>
@@ -817,18 +825,16 @@ export function Home() {
                         <button
                           key={g.co_grupo}
                           onClick={() => handleGroupClick(g)}
-                          className={`relative flex w-full items-center gap-2 overflow-hidden
-                                      border-b border-slate-50 px-3 py-2.5 text-left transition
-                                      last:border-0 ${
-                                        isActive
-                                          ? `${estilo.bg} ${estilo.text} font-medium`
-                                          : 'text-slate-600 hover:bg-slate-50'
-                                      }`}
+                          className={cn(
+                            "relative flex w-full items-center gap-2.5 overflow-hidden border-b border-slate-50 px-3 py-2.5 text-left transition last:border-0",
+                            isActive ? cn(estilo.bg, estilo.text, "font-medium") : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"
+                          )}
                         >
-                          <div className={`absolute left-0 top-0 h-full w-0.5 ${isActive ? estilo.dot : 'bg-transparent'}`} />
-                          <span className={`ml-0.5 shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-bold ${
-                            isActive ? estilo.text : 'text-slate-400'
-                          }`}>
+                          <div className={cn("absolute left-0 top-0 h-full w-[3px]", isActive ? estilo.dot : "bg-slate-100")} />
+                          <span className={cn(
+                            "ml-1 flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded text-[10px] font-bold",
+                            isActive ? cn(estilo.dot, "text-white") : "bg-slate-100 text-slate-400"
+                          )}>
                             {g.co_grupo}
                           </span>
                           <span className="text-xs leading-snug">{estilo.no}</span>
@@ -848,10 +854,13 @@ export function Home() {
                   }`}
                 >
                   <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-                    <div className={`border-b border-slate-100 px-4 py-3 ${selectedEstilo?.bg ?? ''}`}>
-                      <p className={`text-xs font-semibold leading-snug ${selectedEstilo?.text ?? 'text-slate-700'}`}>
+                    <div className={cn("flex items-center justify-between gap-2 border-b px-4 py-3", selectedEstilo?.bg, selectedEstilo?.border ?? "border-slate-100")}>
+                      <span className={cn("text-xs font-bold", selectedEstilo?.text ?? "text-slate-700")}>
                         {selectedGroup.no_grupo}
-                      </p>
+                      </span>
+                      <span className={cn("text-[10px] tabular-nums opacity-70", selectedEstilo?.text)}>
+                        {subgroups.reduce((s, g) => s + Number(g.qt_procedimentos), 0).toLocaleString('pt-BR')}
+                      </span>
                     </div>
 
                     {subgroupLoading ? (
@@ -866,15 +875,21 @@ export function Home() {
                             <button
                               key={s.co_subgrupo}
                               onClick={() => handleSubgroupClick(s)}
-                              className={`flex w-full items-center justify-between gap-3 px-4 py-3
-                                          text-left transition ${
-                                            isActive
-                                              ? `${selectedEstilo?.bg ?? 'bg-blue-50'} ${selectedEstilo?.text ?? 'text-blue-700'} font-medium`
-                                              : 'text-slate-700 hover:bg-slate-50'
-                                          }`}
+                              className={cn(
+                                "relative flex w-full items-center justify-between gap-3 overflow-hidden px-4 py-3 text-left transition",
+                                isActive
+                                  ? cn(selectedEstilo?.bg ?? "bg-blue-50", selectedEstilo?.text ?? "text-blue-700", "font-medium")
+                                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-800"
+                              )}
                             >
-                              <span className="flex-1 text-sm leading-snug">{s.no_subgrupo}</span>
-                              <span className="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-500">
+                              <div className={cn("absolute left-0 top-0 h-full w-[3px]", isActive ? selectedEstilo?.dot : "bg-transparent")} />
+                              <span className="flex-1 pl-1 text-sm leading-snug">{s.no_subgrupo}</span>
+                              <span className={cn(
+                                "shrink-0 rounded-full px-2 py-0.5 text-xs tabular-nums",
+                                isActive
+                                  ? cn("font-semibold", selectedEstilo?.bg, selectedEstilo?.text)
+                                  : "bg-slate-100 text-slate-400"
+                              )}>
                                 {Number(s.qt_procedimentos).toLocaleString('pt-BR')}
                               </span>
                             </button>
@@ -883,10 +898,10 @@ export function Home() {
                       </div>
                     )}
 
-                    <div className="border-t border-slate-100 px-4 py-2.5">
+                    <div className={cn("border-t px-4 py-2.5", selectedEstilo?.border ?? "border-slate-100")}>
                       <Link
                         to={`/grupo/${selectedGroup.co_grupo}`}
-                        className="text-xs text-blue-600 hover:underline"
+                        className={cn("text-xs font-medium hover:underline", selectedEstilo?.text ?? "text-blue-600")}
                       >
                         Ver todos os procedimentos →
                       </Link>
@@ -902,11 +917,13 @@ export function Home() {
                   className="w-full md:flex-1 animate-slide-right"
                 >
                   <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-                    <div className="border-b border-slate-100 px-4 py-3">
-                      <p className="text-xs font-semibold text-slate-700">{selectedSubgroup.no_subgrupo}</p>
-                      <p className="mt-0.5 text-xs text-slate-400">
-                        {Number(selectedSubgroup.qt_procedimentos).toLocaleString('pt-BR')} procedimentos
+                    <div className={cn("flex items-center justify-between gap-2 border-b px-4 py-3", selectedEstilo?.bg, selectedEstilo?.border ?? "border-slate-100")}>
+                      <p className={cn("text-xs font-bold leading-snug", selectedEstilo?.text ?? "text-slate-700")}>
+                        {selectedSubgroup.no_subgrupo}
                       </p>
+                      <span className={cn("shrink-0 text-[10px] tabular-nums opacity-70", selectedEstilo?.text)}>
+                        {Number(selectedSubgroup.qt_procedimentos).toLocaleString('pt-BR')}
+                      </span>
                     </div>
 
                     {procsLoading ? (
@@ -927,15 +944,16 @@ export function Home() {
                             <button
                               key={p.co_procedimento}
                               onClick={() => setSheetProc(p)}
-                              className="flex w-full items-start gap-3 px-4 py-3 hover:bg-slate-50 transition text-left"
+                              className="group relative flex w-full items-center gap-3 overflow-hidden px-4 py-3 text-left transition hover:bg-slate-50"
                             >
-                              <span className="mt-px shrink-0 font-mono text-[11px] text-slate-400">
-                                {p.co_procedimento}
-                              </span>
-                              <span className="flex-1 text-sm text-slate-800 leading-snug">
-                                {p.no_procedimento}
-                              </span>
-                              <svg className="mt-0.5 h-4 w-4 shrink-0 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <div className={cn("absolute left-0 top-0 h-full w-[3px]", selectedEstilo?.dot ?? "bg-slate-200")} />
+                              <div className="min-w-0 flex-1 pl-1">
+                                <p className="font-mono text-[10px] text-slate-400">{formatCodigo(p.co_procedimento)}</p>
+                                <p className="mt-0.5 text-sm leading-snug text-slate-700 group-hover:text-slate-900">
+                                  {p.no_procedimento}
+                                </p>
+                              </div>
+                              <svg className="h-3.5 w-3.5 shrink-0 text-slate-200 transition group-hover:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                               </svg>
                             </button>
@@ -948,10 +966,10 @@ export function Home() {
                     )}
 
                     {subgroupProcs.length >= 50 && (
-                      <div className="border-t border-slate-100 px-4 py-2.5">
+                      <div className={cn("border-t px-4 py-2.5", selectedEstilo?.border ?? "border-slate-100")}>
                         <Link
                           to={`/grupo/${selectedGroup.co_grupo}`}
-                          className="text-xs text-blue-600 hover:underline"
+                          className={cn("text-xs font-medium hover:underline", selectedEstilo?.text ?? "text-blue-600")}
                         >
                           Ver todos os {Number(selectedSubgroup.qt_procedimentos).toLocaleString('pt-BR')} procedimentos →
                         </Link>
