@@ -159,6 +159,18 @@ export function AnamnesePage() {
   })
   const [cidSiblings, setCidSiblings] = useState({}) // { [co_cid_pai]: { loading, data, open } }
 
+  function handleNova() {
+    setAnamnese('')
+    setCids([])
+    setProcedimentos([])
+    setAih('')
+    setAnalyzed(false)
+    setCidProcs({})
+    setCidSiblings({})
+    setError(null)
+    sessionStorage.removeItem('aih-session')
+  }
+
   useEffect(() => {
     if (analyzed) {
       const cidProcsData = Object.fromEntries(Object.entries(cidProcs).map(([k, v]) => [k, v.data || []]))
@@ -650,11 +662,29 @@ export function AnamnesePage() {
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
       <div className={modoUE ? "bg-gradient-to-br from-red-900 via-red-800 to-red-700" : "bg-gradient-to-br from-blue-800 via-blue-700 to-blue-600"}>
-        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6">
-          <h1 className="text-lg font-bold text-white sm:text-xl">Análise de Anamnese</h1>
-          <p className={cn("mt-0.5 text-sm", modoUE ? "text-red-200" : "text-blue-200")}>
-            Cole o texto clínico e a IA identificará CIDs, procedimentos SIGTAP e gerará o texto para AIH
-          </p>
+        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 flex items-center justify-between gap-4">
+          <div>
+            <h1 className="text-lg font-bold text-white sm:text-xl">Análise de Anamnese</h1>
+            <p className={cn("mt-0.5 text-sm", modoUE ? "text-red-200" : "text-blue-200")}>
+              Cole o texto clínico e a IA identificará CIDs, procedimentos SIGTAP e gerará o texto para AIH
+            </p>
+          </div>
+          {showResults && (
+            <button
+              onClick={handleNova}
+              className={cn(
+                "shrink-0 flex items-center gap-1.5 rounded-full border px-4 py-1.5 text-xs font-medium transition",
+                modoUE
+                  ? "border-red-300/50 bg-red-900/30 text-red-100 hover:bg-red-900/50"
+                  : "border-white/30 bg-white/15 text-white hover:bg-white/25"
+              )}
+            >
+              <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              Nova análise
+            </button>
+          )}
         </div>
       </div>
 
