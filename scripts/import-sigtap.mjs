@@ -138,9 +138,12 @@ const rows = readFixed(path.join(dadosDir, 'tb_procedimento.txt'))
     const co_forma_org = co.slice(0, 6) // chave composta grupo+subgrupo+forma
     const co_fin       = line.slice(318, 320).trim()
 
+    const qtDias = parseInt(line.slice(266, 270).trim(), 10)
+
     return {
       co_procedimento:  co,
       no_procedimento:  line.slice(10, 260).trim(),
+      qt_dias_perman:   isNaN(qtDias) ? 0 : qtDias,
       vl_sh:            parseCents(line.slice(282, 294)),
       vl_sa:            parseCents(line.slice(294, 306)),
       vl_sp:            parseCents(line.slice(306, 318)),

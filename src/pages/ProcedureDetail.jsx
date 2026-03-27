@@ -147,6 +147,17 @@ export function ProcedureDetail() {
             <ValueCard label="Hospitalar (SH)" value={data.vl_sh} />
             <ValueCard label="Profissional (SP)" value={data.vl_sp} />
             <ValueCard label="Total SUS" value={total} highlight />
+            {data.qt_dias_perman > 0 && (
+              <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 shadow-sm">
+                <p className="text-xs text-blue-600">Permanência mínima (AIH)</p>
+                <p className="mt-1 text-lg font-bold tabular-nums text-blue-800">
+                  {data.qt_dias_perman} {data.qt_dias_perman === 1 ? 'dia' : 'dias'}
+                </p>
+                <p className="mt-1 text-xs text-blue-500">
+                  Pagamento a partir de {data.qt_dias_perman + 1} dias
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Coluna central — Classificação + Descrição */}
