@@ -292,29 +292,7 @@ export function ProcedureDetail() {
           )}
 
           {compatibilidades.length > 0 && (
-            <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-              <div className="mb-3 flex items-center justify-between">
-                <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  Pode cobrar junto com
-                </h2>
-                <span className="text-xs text-slate-400">{compatibilidades.length}</span>
-              </div>
-              <div className="divide-y divide-slate-100 rounded-lg border border-slate-100">
-                {compatibilidades.map((c) => (
-                  <Link
-                    key={c.co_procedimento_compativel}
-                    to={`/procedimento/${c.co_procedimento_compativel}`}
-                    className="flex items-baseline gap-3 px-3 py-2 hover:bg-slate-50 transition"
-                  >
-                    <span className="shrink-0 font-mono text-xs font-semibold text-blue-600">{formatCodigo(c.co_procedimento_compativel)}</span>
-                    <span className="flex-1 text-sm text-slate-700">{toSentenceCase(c.no_procedimento_compativel)}</span>
-                    {c.qt_permitida > 0 && (
-                      <span className="shrink-0 text-xs text-slate-400">máx {c.qt_permitida}x</span>
-                    )}
-                  </Link>
-                ))}
-              </div>
-            </div>
+            <CompatCard compatibilidades={compatibilidades} />
           )}
 
             </div>
@@ -361,6 +339,50 @@ function Row({ label, value }) {
     <div className="flex flex-col gap-0.5 text-sm sm:flex-row sm:gap-2">
       <dt className="shrink-0 text-slate-400 sm:w-44">{label}</dt>
       <dd className="text-slate-700">{value}</dd>
+    </div>
+  )
+}
+
+function CompatCard({ compatibilidades }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="flex w-full items-center justify-between p-5 text-left"
+      >
+        <div className="flex items-center gap-2">
+          <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            Pode cobrar junto com
+          </h2>
+          <span className="text-xs text-slate-400">{compatibilidades.length}</span>
+        </div>
+        <svg
+          className={`h-4 w-4 text-slate-400 transition-transform ${open ? 'rotate-180' : ''}`}
+          fill="none" stroke="currentColor" viewBox="0 0 24 24"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      {open && (
+        <div className="border-t border-slate-100">
+          <div className="divide-y divide-slate-100 max-h-[60vh] overflow-y-auto">
+            {compatibilidades.map((c) => (
+              <Link
+                key={c.co_procedimento_compativel}
+                to={`/procedimento/${c.co_procedimento_compativel}`}
+                className="flex items-baseline gap-3 px-5 py-2.5 hover:bg-slate-50 transition"
+              >
+                <span className="shrink-0 font-mono text-xs font-semibold text-blue-600">{formatCodigo(c.co_procedimento_compativel)}</span>
+                <span className="flex-1 text-sm text-slate-700">{toSentenceCase(c.no_procedimento_compativel)}</span>
+                {c.qt_permitida > 0 && (
+                  <span className="shrink-0 text-xs text-slate-400">máx {c.qt_permitida}x</span>
+                )}
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

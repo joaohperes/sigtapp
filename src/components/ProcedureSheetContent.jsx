@@ -168,24 +168,7 @@ export function ProcedureSheetContent({ procedure }) {
       )}
 
       {compatibilidades.length > 0 && (
-        <div>
-          <p className="mb-2 text-xs font-medium text-slate-400">Pode cobrar junto com</p>
-          <div className="divide-y divide-slate-100 rounded-lg border border-slate-100">
-            {compatibilidades.map((c) => (
-              <Link
-                key={c.co_procedimento_compativel}
-                to={`/procedimento/${c.co_procedimento_compativel}`}
-                className="flex items-baseline gap-2 px-3 py-2 hover:bg-slate-50 transition"
-              >
-                <span className="shrink-0 font-mono text-xs font-semibold text-blue-600">{formatCodigo(c.co_procedimento_compativel)}</span>
-                <span className="flex-1 text-sm text-slate-600">{toSentenceCase(c.no_procedimento_compativel)}</span>
-                {c.qt_permitida > 0 && (
-                  <span className="shrink-0 text-xs text-slate-400">máx {c.qt_permitida}x</span>
-                )}
-              </Link>
-            ))}
-          </div>
-        </div>
+        <CompatSection compatibilidades={compatibilidades} />
       )}
 
       <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
@@ -231,6 +214,43 @@ export function ProcedureSheetContent({ procedure }) {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
         </svg>
       </Link>
+    </div>
+  )
+}
+
+function CompatSection({ compatibilidades }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div>
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="flex w-full items-center justify-between text-xs font-medium text-slate-400 hover:text-slate-600 transition mb-2"
+      >
+        <span>Pode cobrar junto com ({compatibilidades.length})</span>
+        <svg
+          className={`h-3.5 w-3.5 transition-transform ${open ? 'rotate-180' : ''}`}
+          fill="none" stroke="currentColor" viewBox="0 0 24 24"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      {open && (
+        <div className="divide-y divide-slate-100 rounded-lg border border-slate-100">
+          {compatibilidades.map((c) => (
+            <Link
+              key={c.co_procedimento_compativel}
+              to={`/procedimento/${c.co_procedimento_compativel}`}
+              className="flex items-baseline gap-2 px-3 py-2 hover:bg-slate-50 transition"
+            >
+              <span className="shrink-0 font-mono text-xs font-semibold text-blue-600">{formatCodigo(c.co_procedimento_compativel)}</span>
+              <span className="flex-1 text-sm text-slate-600">{toSentenceCase(c.no_procedimento_compativel)}</span>
+              {c.qt_permitida > 0 && (
+                <span className="shrink-0 text-xs text-slate-400">máx {c.qt_permitida}x</span>
+              )}
+            </Link>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
