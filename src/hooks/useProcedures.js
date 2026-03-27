@@ -31,7 +31,7 @@ export function useProcedures() {
       setSearchMeta({ type: 'code' })
       ;({ data, error: err } = await supabase
         .from('procedimentos')
-        .select('co_procedimento, no_procedimento, vl_sa, vl_sh, vl_sp, tp_financiamento, no_financiamento, ds_procedimento')
+        .select('co_procedimento, no_procedimento, vl_sa, vl_sh, vl_sp, tp_financiamento, no_financiamento, ds_procedimento, qt_dias_perman')
         .ilike('co_procedimento', `${q}%`)
         .limit(200))
     } else if (isCid) {

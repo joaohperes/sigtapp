@@ -31,22 +31,26 @@ export function ProcedureSheetContent({ procedure }) {
   const { isFavorito, toggleFavorito } = useFavoritos()
   const fav = isFavorito(co_procedimento)
 
-  const [descricao, setDescricao] = useState(() => descCache.get(co_procedimento) ?? null)
+  const [descricao, setDescricao] = useState(() => descCache.get(co_procedimento)?.desc ?? null)
+  const [diasPerman, setDiasPerman] = useState(() => descCache.get(co_procedimento)?.dias ?? null)
   const [descLoading, setDescLoading] = useState(!descCache.has(co_procedimento))
 
   useEffect(() => {
     if (descCache.has(co_procedimento)) return
     setDescricao(null)
+    setDiasPerman(null)
     setDescLoading(true)
     supabase
       .from('procedimentos')
-      .select('ds_procedimento')
+      .select('ds_procedimento, qt_dias_perman')
       .eq('co_procedimento', co_procedimento)
       .single()
       .then(({ data }) => {
         const desc = data?.ds_procedimento || null
-        descCache.set(co_procedimento, desc)
+        const dias = data?.qt_dias_perman || 0
+        descCache.set(co_procedimento, { desc, dias })
         setDescricao(desc)
+        setDiasPerman(dias)
         setDescLoading(false)
       })
   }, [co_procedimento])
@@ -118,6 +122,19 @@ export function ProcedureSheetContent({ procedure }) {
             <span className="tabular-nums text-base font-bold text-emerald-600">{formatBRL(total)}</span>
           </div>
         </div>
+        {diasPerman > 0 && (
+          <div className="mt-3 border-t border-slate-200 pt-3">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-slate-500">Permanência mínima (AIH)</span>
+              <span className="tabular-nums text-sm font-semibold text-blue-700">
+                {diasPerman} {diasPerman === 1 ? 'dia' : 'dias'}
+              </span>
+            </div>
+            <p className="mt-0.5 text-right text-xs text-slate-400">
+              Pagamento a partir de {diasPerman + 1} dias
+            </p>
+          </div>
+        )}
       </div>
 
       <Link

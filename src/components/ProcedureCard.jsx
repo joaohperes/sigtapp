@@ -21,7 +21,7 @@ function StarIcon({ filled }) {
   )
 }
 
-function PriceTooltip({ total, vl_sa, vl_sh, vl_sp, children }) {
+function PriceTooltip({ total, vl_sa, vl_sh, vl_sp, qt_dias_perman, children }) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>{children}</TooltipTrigger>
@@ -45,13 +45,22 @@ function PriceTooltip({ total, vl_sa, vl_sh, vl_sp, children }) {
           <span className="font-semibold text-white">Total</span>
           <span className="tabular-nums font-semibold text-emerald-400">{formatBRL(total)}</span>
         </div>
+        {qt_dias_perman > 0 && (
+          <div className="border-t border-slate-700 pt-1 mt-1 space-y-0.5">
+            <div className="flex justify-between gap-4">
+              <span className="text-slate-400">Permanência mín.</span>
+              <span className="tabular-nums text-blue-300">{qt_dias_perman} {qt_dias_perman === 1 ? 'dia' : 'dias'}</span>
+            </div>
+            <p className="text-slate-500 text-right">Paga a partir de {qt_dias_perman + 1} dias</p>
+          </div>
+        )}
       </TooltipContent>
     </Tooltip>
   )
 }
 
 export function ProcedureCard({ procedure, onSelect, compareMode, compareSelected, onToggleCompare }) {
-  const { co_procedimento, no_procedimento, vl_sa, vl_sh, vl_sp, no_financiamento } = procedure
+  const { co_procedimento, no_procedimento, vl_sa, vl_sh, vl_sp, no_financiamento, qt_dias_perman } = procedure
   const total = (vl_sa || 0) + (vl_sh || 0) + (vl_sp || 0)
   const estilo = GRUPO_MAP[co_procedimento?.slice(0, 2)]
   const { isFavorito, toggleFavorito } = useFavoritos()
@@ -97,7 +106,7 @@ export function ProcedureCard({ procedure, onSelect, compareMode, compareSelecte
                 <StarIcon filled={fav} />
               </button>
             )}
-            <PriceTooltip total={total} vl_sa={vl_sa} vl_sh={vl_sh} vl_sp={vl_sp}>
+            <PriceTooltip total={total} vl_sa={vl_sa} vl_sh={vl_sh} vl_sp={vl_sp} qt_dias_perman={qt_dias_perman}>
               <div className="text-right cursor-default">
                 <p className="text-xs text-slate-400">Total SUS</p>
                 <p className="text-base font-bold text-emerald-600">{formatBRL(total)}</p>
@@ -186,7 +195,7 @@ function ValueCell({ label, value }) {
 }
 
 export function ProcedureRow({ procedure, onSelect, compareMode, compareSelected, onToggleCompare }) {
-  const { co_procedimento, no_procedimento, vl_sa, vl_sh, vl_sp, no_financiamento } = procedure
+  const { co_procedimento, no_procedimento, vl_sa, vl_sh, vl_sp, no_financiamento, qt_dias_perman } = procedure
   const total = (vl_sa || 0) + (vl_sh || 0) + (vl_sp || 0)
   const estilo = GRUPO_MAP[co_procedimento?.slice(0, 2)]
   const { isFavorito, toggleFavorito } = useFavoritos()
@@ -254,7 +263,7 @@ export function ProcedureRow({ procedure, onSelect, compareMode, compareSelected
         >
           <StarIcon filled={fav} />
         </button>
-        <PriceTooltip total={total} vl_sa={vl_sa} vl_sh={vl_sh} vl_sp={vl_sp}>
+        <PriceTooltip total={total} vl_sa={vl_sa} vl_sh={vl_sh} vl_sp={vl_sp} qt_dias_perman={qt_dias_perman}>
           <div className="shrink-0 text-right cursor-default">
             <p className="text-xs text-slate-400">Total SUS</p>
             <p className="text-sm font-bold text-emerald-600">{formatBRL(total)}</p>
