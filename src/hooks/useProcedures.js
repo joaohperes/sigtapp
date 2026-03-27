@@ -8,7 +8,9 @@ export function useProcedures() {
   const [searchMeta, setSearchMeta] = useState(null)
 
   const search = useCallback(async (query, mode = null) => {
-    const q = query?.trim() ?? ''
+    const raw = query?.trim() ?? ''
+    // Remove pontos e hífens para detectar e buscar por código formatado (ex: 04.07.02.003-9)
+    const q = raw.replace(/[.\-]/g, '')
 
     const isNumeric = /^\d+$/.test(q)
     const isCode = (mode === 'codigo' && isNumeric) || (!mode && isNumeric)
