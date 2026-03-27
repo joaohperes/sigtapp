@@ -34,6 +34,8 @@ export function ProcedureSheetContent({ procedure }) {
 
   const [descricao, setDescricao] = useState(() => descCache.get(co_procedimento)?.desc ?? null)
   const [diasPerman, setDiasPerman] = useState(() => descCache.get(co_procedimento)?.dias ?? null)
+  const [inSia, setInSia] = useState(() => descCache.get(co_procedimento)?.sia ?? false)
+  const [inSih, setInSih] = useState(() => descCache.get(co_procedimento)?.sih ?? false)
   const [descLoading, setDescLoading] = useState(!descCache.has(co_procedimento))
 
   useEffect(() => {
@@ -43,15 +45,19 @@ export function ProcedureSheetContent({ procedure }) {
     setDescLoading(true)
     supabase
       .from('procedimentos')
-      .select('ds_procedimento, qt_dias_perman')
+      .select('ds_procedimento, qt_dias_perman, in_sia, in_sih')
       .eq('co_procedimento', co_procedimento)
       .single()
       .then(({ data }) => {
         const desc = data?.ds_procedimento || null
         const dias = data?.qt_dias_perman || 0
-        descCache.set(co_procedimento, { desc, dias })
+        const sia  = data?.in_sia || false
+        const sih  = data?.in_sih || false
+        descCache.set(co_procedimento, { desc, dias, sia, sih })
         setDescricao(desc)
         setDiasPerman(dias)
+        setInSia(sia)
+        setInSih(sih)
         setDescLoading(false)
       })
   }, [co_procedimento])
@@ -100,6 +106,17 @@ export function ProcedureSheetContent({ procedure }) {
       {estilo && (
         <div className={cn('rounded-lg px-3 py-2 text-xs font-medium', estilo.bg, estilo.text)}>
           {estilo.no}
+        </div>
+      )}
+
+      {(inSia || inSih) && (
+        <div className="flex gap-1.5">
+          {inSia && (
+            <span className="rounded-full bg-violet-100 px-2.5 py-1 text-xs font-medium text-violet-700">SIA</span>
+          )}
+          {inSih && (
+            <span className="rounded-full bg-orange-100 px-2.5 py-1 text-xs font-medium text-orange-700">SIH</span>
+          )}
         </div>
       )}
 

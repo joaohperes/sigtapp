@@ -194,6 +194,15 @@ export function ProcedureDetail() {
                   {data.no_financiamento && (
                     <Row label="Financiamento" value={`${data.tp_financiamento} — ${data.no_financiamento}`} />
                   )}
+                  {(data.in_sia || data.in_sih) && (
+                    <div className="flex flex-col gap-0.5 text-sm sm:flex-row sm:gap-2">
+                      <dt className="shrink-0 text-slate-400 sm:w-44">Sistema</dt>
+                      <dd className="flex gap-1.5">
+                        {data.in_sia && <span className="rounded-full bg-violet-100 px-2 py-0.5 text-xs font-medium text-violet-700">SIA</span>}
+                        {data.in_sih && <span className="rounded-full bg-orange-100 px-2 py-0.5 text-xs font-medium text-orange-700">SIH</span>}
+                      </dd>
+                    </div>
+                  )}
                 </dl>
               </div>
             )}
