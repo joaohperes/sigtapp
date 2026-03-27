@@ -67,7 +67,7 @@ function PriceTooltip({ total, vl_sa, vl_sh, vl_sp, qt_dias_perman, children }) 
           <span className="font-semibold text-white">Total</span>
           <span className="tabular-nums font-semibold text-emerald-400">{formatBRL(total)}</span>
         </div>
-        {qt_dias_perman > 0 && (
+        {qt_dias_perman > 0 && qt_dias_perman < 9999 && (
           <div className="border-t border-slate-700 pt-1 mt-1 space-y-0.5">
             <div className="flex justify-between gap-4">
               <span className="text-slate-400">Permanência mín.</span>

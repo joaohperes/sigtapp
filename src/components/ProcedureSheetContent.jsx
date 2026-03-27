@@ -136,7 +136,7 @@ export function ProcedureSheetContent({ procedure }) {
             <span className="tabular-nums text-base font-bold text-emerald-600">{formatBRL(total)}</span>
           </div>
         </div>
-        {diasPerman > 0 && (
+        {diasPerman > 0 && diasPerman < 9999 && (
           <div className="mt-3 border-t border-slate-200 pt-3">
             <div className="flex items-center justify-between">
               <span className="text-sm text-slate-500">Permanência mínima (AIH)</span>
