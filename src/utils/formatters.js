@@ -36,7 +36,10 @@ export function formatCodigo(codigo) {
   return `${codigo.slice(0, 2)}.${codigo.slice(2, 4)}.${codigo.slice(4, 6)}.${codigo.slice(6, 9)}-${codigo.slice(9)}`
 }
 
+const SIGLAS = /\b(SUS|AIH|SIA|SIH|UTI|UPA|OPM|BPA|CID|SADT|MAC|FAEC|RPA|CTI|UCI|UDI|pH|HIV|HPV|TB|PCR)\b/gi
+
 export function toSentenceCase(str) {
   if (!str) return str
-  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()
+  const sentence = str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()
+  return sentence.replace(SIGLAS, (match) => match.toUpperCase())
 }
