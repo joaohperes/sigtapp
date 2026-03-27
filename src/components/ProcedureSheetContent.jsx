@@ -37,6 +37,7 @@ export function ProcedureSheetContent({ procedure }) {
   const [inSia, setInSia] = useState(() => descCache.get(co_procedimento)?.sia ?? false)
   const [inSih, setInSih] = useState(() => descCache.get(co_procedimento)?.sih ?? false)
   const [habilitacoes, setHabilitacoes] = useState(() => descCache.get(co_procedimento)?.hab ?? [])
+  const [compatibilidades, setCompatibilidades] = useState(() => descCache.get(co_procedimento)?.compat ?? [])
   const [descLoading, setDescLoading] = useState(!descCache.has(co_procedimento))
 
   useEffect(() => {
@@ -56,18 +57,25 @@ export function ProcedureSheetContent({ procedure }) {
         .select('co_habilitacao, no_habilitacao')
         .eq('co_procedimento', co_procedimento)
         .order('co_habilitacao'),
-    ]).then(([{ data }, { data: habData }]) => {
-        const desc = data?.ds_procedimento || null
-        const dias = data?.qt_dias_perman || 0
-        const sia  = data?.in_sia || false
-        const sih  = data?.in_sih || false
-        const hab  = habData ?? []
-        descCache.set(co_procedimento, { desc, dias, sia, sih, hab })
+      supabase
+        .from('procedimento_compatibilidades')
+        .select('co_procedimento_compativel, no_procedimento_compativel, qt_permitida')
+        .eq('co_procedimento', co_procedimento)
+        .order('no_procedimento_compativel'),
+    ]).then(([{ data }, { data: habData }, { data: compatData }]) => {
+        const desc  = data?.ds_procedimento || null
+        const dias  = data?.qt_dias_perman || 0
+        const sia   = data?.in_sia || false
+        const sih   = data?.in_sih || false
+        const hab   = habData ?? []
+        const compat = compatData ?? []
+        descCache.set(co_procedimento, { desc, dias, sia, sih, hab, compat })
         setDescricao(desc)
         setDiasPerman(dias)
         setInSia(sia)
         setInSih(sih)
         setHabilitacoes(hab)
+        setCompatibilidades(compat)
         setDescLoading(false)
       })
   }, [co_procedimento])
@@ -154,6 +162,27 @@ export function ProcedureSheetContent({ procedure }) {
                 <span className="shrink-0 font-mono text-xs font-semibold text-teal-600">{h.co_habilitacao}</span>
                 <span className="text-sm text-slate-600">{toSentenceCase(h.no_habilitacao)}</span>
               </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {compatibilidades.length > 0 && (
+        <div>
+          <p className="mb-2 text-xs font-medium text-slate-400">Pode cobrar junto com</p>
+          <div className="divide-y divide-slate-100 rounded-lg border border-slate-100">
+            {compatibilidades.map((c) => (
+              <Link
+                key={c.co_procedimento_compativel}
+                to={`/procedimento/${c.co_procedimento_compativel}`}
+                className="flex items-baseline gap-2 px-3 py-2 hover:bg-slate-50 transition"
+              >
+                <span className="shrink-0 font-mono text-xs font-semibold text-blue-600">{formatCodigo(c.co_procedimento_compativel)}</span>
+                <span className="flex-1 text-sm text-slate-600">{toSentenceCase(c.no_procedimento_compativel)}</span>
+                {c.qt_permitida > 0 && (
+                  <span className="shrink-0 text-xs text-slate-400">máx {c.qt_permitida}x</span>
+                )}
+              </Link>
             ))}
           </div>
         </div>

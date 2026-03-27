@@ -14,6 +14,7 @@ export function ProcedureDetail() {
   const [data, setData] = useState(null)
   const [cids, setCids] = useState([])
   const [habilitacoes, setHabilitacoes] = useState([])
+  const [compatibilidades, setCompatibilidades] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
@@ -37,11 +38,17 @@ export function ProcedureDetail() {
         .select('co_habilitacao, no_habilitacao')
         .eq('co_procedimento', codigo)
         .order('co_habilitacao'),
-    ]).then(([{ data: row, error: err }, { data: cidData }, { data: habData }]) => {
+      supabase
+        .from('procedimento_compatibilidades')
+        .select('co_procedimento_compativel, no_procedimento_compativel, qt_permitida')
+        .eq('co_procedimento', codigo)
+        .order('no_procedimento_compativel'),
+    ]).then(([{ data: row, error: err }, { data: cidData }, { data: habData }, { data: compatData }]) => {
       if (err) setError(err.message)
       else setData(row)
       setCids(cidData ?? [])
       setHabilitacoes(habData ?? [])
+      setCompatibilidades(compatData ?? [])
       setLoading(false)
     })
   }, [codigo])
@@ -279,6 +286,32 @@ export function ProcedureDetail() {
                     <span className="shrink-0 font-mono text-xs font-semibold text-teal-600">{h.co_habilitacao}</span>
                     <span className="text-sm text-slate-700">{toSentenceCase(h.no_habilitacao)}</span>
                   </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {compatibilidades.length > 0 && (
+            <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+              <div className="mb-3 flex items-center justify-between">
+                <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  Pode cobrar junto com
+                </h2>
+                <span className="text-xs text-slate-400">{compatibilidades.length}</span>
+              </div>
+              <div className="divide-y divide-slate-100 rounded-lg border border-slate-100">
+                {compatibilidades.map((c) => (
+                  <Link
+                    key={c.co_procedimento_compativel}
+                    to={`/procedimento/${c.co_procedimento_compativel}`}
+                    className="flex items-baseline gap-3 px-3 py-2 hover:bg-slate-50 transition"
+                  >
+                    <span className="shrink-0 font-mono text-xs font-semibold text-blue-600">{formatCodigo(c.co_procedimento_compativel)}</span>
+                    <span className="flex-1 text-sm text-slate-700">{toSentenceCase(c.no_procedimento_compativel)}</span>
+                    {c.qt_permitida > 0 && (
+                      <span className="shrink-0 text-xs text-slate-400">máx {c.qt_permitida}x</span>
+                    )}
+                  </Link>
                 ))}
               </div>
             </div>
