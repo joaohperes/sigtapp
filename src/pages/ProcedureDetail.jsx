@@ -7,6 +7,7 @@ import { GRUPO_MAP } from '../data/grupos'
 import { useFavoritos } from '../contexts/FavoritosContext'
 import { useModoUE } from '../contexts/ModoUEContext'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
 
 export function ProcedureDetail() {
@@ -212,8 +213,30 @@ export function ProcedureDetail() {
                     <div className="flex flex-col gap-0.5 text-sm sm:flex-row sm:gap-2">
                       <dt className="shrink-0 text-slate-400 sm:w-44">Sistema</dt>
                       <dd className="flex gap-1.5">
-                        {data.in_sia && <span className="rounded-full bg-violet-100 px-2 py-0.5 text-xs font-medium text-violet-700">SIA</span>}
-                        {data.in_sih && <span className="rounded-full bg-orange-100 px-2 py-0.5 text-xs font-medium text-orange-700">SIH</span>}
+                        {data.in_sia && (
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span className="cursor-default rounded-full bg-violet-100 px-2 py-0.5 text-xs font-medium text-violet-700">SIA</span>
+                              </TooltipTrigger>
+                              <TooltipContent className="max-w-[200px] text-xs">
+                                Sistema de Informações Ambulatoriais — procedimento cobrado via BPA (ambulatório)
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        )}
+                        {data.in_sih && (
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span className="cursor-default rounded-full bg-orange-100 px-2 py-0.5 text-xs font-medium text-orange-700">SIH</span>
+                              </TooltipTrigger>
+                              <TooltipContent className="max-w-[200px] text-xs">
+                                Sistema de Informações Hospitalares — procedimento cobrado via AIH (internação)
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        )}
                       </dd>
                     </div>
                   )}

@@ -131,10 +131,28 @@ export function ProcedureSheetContent({ procedure }) {
       {(inSia || inSih) && (
         <div className="flex gap-1.5">
           {inSia && (
-            <span className="rounded-full bg-violet-100 px-2.5 py-1 text-xs font-medium text-violet-700">SIA</span>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="cursor-default rounded-full bg-violet-100 px-2.5 py-1 text-xs font-medium text-violet-700">SIA</span>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-[200px] text-xs">
+                  Sistema de Informações Ambulatoriais — procedimento cobrado via BPA (ambulatório)
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           )}
           {inSih && (
-            <span className="rounded-full bg-orange-100 px-2.5 py-1 text-xs font-medium text-orange-700">SIH</span>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="cursor-default rounded-full bg-orange-100 px-2.5 py-1 text-xs font-medium text-orange-700">SIH</span>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-[200px] text-xs">
+                  Sistema de Informações Hospitalares — procedimento cobrado via AIH (internação)
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           )}
         </div>
       )}
