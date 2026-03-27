@@ -7,6 +7,7 @@ import { GRUPO_MAP } from '../data/grupos'
 import { useFavoritos } from '../contexts/FavoritosContext'
 import { useModoUE } from '../contexts/ModoUEContext'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
 
 export function ProcedureDetail() {
@@ -282,10 +283,7 @@ export function ProcedureDetail() {
               </div>
               <div className="divide-y divide-slate-100 rounded-lg border border-slate-100">
                 {habilitacoes.map((h) => (
-                  <div key={h.co_habilitacao} className="flex items-baseline gap-3 px-3 py-2">
-                    <span className="shrink-0 font-mono text-xs font-semibold text-teal-600">{h.co_habilitacao}</span>
-                    <span className="text-sm text-slate-700">{toSentenceCase(h.no_habilitacao)}</span>
-                  </div>
+                  <HabilitacaoRow key={h.co_habilitacao} h={h} />
                 ))}
               </div>
             </div>
@@ -343,40 +341,72 @@ function Row({ label, value }) {
   )
 }
 
+function isProgramaSUS(nome) {
+  const n = nome?.toLowerCase() ?? ''
+  return n.includes('programa') || n.includes('agora tem') || n.includes('componente acesso')
+}
+
+function HabilitacaoRow({ h }) {
+  const isPrograma = isProgramaSUS(h.no_habilitacao)
+  return (
+    <div className="flex items-center gap-3 px-3 py-2">
+      <span className="shrink-0 font-mono text-xs font-semibold text-teal-600">{h.co_habilitacao}</span>
+      <span className="flex-1 text-sm text-slate-700">{toSentenceCase(h.no_habilitacao)}</span>
+      {isPrograma && (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="shrink-0 cursor-default rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-medium text-violet-700">
+                Programa SUS
+              </span>
+            </TooltipTrigger>
+            <TooltipContent side="left" className="max-w-[220px] text-xs">
+              Esta habilitação é referente a um programa do SUS. O estabelecimento precisa estar credenciado neste programa para cobrar este procedimento.
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      )}
+    </div>
+  )
+}
+
 function CompatCard({ compatibilidades }) {
   const [open, setOpen] = useState(false)
   return (
-    <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
+    <div className="rounded-xl border border-blue-200 bg-blue-50 shadow-sm overflow-hidden">
       <button
         onClick={() => setOpen(o => !o)}
-        className="flex w-full items-center justify-between p-5 text-left"
+        className="flex w-full items-center justify-between px-5 py-4 text-left"
       >
         <div className="flex items-center gap-2">
-          <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+          <svg className="h-4 w-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+          </svg>
+          <h2 className="text-sm font-semibold text-blue-800">
             Pode cobrar junto com
           </h2>
-          <span className="text-xs text-slate-400">{compatibilidades.length}</span>
+          <span className="rounded-full bg-blue-200 px-2 py-0.5 text-xs font-medium text-blue-700">{compatibilidades.length}</span>
         </div>
         <svg
-          className={`h-4 w-4 text-slate-400 transition-transform ${open ? 'rotate-180' : ''}`}
+          className={`h-4 w-4 text-blue-400 transition-transform ${open ? 'rotate-180' : ''}`}
           fill="none" stroke="currentColor" viewBox="0 0 24 24"
         >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>
       </button>
       {open && (
-        <div className="border-t border-slate-100">
+        <div className="border-t border-blue-200 bg-white">
           <div className="divide-y divide-slate-100 max-h-[60vh] overflow-y-auto">
             {compatibilidades.map((c) => (
               <Link
                 key={c.co_procedimento_compativel}
                 to={`/procedimento/${c.co_procedimento_compativel}`}
-                className="flex items-baseline gap-3 px-5 py-2.5 hover:bg-slate-50 transition"
+                className="flex items-baseline gap-3 px-5 py-2.5 hover:bg-blue-50 transition"
               >
                 <span className="shrink-0 font-mono text-xs font-semibold text-blue-600">{formatCodigo(c.co_procedimento_compativel)}</span>
                 <span className="flex-1 text-sm text-slate-700">{toSentenceCase(c.no_procedimento_compativel)}</span>
                 {c.qt_permitida > 0 && (
-                  <span className="shrink-0 text-xs text-slate-400">máx {c.qt_permitida}x</span>
+                  <span className="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-500">máx {c.qt_permitida}x</span>
                 )}
               </Link>
             ))}
