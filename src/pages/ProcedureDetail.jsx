@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
+import { toast } from 'sonner'
 import { supabase } from '../lib/supabase'
 import { formatBRL, formatCodigo, toSentenceCase } from '../utils/formatters'
 import { GRUPO_MAP } from '../data/grupos'
@@ -110,7 +111,20 @@ export function ProcedureDetail() {
           <div className="mt-2">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className={cn("font-mono text-xs", modoUE ? "text-red-300" : "text-blue-300")}>{formatCodigo(data.co_procedimento)}</p>
+                <div className="flex items-center gap-1">
+                  <p className={cn("font-mono text-xs", modoUE ? "text-red-300" : "text-blue-300")}>{formatCodigo(data.co_procedimento)}</p>
+                  <button
+                    type="button"
+                    onClick={() => { navigator.clipboard.writeText(data.co_procedimento); toast.success('Código copiado!', { duration: 1500 }) }}
+                    className="rounded p-0.5 text-white/40 transition hover:text-white/80"
+                    title="Copiar código"
+                  >
+                    <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                        d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                  </button>
+                </div>
                 <h1 className="mt-0.5 text-xl font-bold leading-snug text-white">
                   {data.no_procedimento}
                 </h1>

@@ -1,5 +1,27 @@
 import { Link } from 'react-router-dom'
 import { toast } from 'sonner'
+
+function CopyIcon() {
+  return (
+    <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+        d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+    </svg>
+  )
+}
+
+function CopyButton({ value, className = '' }) {
+  return (
+    <button
+      type="button"
+      onClick={(e) => { e.stopPropagation(); e.preventDefault(); navigator.clipboard.writeText(value); toast.success('Código copiado!', { duration: 1500 }) }}
+      className={`rounded p-0.5 text-slate-300 transition hover:bg-slate-100 hover:text-slate-500 ${className}`}
+      title="Copiar código"
+    >
+      <CopyIcon />
+    </button>
+  )
+}
 import { formatBRL, formatCodigo } from '../utils/formatters'
 import { GRUPO_MAP } from '../data/grupos'
 import { useFavoritos } from '../contexts/FavoritosContext'
@@ -75,7 +97,7 @@ export function ProcedureCard({ procedure, onSelect, compareMode, compareSelecte
       <CardContent className="flex flex-1 flex-col p-4">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
               {compareMode && (
                 <input
                   type="checkbox"
@@ -86,6 +108,7 @@ export function ProcedureCard({ procedure, onSelect, compareMode, compareSelecte
                 />
               )}
               <p className="font-mono text-xs text-slate-400">{formatCodigo(co_procedimento)}</p>
+              <CopyButton value={co_procedimento} />
             </div>
             <p className="mt-1 text-sm font-medium leading-snug text-slate-800 line-clamp-2">
               {no_procedimento}
@@ -201,13 +224,6 @@ export function ProcedureRow({ procedure, onSelect, compareMode, compareSelected
   const { isFavorito, toggleFavorito } = useFavoritos()
   const fav = isFavorito(co_procedimento)
 
-  function handleCopyCodigo(e) {
-    e.preventDefault()
-    e.stopPropagation()
-    navigator.clipboard.writeText(co_procedimento)
-    toast.success('Código copiado!', { duration: 1500 })
-  }
-
   const handleClick = compareMode
     ? () => onToggleCompare?.(procedure)
     : onSelect
@@ -233,17 +249,7 @@ export function ProcedureRow({ procedure, onSelect, compareMode, compareSelected
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1">
             <p className="font-mono text-xs text-slate-400">{formatCodigo(co_procedimento)}</p>
-            <button
-              type="button"
-              onClick={handleCopyCodigo}
-              className="rounded p-0.5 text-slate-300 transition hover:bg-slate-100 hover:text-slate-500"
-              title="Copiar código"
-            >
-              <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                  d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-              </svg>
-            </button>
+            <CopyButton value={co_procedimento} />
           </div>
           <p className="text-sm font-medium leading-snug text-slate-800">{no_procedimento}</p>
           {no_financiamento && (
