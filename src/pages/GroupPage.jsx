@@ -121,7 +121,7 @@ export function GroupPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="bg-gradient-to-br from-blue-800 via-blue-700 to-blue-600">
         <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6">

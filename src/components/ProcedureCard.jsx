@@ -90,7 +90,7 @@ export function ProcedureCard({ procedure, onSelect, compareMode, compareSelecte
 
   const inner = (
     <Card className={cn(
-      'overflow-hidden shadow-sm transition group-hover:shadow-md',
+      'overflow-hidden transition-shadow duration-200 group-hover:shadow-[0_4px_20px_rgba(15,23,42,0.09),0_1px_4px_rgba(15,23,42,0.05)]',
       compareSelected && 'ring-2 ring-blue-500 ring-offset-1',
     )}>
       {estilo && <div className={cn('h-1 w-full', estilo.dot)} />}
@@ -232,7 +232,7 @@ export function ProcedureRow({ procedure, onSelect, compareMode, compareSelected
 
   const inner = (
     <Card className={cn(
-      'transition shadow-sm group-hover:border-slate-300 group-hover:shadow-md',
+      'transition-shadow duration-200 group-hover:shadow-[0_4px_20px_rgba(15,23,42,0.09),0_1px_4px_rgba(15,23,42,0.05)]',
       compareSelected && 'ring-2 ring-blue-500 ring-offset-1',
     )}>
       <CardContent className="flex items-center gap-3 px-4 py-3">

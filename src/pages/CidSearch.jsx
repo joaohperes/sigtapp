@@ -46,7 +46,7 @@ export function CidSearch() {
   const searched = value.trim().length >= 2
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="bg-gradient-to-br from-indigo-800 via-indigo-700 to-indigo-600">
         <div className="mx-auto max-w-3xl px-4 pb-12 pt-10 text-center">

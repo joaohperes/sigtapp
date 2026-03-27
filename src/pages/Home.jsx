@@ -316,7 +316,7 @@ export function Home() {
   const gruposVisiveis = modoUE ? grupos.filter(g => ['03', '04'].includes(g.co_grupo)) : grupos
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-background">
       {/* Hero */}
       <div className={modoUE ? "bg-gradient-to-br from-red-900 via-red-800 to-red-700" : "bg-gradient-to-br from-blue-800 via-blue-700 to-blue-600"}>
         <div className="mx-auto max-w-3xl px-4 pb-8 pt-5 text-center">

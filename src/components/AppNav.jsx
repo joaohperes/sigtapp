@@ -31,8 +31,10 @@ export function AppNav() {
 
   return (
     <nav className={cn(
-      'sticky top-0 z-40 border-b shadow-sm transition-colors',
-      modoUE ? 'border-red-800 bg-red-900' : 'border-slate-200 bg-white'
+      'sticky top-0 z-40 border-b transition-colors',
+      modoUE
+        ? 'border-red-800/80 bg-red-900/95 backdrop-blur-md'
+        : 'border-slate-200/70 bg-white/85 backdrop-blur-md shadow-[0_1px_0_rgba(15,23,42,0.04),0_2px_8px_rgba(15,23,42,0.04)]'
     )}>
       <div className="mx-auto flex max-w-7xl items-center gap-2 px-4 py-2 sm:px-6">
         {/* Logo */}

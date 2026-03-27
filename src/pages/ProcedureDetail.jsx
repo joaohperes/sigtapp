@@ -56,7 +56,7 @@ export function ProcedureDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50">
+      <div className="min-h-screen bg-background">
         <div className="bg-gradient-to-br from-blue-800 via-blue-700 to-blue-600">
           <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6">
             <Skeleton className="h-4 w-24 bg-blue-700" />
@@ -101,7 +101,7 @@ export function ProcedureDetail() {
   const cidsSecundarios = cids.filter((c) => c.st_principal !== 'S')
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
       <div className={modoUE ? "bg-gradient-to-br from-red-900 via-red-800 to-red-700" : "bg-gradient-to-br from-blue-800 via-blue-700 to-blue-600"}>
         <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6">
@@ -192,7 +192,7 @@ export function ProcedureDetail() {
           {/* Coluna central — Classificação + Descrição */}
           <div className="space-y-4">
             {(data.no_grupo || data.no_subgrupo || data.no_forma_org) && (
-              <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+              <div className="rounded-xl border border-slate-200/60 bg-white p-5 shadow-[0_1px_4px_rgba(15,23,42,0.04),0_4px_16px_rgba(15,23,42,0.04)]">
                 <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
                   Classificação
                 </h2>
@@ -245,7 +245,7 @@ export function ProcedureDetail() {
             )}
 
             {data.ds_procedimento && (
-              <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+              <div className="rounded-xl border border-slate-200/60 bg-white p-5 shadow-[0_1px_4px_rgba(15,23,42,0.04),0_4px_16px_rgba(15,23,42,0.04)]">
                 <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
                   Descrição
                 </h2>
@@ -259,7 +259,7 @@ export function ProcedureDetail() {
             <div className="space-y-4">
 
           {cids.length > 0 && (
-            <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="rounded-xl border border-slate-200/60 bg-white p-5 shadow-[0_1px_4px_rgba(15,23,42,0.04),0_4px_16px_rgba(15,23,42,0.04)]">
               <div className="mb-3 flex items-center justify-between">
                 <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
                   CIDs relacionados
@@ -372,7 +372,7 @@ function HabilitacoesCard({ habilitacoes }) {
   return (
     <div className="space-y-3">
       {reais.length > 0 && (
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="rounded-xl border border-slate-200/60 bg-white p-5 shadow-[0_1px_4px_rgba(15,23,42,0.04),0_4px_16px_rgba(15,23,42,0.04)]">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-500">Habilitações necessárias</h2>
             <span className="text-xs text-slate-400">{reais.length}</span>
