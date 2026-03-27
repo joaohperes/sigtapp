@@ -137,6 +137,8 @@ function formatCidCode(code) {
 }
 
 const SESSION_V = 11 // incrementar sempre que mudar o formato/filtros dos resultados
+const SAVED_KEY = 'sigtap-analises-salvas'
+const MAX_SAVED = 10
 
 function getSession() {
   try {
@@ -160,6 +162,43 @@ export function AnamnesePage() {
     return Object.fromEntries(Object.entries(saved).map(([k, v]) => [k, { loading: false, data: v, open: false }]))
   })
   const [cidSiblings, setCidSiblings] = useState({}) // { [co_cid_pai]: { loading, data, open } }
+
+  const [savedAnalyses, setSavedAnalyses] = useState(() => {
+    try { return JSON.parse(localStorage.getItem(SAVED_KEY) || '[]') } catch { return [] }
+  })
+
+  function handleSalvar() {
+    const entry = {
+      id: Date.now(),
+      date: new Date().toISOString(),
+      titulo: anamnese.slice(0, 80).trim(),
+      anamnese,
+      cids,
+      procedimentos,
+      aih,
+    }
+    const updated = [entry, ...savedAnalyses].slice(0, MAX_SAVED)
+    setSavedAnalyses(updated)
+    localStorage.setItem(SAVED_KEY, JSON.stringify(updated))
+    toast.success('Análise salva!', { duration: 2000 })
+  }
+
+  function handleLoadSaved(entry) {
+    setAnamnese(entry.anamnese)
+    setCids(entry.cids || [])
+    setProcedimentos(entry.procedimentos || [])
+    setAih(entry.aih || '')
+    setAnalyzed(true)
+    setCidProcs({})
+    setCidSiblings({})
+    setError(null)
+  }
+
+  function handleDeleteSaved(id) {
+    const updated = savedAnalyses.filter(a => a.id !== id)
+    setSavedAnalyses(updated)
+    localStorage.setItem(SAVED_KEY, JSON.stringify(updated))
+  }
 
   function handleNova() {
     setAnamnese('')
@@ -769,6 +808,40 @@ export function AnamnesePage() {
                   </div>
                 )}
               </div>
+            {/* Análises salvas — visíveis apenas antes da análise */}
+            {!showResults && savedAnalyses.length > 0 && (
+              <div className="mt-4">
+                <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+                  Análises salvas
+                </p>
+                <div className="space-y-2">
+                  {savedAnalyses.map(entry => (
+                    <div key={entry.id} className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+                      <button
+                        onClick={() => handleLoadSaved(entry)}
+                        className="min-w-0 flex-1 text-left"
+                      >
+                        <p className="truncate text-sm font-medium text-slate-700">{entry.titulo}</p>
+                        <p className="text-xs text-slate-400">
+                          {new Date(entry.date).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                          {entry.cids?.length > 0 && ` · ${entry.cids.length} CID${entry.cids.length > 1 ? 's' : ''}`}
+                        </p>
+                      </button>
+                      <button
+                        onClick={() => handleDeleteSaved(entry.id)}
+                        className="shrink-0 rounded p-1 text-slate-300 transition hover:bg-red-50 hover:text-red-400"
+                        title="Remover"
+                      >
+                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Cards de exemplo — visíveis apenas antes da análise */}
             {!showResults && (
               <div className="mt-4">
@@ -804,19 +877,31 @@ export function AnamnesePage() {
                     <h2 className="text-sm font-semibold text-slate-700">Texto para AIH</h2>
                     <p className="text-[11px] text-slate-400 mt-0.5">{aih.length} caracteres</p>
                   </div>
-                  <button
-                    onClick={handleCopyAih}
-                    className={cn(
-                      "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-white transition",
-                      modoUE ? "bg-red-600 hover:bg-red-700" : "bg-blue-600 hover:bg-blue-700"
-                    )}
-                  >
-                    <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                        d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                    </svg>
-                    Copiar texto
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={handleSalvar}
+                      className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-50"
+                    >
+                      <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                          d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                      </svg>
+                      Salvar
+                    </button>
+                    <button
+                      onClick={handleCopyAih}
+                      className={cn(
+                        "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-white transition",
+                        modoUE ? "bg-red-600 hover:bg-red-700" : "bg-blue-600 hover:bg-blue-700"
+                      )}
+                    >
+                      <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                          d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      </svg>
+                      Copiar texto
+                    </button>
+                  </div>
                 </div>
                 <textarea
                   value={aih}
