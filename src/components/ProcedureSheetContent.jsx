@@ -155,14 +155,7 @@ export function ProcedureSheetContent({ procedure }) {
       )}
 
       {habilitacoes.length > 0 && (
-        <div>
-          <p className="mb-2 text-xs font-medium text-slate-400">Habilitações necessárias</p>
-          <div className="divide-y divide-slate-100 rounded-lg border border-slate-100">
-            {habilitacoes.map((h) => (
-              <SheetHabRow key={h.co_habilitacao} h={h} />
-            ))}
-          </div>
-        </div>
+        <HabilitacoesSection habilitacoes={habilitacoes} />
       )}
 
       {compatibilidades.length > 0 && (
@@ -222,24 +215,53 @@ function isProgramaSUS(nome) {
 }
 
 function SheetHabRow({ h }) {
-  const isPrograma = isProgramaSUS(h.no_habilitacao)
   return (
     <div className="flex items-center gap-2 px-3 py-2">
       <span className="shrink-0 font-mono text-xs font-semibold text-teal-600">{h.co_habilitacao}</span>
-      <span className="flex-1 text-sm text-slate-600">{toSentenceCase(h.no_habilitacao)}</span>
-      {isPrograma && (
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span className="shrink-0 cursor-default rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-medium text-violet-700">
-                Programa
-              </span>
-            </TooltipTrigger>
-            <TooltipContent side="left" className="max-w-[200px] text-xs">
-              Credenciamento em programa do SUS — o estabelecimento precisa estar habilitado neste programa para cobrar este procedimento.
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+      <span className="text-sm text-slate-600">{toSentenceCase(h.no_habilitacao)}</span>
+    </div>
+  )
+}
+
+function HabilitacoesSection({ habilitacoes }) {
+  const [open, setOpen] = useState(false)
+  const reais = habilitacoes.filter(h => !isProgramaSUS(h.no_habilitacao))
+  const programas = habilitacoes.filter(h => isProgramaSUS(h.no_habilitacao))
+  return (
+    <div className="space-y-2">
+      {reais.length > 0 && (
+        <div>
+          <p className="mb-2 text-xs font-medium text-slate-400">Habilitações necessárias</p>
+          <div className="divide-y divide-slate-100 rounded-lg border border-slate-100">
+            {reais.map(h => <SheetHabRow key={h.co_habilitacao} h={h} />)}
+          </div>
+        </div>
+      )}
+      {programas.length > 0 && (
+        <div className="rounded-lg border border-violet-200 bg-violet-50 overflow-hidden">
+          <button
+            onClick={() => setOpen(o => !o)}
+            className="flex w-full items-center justify-between px-3 py-2.5 text-left"
+          >
+            <div className="flex items-center gap-1.5">
+              <svg className="h-3.5 w-3.5 text-violet-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+              </svg>
+              <span className="text-xs font-semibold text-violet-800">Credenciamentos em programas ({programas.length})</span>
+            </div>
+            <svg
+              className={`h-3.5 w-3.5 text-violet-400 transition-transform ${open ? 'rotate-180' : ''}`}
+              fill="none" stroke="currentColor" viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          {open && (
+            <div className="border-t border-violet-200 bg-white divide-y divide-slate-100">
+              {programas.map(h => <SheetHabRow key={h.co_habilitacao} h={h} />)}
+            </div>
+          )}
+        </div>
       )}
     </div>
   )

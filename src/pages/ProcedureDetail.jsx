@@ -7,7 +7,6 @@ import { GRUPO_MAP } from '../data/grupos'
 import { useFavoritos } from '../contexts/FavoritosContext'
 import { useModoUE } from '../contexts/ModoUEContext'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
 
 export function ProcedureDetail() {
@@ -274,19 +273,7 @@ export function ProcedureDetail() {
           )}
 
           {habilitacoes.length > 0 && (
-            <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-              <div className="mb-3 flex items-center justify-between">
-                <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  Habilitações necessárias
-                </h2>
-                <span className="text-xs text-slate-400">{habilitacoes.length}</span>
-              </div>
-              <div className="divide-y divide-slate-100 rounded-lg border border-slate-100">
-                {habilitacoes.map((h) => (
-                  <HabilitacaoRow key={h.co_habilitacao} h={h} />
-                ))}
-              </div>
-            </div>
+            <HabilitacoesCard habilitacoes={habilitacoes} />
           )}
 
           {compatibilidades.length > 0 && (
@@ -346,25 +333,58 @@ function isProgramaSUS(nome) {
   return n.includes('programa') || n.includes('agora tem') || n.includes('componente acesso')
 }
 
-function HabilitacaoRow({ h }) {
-  const isPrograma = isProgramaSUS(h.no_habilitacao)
+function HabRow({ h }) {
   return (
     <div className="flex items-center gap-3 px-3 py-2">
       <span className="shrink-0 font-mono text-xs font-semibold text-teal-600">{h.co_habilitacao}</span>
-      <span className="flex-1 text-sm text-slate-700">{toSentenceCase(h.no_habilitacao)}</span>
-      {isPrograma && (
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span className="shrink-0 cursor-default rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-medium text-violet-700">
-                Programa SUS
-              </span>
-            </TooltipTrigger>
-            <TooltipContent side="left" className="max-w-[220px] text-xs">
-              Esta habilitação é referente a um programa do SUS. O estabelecimento precisa estar credenciado neste programa para cobrar este procedimento.
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+      <span className="text-sm text-slate-700">{toSentenceCase(h.no_habilitacao)}</span>
+    </div>
+  )
+}
+
+function HabilitacoesCard({ habilitacoes }) {
+  const [open, setOpen] = useState(false)
+  const reais = habilitacoes.filter(h => !isProgramaSUS(h.no_habilitacao))
+  const programas = habilitacoes.filter(h => isProgramaSUS(h.no_habilitacao))
+  return (
+    <div className="space-y-3">
+      {reais.length > 0 && (
+        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-500">Habilitações necessárias</h2>
+            <span className="text-xs text-slate-400">{reais.length}</span>
+          </div>
+          <div className="divide-y divide-slate-100 rounded-lg border border-slate-100">
+            {reais.map(h => <HabRow key={h.co_habilitacao} h={h} />)}
+          </div>
+        </div>
+      )}
+      {programas.length > 0 && (
+        <div className="rounded-xl border border-violet-200 bg-violet-50 shadow-sm overflow-hidden">
+          <button
+            onClick={() => setOpen(o => !o)}
+            className="flex w-full items-center justify-between px-5 py-4 text-left"
+          >
+            <div className="flex items-center gap-2">
+              <svg className="h-4 w-4 text-violet-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+              </svg>
+              <h2 className="text-sm font-semibold text-violet-800">Credenciamentos em programas</h2>
+              <span className="rounded-full bg-violet-200 px-2 py-0.5 text-xs font-medium text-violet-700">{programas.length}</span>
+            </div>
+            <svg
+              className={`h-4 w-4 text-violet-400 transition-transform ${open ? 'rotate-180' : ''}`}
+              fill="none" stroke="currentColor" viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          {open && (
+            <div className="border-t border-violet-200 bg-white divide-y divide-slate-100">
+              {programas.map(h => <HabRow key={h.co_habilitacao} h={h} />)}
+            </div>
+          )}
+        </div>
       )}
     </div>
   )
