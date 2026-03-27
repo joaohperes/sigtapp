@@ -13,6 +13,7 @@ export function ProcedureDetail() {
   const { codigo } = useParams()
   const [data, setData] = useState(null)
   const [cids, setCids] = useState([])
+  const [habilitacoes, setHabilitacoes] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
@@ -31,10 +32,16 @@ export function ProcedureDetail() {
         .eq('co_procedimento', codigo)
         .single(),
       supabase.rpc('cids_do_procedimento', { p_co: codigo }),
-    ]).then(([{ data: row, error: err }, { data: cidData }]) => {
+      supabase
+        .from('procedimento_habilitacoes')
+        .select('co_habilitacao, no_habilitacao')
+        .eq('co_procedimento', codigo)
+        .order('co_habilitacao'),
+    ]).then(([{ data: row, error: err }, { data: cidData }, { data: habData }]) => {
       if (err) setError(err.message)
       else setData(row)
       setCids(cidData ?? [])
+      setHabilitacoes(habData ?? [])
       setLoading(false)
     })
   }, [codigo])
@@ -217,7 +224,10 @@ export function ProcedureDetail() {
             )}
           </div>
 
-          {/* Coluna direita — CIDs relacionados */}
+          {/* Coluna direita — CIDs + Habilitações */}
+          {(cids.length > 0 || habilitacoes.length > 0) && (
+            <div className="space-y-4">
+
           {cids.length > 0 && (
             <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
               <div className="mb-3 flex items-center justify-between">
@@ -252,6 +262,28 @@ export function ProcedureDetail() {
                   </div>
                 )}
               </div>
+            </div>
+          )}
+
+          {habilitacoes.length > 0 && (
+            <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+              <div className="mb-3 flex items-center justify-between">
+                <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  Habilitações necessárias
+                </h2>
+                <span className="text-xs text-slate-400">{habilitacoes.length}</span>
+              </div>
+              <div className="divide-y divide-slate-100 rounded-lg border border-slate-100">
+                {habilitacoes.map((h) => (
+                  <div key={h.co_habilitacao} className="flex items-baseline gap-3 px-3 py-2">
+                    <span className="shrink-0 font-mono text-xs font-semibold text-teal-600">{h.co_habilitacao}</span>
+                    <span className="text-sm text-slate-700">{toSentenceCase(h.no_habilitacao)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
             </div>
           )}
 

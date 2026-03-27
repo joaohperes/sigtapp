@@ -36,28 +36,38 @@ export function ProcedureSheetContent({ procedure }) {
   const [diasPerman, setDiasPerman] = useState(() => descCache.get(co_procedimento)?.dias ?? null)
   const [inSia, setInSia] = useState(() => descCache.get(co_procedimento)?.sia ?? false)
   const [inSih, setInSih] = useState(() => descCache.get(co_procedimento)?.sih ?? false)
+  const [habilitacoes, setHabilitacoes] = useState(() => descCache.get(co_procedimento)?.hab ?? [])
   const [descLoading, setDescLoading] = useState(!descCache.has(co_procedimento))
 
   useEffect(() => {
     if (descCache.has(co_procedimento)) return
     setDescricao(null)
     setDiasPerman(null)
+    setHabilitacoes([])
     setDescLoading(true)
-    supabase
-      .from('procedimentos')
-      .select('ds_procedimento, qt_dias_perman, in_sia, in_sih')
-      .eq('co_procedimento', co_procedimento)
-      .single()
-      .then(({ data }) => {
+    Promise.all([
+      supabase
+        .from('procedimentos')
+        .select('ds_procedimento, qt_dias_perman, in_sia, in_sih')
+        .eq('co_procedimento', co_procedimento)
+        .single(),
+      supabase
+        .from('procedimento_habilitacoes')
+        .select('co_habilitacao, no_habilitacao')
+        .eq('co_procedimento', co_procedimento)
+        .order('co_habilitacao'),
+    ]).then(([{ data }, { data: habData }]) => {
         const desc = data?.ds_procedimento || null
         const dias = data?.qt_dias_perman || 0
         const sia  = data?.in_sia || false
         const sih  = data?.in_sih || false
-        descCache.set(co_procedimento, { desc, dias, sia, sih })
+        const hab  = habData ?? []
+        descCache.set(co_procedimento, { desc, dias, sia, sih, hab })
         setDescricao(desc)
         setDiasPerman(dias)
         setInSia(sia)
         setInSih(sih)
+        setHabilitacoes(hab)
         setDescLoading(false)
       })
   }, [co_procedimento])
@@ -132,6 +142,20 @@ export function ProcedureSheetContent({ procedure }) {
           ) : (
             <p className="text-sm leading-relaxed text-slate-600">{toSentenceCase(descricao)}</p>
           )}
+        </div>
+      )}
+
+      {habilitacoes.length > 0 && (
+        <div>
+          <p className="mb-2 text-xs font-medium text-slate-400">Habilitações necessárias</p>
+          <div className="divide-y divide-slate-100 rounded-lg border border-slate-100">
+            {habilitacoes.map((h) => (
+              <div key={h.co_habilitacao} className="flex items-baseline gap-2 px-3 py-2">
+                <span className="shrink-0 font-mono text-xs font-semibold text-teal-600">{h.co_habilitacao}</span>
+                <span className="text-sm text-slate-600">{toSentenceCase(h.no_habilitacao)}</span>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
