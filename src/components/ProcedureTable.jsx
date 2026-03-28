@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { formatBRL, formatCodigo, exportCsv } from '../utils/formatters'
+import { GRUPO_MAP } from '../data/grupos'
 
 export function ProcedureTable({ results, onSelect, compareMode, compareSelection, onToggleCompare }) {
   const navigate = useNavigate()
@@ -26,6 +27,7 @@ export function ProcedureTable({ results, onSelect, compareMode, compareSelectio
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-slate-100 bg-slate-50 text-left">
+              <th className="w-[3px] p-0" />
               {compareMode && <th className="w-10 px-4 py-3" />}
               <th className="px-4 py-3 text-xs font-medium uppercase tracking-wide text-slate-500 whitespace-nowrap">Código</th>
               <th className="px-4 py-3 text-xs font-medium uppercase tracking-wide text-slate-500">Procedimento</th>
@@ -38,6 +40,7 @@ export function ProcedureTable({ results, onSelect, compareMode, compareSelectio
           <tbody className="divide-y divide-slate-100">
             {results.map((p) => {
               const total = (p.vl_sa || 0) + (p.vl_sh || 0) + (p.vl_sp || 0)
+              const estilo = GRUPO_MAP[p.co_procedimento?.slice(0, 2)]
               const selected = compareSelection?.some(c => c.co_procedimento === p.co_procedimento)
               const handleClick = compareMode
                 ? () => onToggleCompare?.(p)
@@ -48,6 +51,7 @@ export function ProcedureTable({ results, onSelect, compareMode, compareSelectio
                   onClick={handleClick}
                   className={`cursor-pointer transition-colors ${selected ? 'bg-blue-50' : 'hover:bg-blue-50/50'}`}
                 >
+                  <td className={`w-[3px] p-0 ${estilo?.dot ?? 'bg-slate-200'}`} />
                   {compareMode && (
                     <td className="px-4 py-3">
                       <input
