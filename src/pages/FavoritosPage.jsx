@@ -16,7 +16,7 @@ export function FavoritosPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className={modoUE ? "bg-gradient-to-br from-red-900 via-red-800 to-red-700" : "bg-gradient-to-br from-blue-800 via-blue-700 to-blue-600"}>
+      <div className={modoUE ? "bg-gradient-to-br from-red-950 via-red-900 to-red-800" : "bg-gradient-to-br from-[#0A1628] via-[#0D2347] to-[#0F3460]"}>
         <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">

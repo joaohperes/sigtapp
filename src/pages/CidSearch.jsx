@@ -48,7 +48,7 @@ export function CidSearch() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-gradient-to-br from-indigo-800 via-indigo-700 to-indigo-600">
+      <div className="bg-gradient-to-br from-[#0A1628] via-[#0D2347] to-[#0F3460]">
         <div className="mx-auto max-w-3xl px-4 pb-12 pt-10 text-center">
           <Link to="/" className="text-xs font-semibold uppercase tracking-widest text-indigo-300 hover:text-white transition">
             ← SIGTAP

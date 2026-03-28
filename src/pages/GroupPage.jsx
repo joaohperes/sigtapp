@@ -123,7 +123,7 @@ export function GroupPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-gradient-to-br from-blue-800 via-blue-700 to-blue-600">
+      <div className="bg-gradient-to-br from-[#0A1628] via-[#0D2347] to-[#0F3460]">
         <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6">
           <nav className="flex items-center gap-1.5 text-xs text-blue-300">
             <Link to="/" className="hover:text-white transition">Busca</Link>

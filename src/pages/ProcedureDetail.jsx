@@ -57,13 +57,13 @@ export function ProcedureDetail() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <div className="bg-gradient-to-br from-blue-800 via-blue-700 to-blue-600">
+        <div className="bg-gradient-to-br from-[#0A1628] via-[#0D2347] to-[#0F3460]">
           <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6">
-            <Skeleton className="h-4 w-24 bg-blue-700" />
+            <Skeleton className="h-4 w-24 bg-white/10" />
             <div className="mt-4 space-y-2">
-              <Skeleton className="h-3 w-32 bg-blue-700" />
-              <Skeleton className="h-7 w-3/4 bg-blue-700" />
-              <Skeleton className="h-3 w-28 bg-blue-700" />
+              <Skeleton className="h-3 w-32 bg-white/10" />
+              <Skeleton className="h-7 w-3/4 bg-white/10" />
+              <Skeleton className="h-3 w-28 bg-white/10" />
             </div>
           </div>
         </div>
@@ -103,7 +103,7 @@ export function ProcedureDetail() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className={modoUE ? "bg-gradient-to-br from-red-900 via-red-800 to-red-700" : "bg-gradient-to-br from-blue-800 via-blue-700 to-blue-600"}>
+      <div className={modoUE ? "bg-gradient-to-br from-red-950 via-red-900 to-red-800" : "bg-gradient-to-br from-[#0A1628] via-[#0D2347] to-[#0F3460]"}>
         <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6">
           {/* Breadcrumb */}
           <nav className="flex items-center gap-1.5 text-xs">
