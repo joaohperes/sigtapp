@@ -40,8 +40,8 @@ export function AppNav() {
         {/* Logo */}
         <Link
           to="/"
-          className={cn('text-xl font-bold transition', modoUE ? 'text-white' : 'text-blue-600')}
-          style={{ fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '0.06em' }}
+          className={cn('text-xl font-bold tracking-widest transition', modoUE ? 'text-white' : 'text-slate-900')}
+          style={{ fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '0.12em' }}
         >
           SIGTAPP
         </Link>

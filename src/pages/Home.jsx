@@ -318,13 +318,13 @@ export function Home() {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero */}
-      <div className={modoUE ? "bg-gradient-to-br from-red-900 via-red-800 to-red-700" : "bg-gradient-to-br from-blue-800 via-blue-700 to-blue-600"}>
-        <div className="mx-auto max-w-3xl px-4 pb-8 pt-5 text-center">
+      <div className={modoUE ? "bg-gradient-to-br from-red-950 via-red-900 to-red-800" : "bg-[#0A1628] bg-gradient-to-br from-[#0A1628] via-[#0D2347] to-[#0F3460]"}>
+        <div className="mx-auto max-w-3xl px-4 pb-10 pt-8 text-center">
           <Link to="/" className="block hover:opacity-80 transition-opacity">
-            <h1 className="text-5xl text-white"
-                style={{ fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '0.05em' }}>SIGTAPP</h1>
+            <h1 className="text-6xl text-white tracking-widest"
+                style={{ fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '0.08em' }}>SIGTAPP</h1>
           </Link>
-          <p className={cn("mt-1.5 text-sm", modoUE ? "text-red-200" : "text-blue-200")}>
+          <p className={cn("mt-2 text-sm tracking-wide", modoUE ? "text-red-300/80" : "text-blue-300/70")}>
             Procedimentos, Medicamentos e OPM do SUS · CID-10
           </p>
           <div className="mt-6">
@@ -439,7 +439,7 @@ export function Home() {
             {/* Sidebar — grupos presentes nos resultados */}
             {gruposPresentes.length > 1 && (
               <aside className="hidden lg:block w-56 shrink-0">
-                <div className="sticky top-[60px] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+                <div className="sticky top-[60px] overflow-hidden rounded-xl bg-white shadow-[0_2px_8px_rgba(15,23,42,0.06),0_1px_2px_rgba(15,23,42,0.04)]">
                   <div className="border-b border-slate-100 px-4 py-3">
                     <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Grupos</p>
                   </div>

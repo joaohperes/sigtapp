@@ -107,10 +107,10 @@ export function ProcedureCard({ procedure, onSelect, compareMode, compareSelecte
                   className="h-4 w-4 shrink-0 rounded border-slate-300 text-blue-600 cursor-pointer"
                 />
               )}
-              <p className="font-mono text-xs text-slate-400">{formatCodigo(co_procedimento)}</p>
+              <p className="font-mono text-[11px] font-medium tracking-wider text-slate-400">{formatCodigo(co_procedimento)}</p>
               <CopyButton value={co_procedimento} />
             </div>
-            <p className="mt-1 text-sm font-medium leading-snug text-slate-800 line-clamp-2">
+            <p className="mt-1 text-sm font-semibold leading-snug text-slate-900 line-clamp-2">
               {no_procedimento}
             </p>
             {no_financiamento && (
@@ -131,7 +131,7 @@ export function ProcedureCard({ procedure, onSelect, compareMode, compareSelecte
             )}
             <PriceTooltip total={total} vl_sa={vl_sa} vl_sh={vl_sh} vl_sp={vl_sp} qt_dias_perman={qt_dias_perman}>
               <div className="text-right cursor-default">
-                <p className="text-xs text-slate-400">Total SUS</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Total SUS</p>
                 <p className="text-base font-bold text-emerald-600">{formatBRL(total)}</p>
               </div>
             </PriceTooltip>
@@ -271,7 +271,7 @@ export function ProcedureRow({ procedure, onSelect, compareMode, compareSelected
         </button>
         <PriceTooltip total={total} vl_sa={vl_sa} vl_sh={vl_sh} vl_sp={vl_sp} qt_dias_perman={qt_dias_perman}>
           <div className="shrink-0 text-right cursor-default">
-            <p className="text-xs text-slate-400">Total SUS</p>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Total SUS</p>
             <p className="text-sm font-bold text-emerald-600">{formatBRL(total)}</p>
           </div>
         </PriceTooltip>

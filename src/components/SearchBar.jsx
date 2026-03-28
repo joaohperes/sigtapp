@@ -44,9 +44,10 @@ export function SearchBar({ onSearch, loading, initialValue = '', recentSearches
           value={value}
           onChange={handleChange}
           placeholder="Buscar por nome, código ou CID  (ex: colecistectomia, 0407010005, J94)"
-          className="w-full rounded-xl border border-gray-200 bg-white py-3.5 pl-12 pr-10
-                     text-sm shadow-sm placeholder:text-gray-400
-                     focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+          className="w-full rounded-xl border-0 bg-white/95 py-4 pl-12 pr-10
+                     text-sm shadow-[0_4px_24px_rgba(0,0,0,0.25)] placeholder:text-slate-400
+                     focus:outline-none focus:ring-2 focus:ring-white/40 focus:ring-offset-0
+                     transition-shadow duration-200"
         />
 
         {value && (
