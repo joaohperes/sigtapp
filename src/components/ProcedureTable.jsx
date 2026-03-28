@@ -64,7 +64,7 @@ export function ProcedureTable({ results, onSelect, compareMode, compareSelectio
                     </td>
                   )}
                   <td className="px-4 py-3 whitespace-nowrap">
-                    <span className="font-mono text-xs text-blue-600">
+                    <span className={`font-mono text-xs ${estilo?.text ?? 'text-slate-400'}`}>
                       {formatCodigo(p.co_procedimento)}
                     </span>
                   </td>
