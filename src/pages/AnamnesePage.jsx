@@ -685,25 +685,25 @@ export function AnamnesePage() {
           {cidProcsSecundarios.map(({ cid, data }, i) => {
             const isOpen = openProcCids[cid.co_cid] ?? (i === 0)
             return (
-              <div key={cid.co_cid} className="border-t border-slate-100 pt-3">
+              <div key={cid.co_cid} className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
                 <button
                   onClick={() => setOpenProcCids(s => ({ ...s, [cid.co_cid]: !isOpen }))}
-                  className="mb-1.5 flex w-full items-center justify-between gap-2 text-left"
+                  className="flex w-full items-center justify-between gap-2 px-4 py-3 text-left transition hover:bg-slate-50"
                 >
-                  <span className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wide">
-                    <span className="font-mono text-indigo-400">{cid.co_cid_pai || cid.co_cid}</span>
-                    <span className="normal-case font-normal text-slate-400 truncate">{cid.no_cid_pai || cid.no_cid}</span>
-                    <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[9px] text-slate-500">{data.length}</span>
+                  <span className="flex items-center gap-2">
+                    <span className="font-mono text-sm font-bold text-indigo-500">{cid.co_cid_pai || cid.co_cid}</span>
+                    <span className="text-sm text-slate-600 truncate">{cid.no_cid_pai || cid.no_cid}</span>
+                    <span className="rounded-full bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-400">{data.length}</span>
                   </span>
                   <svg
-                    className={`h-3 w-3 shrink-0 text-slate-300 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+                    className={`h-4 w-4 shrink-0 text-slate-300 transition-transform ${isOpen ? 'rotate-180' : ''}`}
                     fill="none" stroke="currentColor" viewBox="0 0 24 24"
                   >
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </button>
                 {isOpen && (
-                  <div className="space-y-2">
+                  <div className="border-t border-slate-100 p-3 space-y-2">
                     {data.map((p) => (
                       <ProcedureRow key={p.co_procedimento} procedure={p} onSelect={setSheetProc} />
                     ))}
