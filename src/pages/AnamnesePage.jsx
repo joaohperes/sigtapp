@@ -414,40 +414,44 @@ export function AnamnesePage() {
     if (cur?.loading) return
     // primeira abertura — inicia fetch
     setCidProcs(prev => ({ ...prev, [co_cid]: { loading: true, data: null, open: true } }))
-    const cid = cids.find(c => c.co_cid === co_cid)
-    const queryCode = cid?.co_cid_pai || co_cid
-    const { data } = await supabase.rpc('buscar_por_cid', { query: queryCode, limite: 15 })
+    try {
+      const cid = cids.find(c => c.co_cid === co_cid)
+      const queryCode = cid?.co_cid_pai || co_cid
+      const { data } = await supabase.rpc('buscar_por_cid', { query: queryCode, limite: 15 })
 
-    // Usa a descrição do grupo pai como referência para o filtro de qualificadores
-    const refTermo = (cid?.no_cid_pai || cid?.no_cid)?.toLowerCase() || co_cid
-    // CIDs comorbidade usam lista de bloqueio estendida (impede ablação, transplante, etc.)
-    const bloqueio = isPrincipal ? QUALIF_BLOQUEIO : QUALIF_BLOQUEIO_COMORBIDADE
+      // Usa a descrição do grupo pai como referência para o filtro de qualificadores
+      const refTermo = (cid?.no_cid_pai || cid?.no_cid)?.toLowerCase() || co_cid
+      // CIDs comorbidade usam lista de bloqueio estendida (impede ablação, transplante, etc.)
+      const bloqueio = isPrincipal ? QUALIF_BLOQUEIO : QUALIF_BLOQUEIO_COMORBIDADE
 
-    const filtered = (data || [])
-      .filter(p => {
-        const nome = p.no_procedimento || ''
-        const nomeNorm = normalizarTexto(nome)
-        const termoNorm = normalizarTexto(refTermo)
-        return (
-          !bloqueio.some(q => {
-            const qNorm = normalizarTexto(q)
-            return nomeNorm.includes(qNorm) && !termoNorm.includes(qNorm)
-          }) &&
-          algumTermoPresente(nome, refTermo)
-        )
-      })
-      // ordena: TRATAMENTO primeiro (código primário de internação), depois valor desc
-      .sort((a, b) => {
-        const aTrat = /^TRATAMENTO\b/i.test(a.no_procedimento || '')
-        const bTrat = /^TRATAMENTO\b/i.test(b.no_procedimento || '')
-        if (aTrat !== bTrat) return aTrat ? -1 : 1
-        const ta = (a.vl_sa || 0) + (a.vl_sh || 0) + (a.vl_sp || 0)
-        const tb = (b.vl_sa || 0) + (b.vl_sh || 0) + (b.vl_sp || 0)
-        return tb - ta
-      })
-      .slice(0, 5)
+      const filtered = (data || [])
+        .filter(p => {
+          const nome = p.no_procedimento || ''
+          const nomeNorm = normalizarTexto(nome)
+          const termoNorm = normalizarTexto(refTermo)
+          return (
+            !bloqueio.some(q => {
+              const qNorm = normalizarTexto(q)
+              return nomeNorm.includes(qNorm) && !termoNorm.includes(qNorm)
+            }) &&
+            algumTermoPresente(nome, refTermo)
+          )
+        })
+        // ordena: TRATAMENTO primeiro (código primário de internação), depois valor desc
+        .sort((a, b) => {
+          const aTrat = /^TRATAMENTO\b/i.test(a.no_procedimento || '')
+          const bTrat = /^TRATAMENTO\b/i.test(b.no_procedimento || '')
+          if (aTrat !== bTrat) return aTrat ? -1 : 1
+          const ta = (a.vl_sa || 0) + (a.vl_sh || 0) + (a.vl_sp || 0)
+          const tb = (b.vl_sa || 0) + (b.vl_sh || 0) + (b.vl_sp || 0)
+          return tb - ta
+        })
+        .slice(0, 5)
 
-    setCidProcs(prev => ({ ...prev, [co_cid]: { loading: false, data: filtered, open: true } }))
+      setCidProcs(prev => ({ ...prev, [co_cid]: { loading: false, data: filtered, open: true } }))
+    } catch {
+      setCidProcs(prev => ({ ...prev, [co_cid]: { loading: false, data: [], open: true } }))
+    }
   }
 
   async function toggleCidSiblings(co_cid_pai) {

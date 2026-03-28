@@ -1,3 +1,4 @@
+import { Component } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { Home } from './pages/Home'
 import { ProcedureDetail } from './pages/ProcedureDetail'
@@ -7,18 +8,42 @@ import { AnamnesePage } from './pages/AnamnesePage'
 import { FavoritosPage } from './pages/FavoritosPage'
 import { AppNav } from './components/AppNav'
 
+class ErrorBoundary extends Component {
+  constructor(props) { super(props); this.state = { error: null } }
+  static getDerivedStateFromError(error) { return { error } }
+  render() {
+    if (this.state.error) {
+      return (
+        <div className="flex min-h-[60vh] flex-col items-center justify-center gap-3 px-4 text-center">
+          <p className="text-sm font-medium text-red-600">Algo deu errado ao renderizar esta página.</p>
+          <p className="text-xs text-slate-400">{this.state.error?.message}</p>
+          <button
+            onClick={() => this.setState({ error: null })}
+            className="mt-2 rounded-lg border border-slate-200 px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50"
+          >
+            Tentar novamente
+          </button>
+        </div>
+      )
+    }
+    return this.props.children
+  }
+}
+
 export default function App() {
   return (
     <BrowserRouter>
       <AppNav />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/grupo/:co" element={<GroupPage />} />
-        <Route path="/procedimento/:codigo" element={<ProcedureDetail />} />
-        <Route path="/cid" element={<CidSearch />} />
-        <Route path="/anamnese" element={<AnamnesePage />} />
-        <Route path="/favoritos" element={<FavoritosPage />} />
-      </Routes>
+      <ErrorBoundary>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/grupo/:co" element={<GroupPage />} />
+          <Route path="/procedimento/:codigo" element={<ProcedureDetail />} />
+          <Route path="/cid" element={<CidSearch />} />
+          <Route path="/anamnese" element={<AnamnesePage />} />
+          <Route path="/favoritos" element={<FavoritosPage />} />
+        </Routes>
+      </ErrorBoundary>
       <footer className="border-t border-slate-100 bg-white py-5 text-center">
         <p className="text-xs text-slate-400">
           Desenvolvido por{' '}
