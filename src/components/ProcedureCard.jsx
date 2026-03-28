@@ -137,11 +137,6 @@ export function ProcedureCard({ procedure, onSelect, compareMode, compareSelecte
             </PriceTooltip>
           </div>
         </div>
-        <div className="mt-3 grid grid-cols-3 gap-2 border-t border-slate-100 pt-3">
-          <ValueCell label="Ambulatorial" value={vl_sa} />
-          <ValueCell label="Hospitalar" value={vl_sh} />
-          <ValueCell label="Profissional" value={vl_sp} />
-        </div>
       </CardContent>
     </Card>
   )
@@ -195,27 +190,11 @@ export function ProcedureCardSkeleton() {
             <Skeleton className="ml-auto h-5 w-20" />
           </div>
         </div>
-        <div className="mt-3 grid grid-cols-3 gap-2 border-t border-slate-100 pt-3">
-          {[0, 1, 2].map(i => (
-            <div key={i} className="space-y-1">
-              <Skeleton className="h-3 w-16" />
-              <Skeleton className="h-4 w-14" />
-            </div>
-          ))}
-        </div>
       </CardContent>
     </Card>
   )
 }
 
-function ValueCell({ label, value }) {
-  return (
-    <div>
-      <p className="text-xs text-slate-400">{label}</p>
-      <p className="text-sm tabular-nums text-slate-700">{formatBRL(value)}</p>
-    </div>
-  )
-}
 
 export function ProcedureRow({ procedure, onSelect, compareMode, compareSelected, onToggleCompare }) {
   const { co_procedimento, no_procedimento, vl_sa, vl_sh, vl_sp, no_financiamento, qt_dias_perman } = procedure
