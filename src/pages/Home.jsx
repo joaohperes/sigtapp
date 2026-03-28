@@ -781,8 +781,8 @@ export function Home() {
                           key={g.co_grupo}
                           onClick={() => handleGroupClick(g)}
                           className="group flex items-center gap-3 overflow-hidden rounded-xl
-                                     border border-slate-200 bg-white p-4 shadow-sm text-left transition
-                                     hover:shadow-md hover:-translate-y-0.5 active:translate-y-0"
+                                     bg-white p-4 shadow-[0_2px_8px_rgba(15,23,42,0.06),0_1px_2px_rgba(15,23,42,0.04)] text-left transition
+                                     hover:shadow-[0_6px_20px_rgba(15,23,42,0.10),0_2px_6px_rgba(15,23,42,0.06)] hover:-translate-y-0.5 active:translate-y-0"
                         >
                           <span className={`shrink-0 flex h-8 w-8 items-center justify-center rounded-lg text-sm font-bold ${estilo.bg} ${estilo.text}`}>
                             {g.co_grupo}
@@ -795,7 +795,7 @@ export function Home() {
                     })}
                   </div>
                 ) : (
-                  <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+                  <div className="overflow-hidden rounded-xl bg-white shadow-[0_2px_8px_rgba(15,23,42,0.06),0_1px_2px_rgba(15,23,42,0.04)]">
                     {gruposVisiveis.map((g) => {
                       const estilo = GRUPO_MAP[g.co_grupo]
                       if (!estilo) return null
@@ -832,7 +832,7 @@ export function Home() {
                     selectedSubgroup ? 'md:w-64' : 'md:w-72'
                   }`}
                 >
-                  <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+                  <div className="overflow-hidden rounded-xl bg-white shadow-[0_2px_8px_rgba(15,23,42,0.06),0_1px_2px_rgba(15,23,42,0.04)]">
                     <div className="flex items-center gap-2 border-b border-slate-100 px-4 py-3">
                       <div className={cn("h-2.5 w-2.5 shrink-0 rounded-sm", selectedEstilo?.dot)} />
                       <span className="text-xs font-semibold text-slate-700">{selectedGroup.no_grupo}</span>
@@ -891,7 +891,7 @@ export function Home() {
                   key={selectedSubgroup.co_subgrupo}
                   className="w-full md:flex-1 animate-slide-right"
                 >
-                  <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+                  <div className="overflow-hidden rounded-xl bg-white shadow-[0_2px_8px_rgba(15,23,42,0.06),0_1px_2px_rgba(15,23,42,0.04)]">
                     <div className="flex items-center gap-2 border-b border-slate-100 px-4 py-3">
                       <div className={cn("h-2.5 w-2.5 shrink-0 rounded-sm", selectedEstilo?.dot)} />
                       <p className="text-xs font-semibold leading-snug text-slate-700">{selectedSubgroup.no_subgrupo}</p>

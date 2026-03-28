@@ -172,14 +172,22 @@ export function ProcedureDetail() {
 
           {/* Coluna esquerda — Valores */}
           <div className="space-y-3">
-            <ValueCard label="Ambulatorial (SA)" value={data.vl_sa} />
-            <ValueCard label="Hospitalar (SH)" value={data.vl_sh} />
-            <ValueCard label="Profissional (SP)" value={data.vl_sp} />
-            <ValueCard label="Total SUS" value={total} highlight />
+            <div className="rounded-xl bg-slate-900 p-5 shadow-lg">
+              <p className="mb-4 text-[10px] font-semibold uppercase tracking-widest text-slate-500">Composição do valor</p>
+              <div className="space-y-3">
+                <ValueRow label="Ambulatorial (SA)" value={data.vl_sa} />
+                <ValueRow label="Hospitalar (SH)" value={data.vl_sh} />
+                <ValueRow label="Profissional (SP)" value={data.vl_sp} />
+              </div>
+              <div className="mt-4 flex items-center justify-between border-t border-white/10 pt-4">
+                <p className="text-sm font-semibold text-slate-300">Total SUS</p>
+                <p className="text-xl font-bold tabular-nums text-emerald-400">{formatBRL(total)}</p>
+              </div>
+            </div>
             {data.qt_dias_perman > 0 && data.qt_dias_perman < 9999 && (
-              <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 shadow-sm">
-                <p className="text-xs text-blue-600">Permanência mínima (AIH)</p>
-                <p className="mt-1 text-lg font-bold tabular-nums text-blue-800">
+              <div className="rounded-xl border border-blue-800/40 bg-blue-950 p-4 shadow-sm">
+                <p className="text-xs text-blue-400">Permanência mínima (AIH)</p>
+                <p className="mt-1 text-lg font-bold tabular-nums text-blue-200">
                   {data.qt_dias_perman} {data.qt_dias_perman === 1 ? 'dia' : 'dias'}
                 </p>
                 <p className="mt-1 text-xs text-blue-500">
@@ -312,19 +320,11 @@ export function ProcedureDetail() {
   )
 }
 
-function ValueCard({ label, value, highlight }) {
+function ValueRow({ label, value }) {
   return (
-    <div className={`rounded-xl border p-4 shadow-sm ${
-      highlight
-        ? 'border-emerald-200 bg-emerald-50'
-        : 'border-slate-200 bg-white'
-    }`}>
-      <p className="text-xs text-slate-500">{label}</p>
-      <p className={`mt-1 text-lg font-bold tabular-nums ${
-        highlight ? 'text-emerald-700' : 'text-slate-800'
-      }`}>
-        {formatBRL(value)}
-      </p>
+    <div className="flex items-center justify-between">
+      <p className="text-xs text-slate-400">{label}</p>
+      <p className="tabular-nums text-sm font-medium text-slate-200">{formatBRL(value)}</p>
     </div>
   )
 }

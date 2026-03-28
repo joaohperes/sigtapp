@@ -477,7 +477,7 @@ export function AnamnesePage() {
       <Skeleton className="mb-3 h-5 w-52" />
       <div className="grid gap-2 grid-cols-1 sm:grid-cols-2 xl:grid-cols-1">
         {[0, 1].map(i => (
-          <div key={i} className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm space-y-2">
+          <div key={i} className="rounded-xl bg-white p-3 shadow-[0_4px_16px_rgba(15,23,42,0.08),0_1px_4px_rgba(15,23,42,0.05)] border-l-2 border-indigo-200 space-y-2">
             <Skeleton className="h-4 w-14" />
             <Skeleton className="h-3 w-full" />
             <Skeleton className="h-3 w-4/6" />
@@ -493,7 +493,7 @@ export function AnamnesePage() {
       <Skeleton className="mb-3 h-5 w-60" />
       <div className="space-y-2">
         {[0, 1, 2, 3].map(i => (
-          <div key={i} className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm space-y-2">
+          <div key={i} className="rounded-xl bg-white p-3 shadow-[0_4px_16px_rgba(15,23,42,0.08),0_1px_4px_rgba(15,23,42,0.05)] border-l-2 border-emerald-200 space-y-2">
             <Skeleton className="h-3 w-24" />
             <Skeleton className="h-4 w-3/4" />
           </div>
@@ -518,7 +518,7 @@ export function AnamnesePage() {
         /* 2-col em sm/lg; 1-col em xl (coluna dedicada) */
         <div className="grid gap-2 grid-cols-1 sm:grid-cols-2 xl:grid-cols-1">
           {cids.map((c, i) => (
-            <div key={c.co_cid} className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+            <div key={c.co_cid} className="rounded-xl bg-white p-3 shadow-[0_4px_16px_rgba(15,23,42,0.08),0_1px_4px_rgba(15,23,42,0.05)] border-l-2 border-indigo-400">
               {/* Header: código pai + badge */}
               <div className="flex items-center gap-2">
                 <span className="font-mono text-sm font-bold text-indigo-600">
