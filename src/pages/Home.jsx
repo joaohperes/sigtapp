@@ -341,13 +341,35 @@ export function Home() {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero */}
-      <div className={modoUE ? "bg-gradient-to-br from-red-950 via-red-900 to-red-800" : "bg-[#0A1628] bg-gradient-to-br from-[#0A1628] via-[#0D2347] to-[#0F3460]"}>
-        <div className="mx-auto max-w-3xl px-4 pb-10 pt-8 text-center">
+      <div className={cn(
+        "relative overflow-hidden",
+        modoUE
+          ? "bg-gradient-to-br from-red-950 via-red-900 to-red-800"
+          : "bg-[#080F1E]"
+      )}>
+        {/* Dot grid */}
+        {!modoUE && (
+          <div className="pointer-events-none absolute inset-0" style={{
+            backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.055) 1px, transparent 1px)',
+            backgroundSize: '28px 28px',
+          }} />
+        )}
+        {/* Glow */}
+        {!modoUE && (
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-72" style={{
+            background: 'radial-gradient(ellipse 80% 100% at 50% -5%, rgba(56,120,255,0.18) 0%, transparent 70%)',
+          }} />
+        )}
+        {/* Bottom fade */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-10"
+          style={{ background: 'linear-gradient(to bottom, transparent, rgba(0,0,0,0.18))' }} />
+
+        <div className="relative mx-auto max-w-3xl px-4 pb-12 pt-10 text-center">
           <Link to="/" className="block hover:opacity-80 transition-opacity">
-            <h1 className="text-6xl text-white tracking-widest"
+            <h1 className="text-6xl text-white"
                 style={{ fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '0.08em' }}>SIGTAPP</h1>
           </Link>
-          <p className={cn("mt-2 text-sm tracking-wide", modoUE ? "text-red-300/80" : "text-blue-300/70")}>
+          <p className={cn("mt-2 text-sm font-medium tracking-wide", modoUE ? "text-red-300/70" : "text-blue-300/60")}>
             Procedimentos, Medicamentos e OPM do SUS · CID-10
           </p>
           <div className="mt-6">
