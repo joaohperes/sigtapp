@@ -65,10 +65,38 @@ function ProcIcon({ co_procedimento }) {
   )
 }
 
+function CidIcon() {
+  return (
+    <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-indigo-100 text-[9px] font-bold text-indigo-600">
+      CID
+    </div>
+  )
+}
+
+async function searchCids(q) {
+  const trimmed = q.trim()
+  // Se parece código CID (letra + dígito), busca por código
+  if (/^[A-Za-z]\d/i.test(trimmed)) {
+    const { data } = await supabase
+      .from('cid')
+      .select('co_cid, no_cid')
+      .ilike('co_cid', `${trimmed.toUpperCase()}%`)
+      .order('co_cid')
+      .limit(5)
+    return data || []
+  }
+  // Senão, busca por nome
+  const { data } = await supabase.rpc('search_cid_unaccent', {
+    search_terms: trimmed.toLowerCase().split(/\s+/).filter(Boolean),
+  })
+  return (data || []).slice(0, 5)
+}
+
 export function CommandMenu() {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
-  const [results, setResults] = useState([])
+  const [procs, setProcs] = useState([])
+  const [cids, setCids] = useState([])
   const [loading, setLoading] = useState(false)
   const debounceRef = useRef(null)
   const navigate = useNavigate()
@@ -85,22 +113,24 @@ export function CommandMenu() {
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [])
 
-  // Busca com debounce
+  // Busca com debounce — procedimentos + CIDs em paralelo
   useEffect(() => {
     if (!open) return
     clearTimeout(debounceRef.current)
     if (query.trim().length < 2) {
-      setResults([])
+      setProcs([])
+      setCids([])
       return
     }
     setLoading(true)
     debounceRef.current = setTimeout(async () => {
       try {
-        const { data } = await supabase.rpc('buscar_procedimentos', {
-          query: query.trim(),
-          limite: 8,
-        })
-        setResults(data || [])
+        const [{ data: procData }, cidData] = await Promise.all([
+          supabase.rpc('buscar_procedimentos', { query: query.trim(), limite: 6 }),
+          searchCids(query),
+        ])
+        setProcs(procData || [])
+        setCids(cidData)
       } finally {
         setLoading(false)
       }
@@ -111,7 +141,8 @@ export function CommandMenu() {
   const handleSelect = useCallback((to) => {
     setOpen(false)
     setQuery('')
-    setResults([])
+    setProcs([])
+    setCids([])
     navigate(to)
   }, [navigate])
 
@@ -119,13 +150,16 @@ export function CommandMenu() {
     setOpen(v)
     if (!v) {
       setQuery('')
-      setResults([])
+      setProcs([])
+      setCids([])
     }
   }
 
+  const hasResults = procs.length > 0 || cids.length > 0
+  const isSearching = query.trim().length >= 2
+
   return (
     <>
-      {/* Botão na nav para abrir (opcional, via atalho ⌘K) */}
       <button
         onClick={() => setOpen(true)}
         className="hidden items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs text-slate-500 transition hover:border-slate-300 hover:bg-white sm:flex"
@@ -139,18 +173,18 @@ export function CommandMenu() {
       </button>
 
       <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent className="overflow-hidden p-0 shadow-2xl sm:max-w-[540px] [&>button]:hidden">
+        <DialogContent className="overflow-hidden p-0 shadow-2xl sm:max-w-[560px] [&>button]:hidden">
           <VisuallyHidden.Root asChild>
-            <DialogTitle>Busca rápida de procedimentos</DialogTitle>
+            <DialogTitle>Busca rápida de procedimentos e CIDs</DialogTitle>
           </VisuallyHidden.Root>
           <Command shouldFilter={false} className="rounded-xl">
             <CommandInput
-              placeholder="Buscar procedimento, código..."
+              placeholder="Buscar procedimento, código ou CID..."
               value={query}
               onValueChange={setQuery}
             />
             <CommandList>
-              {query.trim().length < 2 ? (
+              {!isSearching ? (
                 <CommandGroup heading="Navegação rápida">
                   {NAV_SHORTCUTS.map((item) => (
                     <CommandItem
@@ -171,48 +205,73 @@ export function CommandMenu() {
                   </svg>
                   Buscando...
                 </div>
-              ) : results.length === 0 ? (
-                <CommandEmpty>Nenhum procedimento encontrado.</CommandEmpty>
+              ) : !hasResults ? (
+                <CommandEmpty>Nenhum resultado encontrado.</CommandEmpty>
               ) : (
-                <CommandGroup heading={`${results.length} resultado${results.length !== 1 ? 's' : ''}`}>
-                  {results.map((proc) => {
-                    const total = (proc.vl_sa || 0) + (proc.vl_sh || 0) + (proc.vl_sp || 0)
-                    return (
-                      <CommandItem
-                        key={proc.co_procedimento}
-                        value={proc.co_procedimento}
-                        onSelect={() => handleSelect(`/procedimento/${proc.co_procedimento}`)}
-                      >
-                        <ProcIcon co_procedimento={proc.co_procedimento} />
-                        <div className="min-w-0 flex-1">
-                          <p className="font-mono text-[10px] text-slate-400">
-                            {formatCodigo(proc.co_procedimento)}
-                          </p>
-                          <p className="truncate text-sm font-medium text-slate-800">
-                            {proc.no_procedimento}
-                          </p>
-                        </div>
-                        {total > 0 && (
-                          <span className="shrink-0 text-xs font-semibold text-emerald-600">
-                            {formatBRL(total)}
-                          </span>
-                        )}
-                      </CommandItem>
-                    )
-                  })}
-                </CommandGroup>
+                <>
+                  {procs.length > 0 && (
+                    <CommandGroup heading={`Procedimentos · ${procs.length} resultado${procs.length !== 1 ? 's' : ''}`}>
+                      {procs.map((proc) => {
+                        const total = (proc.vl_sa || 0) + (proc.vl_sh || 0) + (proc.vl_sp || 0)
+                        return (
+                          <CommandItem
+                            key={proc.co_procedimento}
+                            value={proc.co_procedimento}
+                            onSelect={() => handleSelect(`/procedimento/${proc.co_procedimento}`)}
+                          >
+                            <ProcIcon co_procedimento={proc.co_procedimento} />
+                            <div className="min-w-0 flex-1">
+                              <p className="font-mono text-[10px] text-slate-400">
+                                {formatCodigo(proc.co_procedimento)}
+                              </p>
+                              <p className="truncate text-sm font-medium text-slate-800">
+                                {proc.no_procedimento}
+                              </p>
+                            </div>
+                            {total > 0 && (
+                              <span className="shrink-0 text-xs font-semibold text-emerald-600">
+                                {formatBRL(total)}
+                              </span>
+                            )}
+                          </CommandItem>
+                        )
+                      })}
+                    </CommandGroup>
+                  )}
+
+                  {cids.length > 0 && procs.length > 0 && <CommandSeparator />}
+
+                  {cids.length > 0 && (
+                    <CommandGroup heading={`CID-10 · ${cids.length} resultado${cids.length !== 1 ? 's' : ''}`}>
+                      {cids.map((cid) => (
+                        <CommandItem
+                          key={cid.co_cid}
+                          value={cid.co_cid}
+                          onSelect={() => handleSelect(`/?q=${encodeURIComponent(cid.co_cid.trim())}`)}
+                        >
+                          <CidIcon />
+                          <div className="min-w-0 flex-1">
+                            <p className="font-mono text-[10px] text-indigo-400">
+                              {cid.co_cid.trim()}
+                            </p>
+                            <p className="truncate text-sm font-medium text-slate-800">
+                              {cid.no_cid}
+                            </p>
+                          </div>
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  )}
+                </>
               )}
             </CommandList>
 
-            {query.trim().length >= 2 && results.length > 0 && (
+            {isSearching && hasResults && (
               <>
                 <CommandSeparator />
                 <div className="px-3 py-2">
                   <button
-                    onClick={() => {
-                      setOpen(false)
-                      navigate(`/?q=${encodeURIComponent(query.trim())}`)
-                    }}
+                    onClick={() => handleSelect(`/?q=${encodeURIComponent(query.trim())}`)}
                     className="w-full rounded-lg px-3 py-2 text-left text-xs text-slate-500 transition hover:bg-slate-50"
                   >
                     Ver todos os resultados para <span className="font-medium text-slate-700">"{query}"</span> →
