@@ -365,7 +365,7 @@ export function CalculadoraPage() {
                         className={cn(
                           'rounded-xl border shadow-sm transition-all duration-150',
                           isPrincipal
-                            ? 'border-slate-200 bg-blue-50/40'
+                            ? 'border-slate-200 bg-white'
                             : warning
                               ? 'border-amber-200 bg-white'
                               : 'border-slate-200 bg-white',
