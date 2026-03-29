@@ -281,7 +281,7 @@ export function CalculadoraPage() {
 
   function getCompatWarning(co, qty, isPrincipal) {
     if (isPrincipal || !compatMap || compatEmpty) return null
-    if (!compatMap.has(co)) return 'Não consta nas compatibilidades do SIGTAP para este procedimento principal'
+    if (!compatMap.has(co)) return 'Incompatível com o procedimento principal'
     const qtMax = compatMap.get(co)
     if (qtMax && qty > qtMax) return `Quantidade máxima permitida: ${qtMax}×`
     return null
@@ -539,11 +539,6 @@ export function CalculadoraPage() {
                   {!compatLoading && compatEmpty && items.length > 1 && (
                     <div className="rounded-lg bg-slate-50 p-3 text-xs text-slate-500">
                       O procedimento principal não possui compatibilidades cadastradas no SIGTAP.
-                    </div>
-                  )}
-                  {!compatLoading && compatMap && !compatEmpty && items.length > 1 && items.slice(1).some(i => !compatMap.has(i.procedure.co_procedimento)) && (
-                    <div className="rounded-lg bg-amber-50 p-3 text-xs text-amber-700">
-                      <strong>Atenção:</strong> um ou mais procedimentos não constam nas compatibilidades do SIGTAP para este procedimento principal.
                     </div>
                   )}
                   {!compatLoading && compatMap && !compatEmpty && items.length > 1 && items.slice(1).every(i => compatMap.has(i.procedure.co_procedimento)) && (
