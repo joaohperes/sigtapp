@@ -97,7 +97,7 @@ export function CommandMenu() {
     debounceRef.current = setTimeout(async () => {
       try {
         const { data } = await supabase.rpc('buscar_procedimentos', {
-          termo: query.trim(),
+          query: query.trim(),
           limite: 8,
         })
         setResults(data || [])
