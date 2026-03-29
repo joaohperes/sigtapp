@@ -41,7 +41,7 @@ function ProcSearchInput({ onAdd, existingCodes }) {
     if (isNumeric) {
       const { data: d } = await supabase
         .from('procedimentos')
-        .select('co_procedimento, no_procedimento, vl_sa, vl_sh, vl_sp, tp_financiamento, no_financiamento')
+        .select('co_procedimento, no_procedimento, vl_sa, vl_sh, vl_sp, tp_financiamento, no_financiamento, qt_dias_perman')
         .ilike('co_procedimento', `${raw}%`)
         .limit(15)
       data = d
@@ -210,14 +210,26 @@ export function CalculadoraPage() {
   async function addByCode(co) {
     const { data } = await supabase
       .from('procedimentos')
-      .select('co_procedimento, no_procedimento, vl_sa, vl_sh, vl_sp, tp_financiamento, no_financiamento')
+      .select('co_procedimento, no_procedimento, vl_sa, vl_sh, vl_sp, tp_financiamento, no_financiamento, qt_dias_perman')
       .eq('co_procedimento', co)
       .single()
     if (data) addProcedure(data)
   }
 
+  async function addAllCompatible() {
+    const codes = compatSuggestions.map(c => c.co_procedimento_compativel)
+    if (codes.length === 0) return
+    const { data } = await supabase
+      .from('procedimentos')
+      .select('co_procedimento, no_procedimento, vl_sa, vl_sh, vl_sp, tp_financiamento, no_financiamento, qt_dias_perman')
+      .in('co_procedimento', codes)
+    if (data) data.forEach(addProcedure)
+  }
+
   function addProcedure(proc) {
-    setItems(prev => [...prev, { procedure: proc, qty: 1 }])
+    const temDiaria = proc.qt_dias_perman > 0 && proc.qt_dias_perman < 9999
+    const defaultDias = temDiaria ? proc.qt_dias_perman : 1
+    setItems(prev => [...prev, { procedure: proc, qty: 1, dias: defaultDias }])
   }
 
   function removeItem(co) {
@@ -228,6 +240,13 @@ export function CalculadoraPage() {
     if (qty < 1 || qty > 99) return
     setItems(prev => prev.map(i =>
       i.procedure.co_procedimento === co ? { ...i, qty } : i
+    ))
+  }
+
+  function setDias(co, dias) {
+    if (dias < 1 || dias > 999) return
+    setItems(prev => prev.map(i =>
+      i.procedure.co_procedimento === co ? { ...i, dias } : i
     ))
   }
 
@@ -273,9 +292,17 @@ export function CalculadoraPage() {
     setHoverIndex(null)
   }
 
-  // Totais
+  // Totais — SH multiplica por dias (para internações), SA e SP por qty
+  function itemTotalSH(item) {
+    const temDiaria = item.procedure.qt_dias_perman > 0 && item.procedure.qt_dias_perman < 9999
+    return (item.procedure.vl_sh || 0) * (temDiaria ? item.dias : item.qty)
+  }
+  function itemTotal(item) {
+    return (item.procedure.vl_sa || 0) * item.qty + itemTotalSH(item) + (item.procedure.vl_sp || 0) * item.qty
+  }
+
   const totalSA = items.reduce((s, i) => s + (i.procedure.vl_sa || 0) * i.qty, 0)
-  const totalSH = items.reduce((s, i) => s + (i.procedure.vl_sh || 0) * i.qty, 0)
+  const totalSH = items.reduce((s, i) => s + itemTotalSH(i), 0)
   const totalSP = items.reduce((s, i) => s + (i.procedure.vl_sp || 0) * i.qty, 0)
   const totalGeral = totalSA + totalSH + totalSP
 
@@ -285,6 +312,10 @@ export function CalculadoraPage() {
     const qtMax = compatMap.get(co)
     if (qtMax && qty > qtMax) return `Quantidade máxima permitida: ${qtMax}×`
     return null
+  }
+
+  function hasDiaria(proc) {
+    return (proc.qt_dias_perman || 0) > 0 && (proc.qt_dias_perman || 0) < 9999
   }
 
   const compatSuggestions = compatList
@@ -341,12 +372,13 @@ export function CalculadoraPage() {
                 </div>
 
                 {items.map((item, index) => {
-                  const { procedure: proc, qty } = item
+                  const { procedure: proc, qty, dias } = item
                   const isPrincipal = index === 0
                   const estilo = GRUPO_MAP[proc.co_procedimento?.slice(0, 2)]
                   const warning = getCompatWarning(proc.co_procedimento, qty, isPrincipal)
                   const isCompat = compatMap && !isPrincipal && compatMap.has(proc.co_procedimento)
-                  const total = totalOf(proc) * qty
+                  const total = itemTotal(item)
+                  const temDiaria = hasDiaria(proc)
                   const isDragTarget = hoverIndex === index && dragIndexRef.current !== index
 
                   return (
@@ -446,28 +478,72 @@ export function CalculadoraPage() {
                                 <p className="text-base font-bold text-emerald-600">{formatBRL(total)}</p>
                               </div>
 
-                              <div className="flex items-center gap-1">
-                                <button
-                                  onClick={() => setQty(proc.co_procedimento, qty - 1)}
-                                  disabled={qty <= 1}
-                                  className="flex h-6 w-6 items-center justify-center rounded-md border border-slate-200
-                                             text-slate-600 transition hover:bg-slate-100 disabled:opacity-40"
-                                >
-                                  <svg className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fillRule="evenodd" d="M3 10a.75.75 0 01.75-.75h12.5a.75.75 0 010 1.5H3.75A.75.75 0 013 10z" clipRule="evenodd" />
-                                  </svg>
-                                </button>
-                                <span className="w-6 text-center text-sm font-semibold tabular-nums text-slate-800">{qty}</span>
-                                <button
-                                  onClick={() => setQty(proc.co_procedimento, qty + 1)}
-                                  disabled={qty >= 99}
-                                  className="flex h-6 w-6 items-center justify-center rounded-md border border-slate-200
-                                             text-slate-600 transition hover:bg-slate-100 disabled:opacity-40"
-                                >
-                                  <svg className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
-                                    <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
-                                  </svg>
-                                </button>
+                              {/* Contador de quantidade */}
+                              <div className="flex flex-col items-end gap-1">
+                                <div className="flex items-center gap-1">
+                                  <span className="text-[10px] text-slate-400 mr-0.5">Qtd</span>
+                                  <button
+                                    onClick={() => setQty(proc.co_procedimento, qty - 1)}
+                                    disabled={qty <= 1}
+                                    className="flex h-6 w-6 items-center justify-center rounded-md border border-slate-200
+                                               text-slate-600 transition hover:bg-slate-100 disabled:opacity-40"
+                                  >
+                                    <svg className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                                      <path fillRule="evenodd" d="M3 10a.75.75 0 01.75-.75h12.5a.75.75 0 010 1.5H3.75A.75.75 0 013 10z" clipRule="evenodd" />
+                                    </svg>
+                                  </button>
+                                  <span className="w-6 text-center text-sm font-semibold tabular-nums text-slate-800">{qty}</span>
+                                  <button
+                                    onClick={() => setQty(proc.co_procedimento, qty + 1)}
+                                    disabled={qty >= 99}
+                                    className="flex h-6 w-6 items-center justify-center rounded-md border border-slate-200
+                                               text-slate-600 transition hover:bg-slate-100 disabled:opacity-40"
+                                  >
+                                    <svg className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                                      <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
+                                    </svg>
+                                  </button>
+                                </div>
+
+                                {/* Contador de diárias — só para procedimentos com internação */}
+                                {temDiaria && (
+                                  <div className="flex items-center gap-1">
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <span className="text-[10px] text-slate-400 mr-0.5 cursor-help underline decoration-dotted">
+                                          Diárias
+                                        </span>
+                                      </TooltipTrigger>
+                                      <TooltipContent side="left" className="text-xs max-w-[180px]">
+                                        Mínimo de {proc.qt_dias_perman} diária{proc.qt_dias_perman !== 1 ? 's' : ''} para pagamento. O SH é multiplicado pelo número de diárias.
+                                      </TooltipContent>
+                                    </Tooltip>
+                                    <button
+                                      onClick={() => setDias(proc.co_procedimento, dias - 1)}
+                                      disabled={dias <= 1}
+                                      className="flex h-6 w-6 items-center justify-center rounded-md border border-slate-200
+                                                 text-slate-600 transition hover:bg-slate-100 disabled:opacity-40"
+                                    >
+                                      <svg className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fillRule="evenodd" d="M3 10a.75.75 0 01.75-.75h12.5a.75.75 0 010 1.5H3.75A.75.75 0 013 10z" clipRule="evenodd" />
+                                      </svg>
+                                    </button>
+                                    <span className={cn(
+                                      'w-6 text-center text-sm font-semibold tabular-nums',
+                                      dias < proc.qt_dias_perman ? 'text-amber-600' : 'text-slate-800',
+                                    )}>{dias}</span>
+                                    <button
+                                      onClick={() => setDias(proc.co_procedimento, dias + 1)}
+                                      disabled={dias >= 999}
+                                      className="flex h-6 w-6 items-center justify-center rounded-md border border-slate-200
+                                                 text-slate-600 transition hover:bg-slate-100 disabled:opacity-40"
+                                    >
+                                      <svg className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                                        <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
+                                      </svg>
+                                    </button>
+                                  </div>
+                                )}
                               </div>
 
                               <button
@@ -553,10 +629,21 @@ export function CalculadoraPage() {
               {!compatLoading && compatSuggestions.length > 0 && (
                 <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
                   <div className="border-b border-slate-100 px-5 py-3">
-                    <h2 className="text-sm font-bold text-slate-800">Compatíveis com o principal</h2>
-                    <p className="text-[11px] text-slate-400 mt-0.5">
-                      {compatSuggestions.length} ainda não adicionado{compatSuggestions.length !== 1 ? 's' : ''}
-                    </p>
+                    <div className="flex items-center justify-between gap-2">
+                      <div>
+                        <h2 className="text-sm font-bold text-slate-800">Compatíveis com o principal</h2>
+                        <p className="text-[11px] text-slate-400 mt-0.5">
+                          {compatSuggestions.length} ainda não adicionado{compatSuggestions.length !== 1 ? 's' : ''}
+                        </p>
+                      </div>
+                      <button
+                        onClick={addAllCompatible}
+                        className="shrink-0 rounded-lg border border-slate-200 px-2.5 py-1 text-[11px] font-medium
+                                   text-slate-600 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700"
+                      >
+                        Adicionar todos
+                      </button>
+                    </div>
                   </div>
                   <div className="divide-y divide-slate-50">
                     {visibleSuggestions.map((c) => {
