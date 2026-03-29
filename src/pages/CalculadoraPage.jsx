@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { formatBRL, formatCodigo } from '../utils/formatters'
@@ -43,11 +43,11 @@ function ProcSearchInput({ onAdd, existingCodes }) {
         .from('procedimentos')
         .select('co_procedimento, no_procedimento, vl_sa, vl_sh, vl_sp, tp_financiamento, no_financiamento')
         .ilike('co_procedimento', `${raw}%`)
-        .limit(8)
+        .limit(15)
       data = d
     } else {
       const { expanded } = expandirSinonimos(raw)
-      const { data: d } = await supabase.rpc('buscar_procedimentos', { query: expanded, limite: 8 })
+      const { data: d } = await supabase.rpc('buscar_procedimentos', { query: expanded, limite: 15 })
       data = d
     }
 
@@ -68,6 +68,12 @@ function ProcSearchInput({ onAdd, existingCodes }) {
     setQuery('')
     setResults([])
     setOpen(false)
+  }
+
+  // Exposto para uso externo (sugestões de compatíveis)
+  ProcSearchInput.prefill = (term) => {
+    setQuery(term)
+    doSearch(term)
   }
 
   return (
@@ -100,8 +106,8 @@ function ProcSearchInput({ onAdd, existingCodes }) {
       </div>
 
       {open && results.length > 0 && (
-        <div className="absolute left-0 right-0 top-full z-50 mt-1.5 overflow-hidden rounded-xl
-                        bg-white shadow-[0_8px_32px_rgba(0,0,0,0.14)] ring-1 ring-black/5">
+        <div className="absolute left-0 right-0 top-full z-50 mt-1.5 max-h-72 overflow-y-auto
+                        rounded-xl bg-white shadow-[0_8px_32px_rgba(0,0,0,0.14)] ring-1 ring-black/5">
           {results.map((proc) => {
             const estilo = GRUPO_MAP[proc.co_procedimento?.slice(0, 2)]
             const alreadyAdded = existingCodes.has(proc.co_procedimento)
@@ -140,7 +146,7 @@ function ProcSearchInput({ onAdd, existingCodes }) {
 
 function WarningIcon() {
   return (
-    <svg className="h-4 w-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <svg className="h-4 w-4 shrink-0 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
         d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
     </svg>
@@ -167,32 +173,46 @@ function TrashIcon() {
 export function CalculadoraPage() {
   // items: { procedure, qty, isPrincipal }
   const [items, setItems] = useState([])
-  // compatibilidades do procedimento principal: Map<co_procedimento_compativel, qt_permitida>
-  const [compatMap, setCompatMap] = useState(null)
+  // lista completa de compatibilidades do principal: { co_procedimento_compativel, no_procedimento_compativel, qt_permitida }
+  const [compatList, setCompatList] = useState(null)
   const [compatLoading, setCompatLoading] = useState(false)
+  const [showAllCompat, setShowAllCompat] = useState(false)
 
   const principalItem = items.find(i => i.isPrincipal)
   const existingCodes = new Set(items.map(i => i.procedure.co_procedimento))
 
+  // Map derivado para lookup O(1)
+  const compatMap = compatList
+    ? new Map(compatList.map(r => [r.co_procedimento_compativel, r.qt_permitida]))
+    : null
+
+  const compatEmpty = compatList !== null && compatList.length === 0
+
   // Quando o procedimento principal muda, busca suas compatibilidades
   useEffect(() => {
-    if (!principalItem) { setCompatMap(null); return }
+    if (!principalItem) { setCompatList(null); setShowAllCompat(false); return }
 
     setCompatLoading(true)
     supabase
       .from('procedimento_compatibilidades')
-      .select('co_procedimento_compativel, qt_permitida')
+      .select('co_procedimento_compativel, no_procedimento_compativel, qt_permitida')
       .eq('co_procedimento', principalItem.procedure.co_procedimento)
+      .order('no_procedimento_compativel')
       .then(({ data }) => {
-        if (data) {
-          const map = new Map(data.map(r => [r.co_procedimento_compativel, r.qt_permitida]))
-          setCompatMap(map)
-        } else {
-          setCompatMap(new Map())
-        }
+        setCompatList(data ?? [])
         setCompatLoading(false)
       })
   }, [principalItem?.procedure.co_procedimento])
+
+  async function addByCode(co, name) {
+    // Busca os dados completos do procedimento pelo código
+    const { data } = await supabase
+      .from('procedimentos')
+      .select('co_procedimento, no_procedimento, vl_sa, vl_sh, vl_sp, tp_financiamento, no_financiamento')
+      .eq('co_procedimento', co)
+      .single()
+    if (data) addProcedure(data)
+  }
 
   function addProcedure(proc) {
     setItems(prev => {
@@ -204,7 +224,6 @@ export function CalculadoraPage() {
   function removeItem(co) {
     setItems(prev => {
       const remaining = prev.filter(i => i.procedure.co_procedimento !== co)
-      // Se o principal foi removido, promover o primeiro restante
       if (remaining.length > 0 && !remaining.some(i => i.isPrincipal)) {
         remaining[0] = { ...remaining[0], isPrincipal: true }
       }
@@ -225,7 +244,7 @@ export function CalculadoraPage() {
 
   function clearAll() {
     setItems([])
-    setCompatMap(null)
+    setCompatList(null)
   }
 
   // Totais
@@ -236,12 +255,19 @@ export function CalculadoraPage() {
 
   function getCompatWarning(item) {
     if (!principalItem || item.isPrincipal || !compatMap) return null
+    if (compatEmpty) return null // sem dados cadastrados, não avisar
     const co = item.procedure.co_procedimento
-    if (!compatMap.has(co)) return 'Não listado como compatível com o procedimento principal'
+    if (!compatMap.has(co)) return 'Fora da tabela de compatibilidades do SIGTAP para este procedimento principal'
     const qtMax = compatMap.get(co)
-    if (qtMax && item.qty > qtMax) return `Quantidade máxima permitida: ${qtMax}`
+    if (qtMax && item.qty > qtMax) return `Quantidade máxima permitida pelo SIGTAP: ${qtMax}`
     return null
   }
+
+  // Compatíveis ainda não adicionados
+  const compatSuggestions = compatList
+    ? compatList.filter(c => !existingCodes.has(c.co_procedimento_compativel))
+    : []
+  const visibleSuggestions = showAllCompat ? compatSuggestions : compatSuggestions.slice(0, 5)
 
   return (
     <TooltipProvider>
@@ -283,10 +309,7 @@ export function CalculadoraPage() {
                   <p className="text-sm font-semibold text-slate-700">
                     {items.length} procedimento{items.length !== 1 ? 's' : ''}
                   </p>
-                  <button
-                    onClick={clearAll}
-                    className="text-xs text-slate-400 hover:text-red-500 transition"
-                  >
+                  <button onClick={clearAll} className="text-xs text-slate-400 hover:text-red-500 transition">
                     Limpar tudo
                   </button>
                 </div>
@@ -295,6 +318,7 @@ export function CalculadoraPage() {
                   const { procedure: proc, qty, isPrincipal } = item
                   const estilo = GRUPO_MAP[proc.co_procedimento?.slice(0, 2)]
                   const warning = getCompatWarning(item)
+                  const isCompat = compatMap && !isPrincipal && compatMap.has(proc.co_procedimento)
                   const total = totalOf(proc) * qty
 
                   return (
@@ -343,14 +367,14 @@ export function CalculadoraPage() {
                               {proc.vl_sp > 0 && <span>Prof: <strong className="text-slate-700">{formatBRL(proc.vl_sp)}</strong></span>}
                             </div>
 
-                            {/* Aviso de compatibilidade */}
+                            {/* Status de compatibilidade */}
                             {warning && (
-                              <div className="mt-2 flex items-center gap-1.5 rounded-lg bg-amber-50 px-2.5 py-1.5">
+                              <div className="mt-2 flex items-start gap-1.5 rounded-lg bg-amber-50 px-2.5 py-1.5">
                                 <WarningIcon />
                                 <p className="text-xs text-amber-700">{warning}</p>
                               </div>
                             )}
-                            {compatMap && !isPrincipal && !warning && (
+                            {isCompat && !warning && (
                               <div className="mt-2 flex items-center gap-1.5">
                                 <CheckIcon />
                                 <p className="text-xs text-emerald-600">Compatível com o procedimento principal</p>
@@ -360,13 +384,12 @@ export function CalculadoraPage() {
 
                           {/* Controles direita */}
                           <div className="flex shrink-0 flex-col items-end gap-2">
-                            {/* Total linha */}
                             <div className="text-right">
                               <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Total</p>
                               <p className="text-base font-bold text-emerald-600">{formatBRL(total)}</p>
                             </div>
 
-                            {/* Controle de quantidade */}
+                            {/* Quantidade */}
                             <div className="flex items-center gap-1">
                               <button
                                 onClick={() => setQty(proc.co_procedimento, qty - 1)}
@@ -378,9 +401,7 @@ export function CalculadoraPage() {
                                   <path fillRule="evenodd" d="M3 10a.75.75 0 01.75-.75h12.5a.75.75 0 010 1.5H3.75A.75.75 0 013 10z" clipRule="evenodd" />
                                 </svg>
                               </button>
-                              <span className="w-6 text-center text-sm font-semibold tabular-nums text-slate-800">
-                                {qty}
-                              </span>
+                              <span className="w-6 text-center text-sm font-semibold tabular-nums text-slate-800">{qty}</span>
                               <button
                                 onClick={() => setQty(proc.co_procedimento, qty + 1)}
                                 disabled={qty >= 99}
@@ -432,69 +453,124 @@ export function CalculadoraPage() {
 
             {items.length === 0 && (
               <div className="rounded-xl border border-dashed border-slate-300 bg-white p-12 text-center">
-                <p className="text-sm text-slate-400">
-                  Nenhum procedimento adicionado ainda.
-                </p>
-                <p className="mt-1 text-xs text-slate-300">
-                  Use o campo acima para buscar e adicionar procedimentos.
-                </p>
+                <p className="text-sm text-slate-400">Nenhum procedimento adicionado ainda.</p>
+                <p className="mt-1 text-xs text-slate-300">Use o campo acima para buscar e adicionar procedimentos.</p>
               </div>
             )}
           </div>
 
-          {/* Painel de resumo */}
+          {/* Painel lateral */}
           <div className="mt-4 lg:mt-0">
-            <div className="sticky top-[72px] rounded-xl border border-slate-200 bg-white shadow-sm">
-              <div className="border-b border-slate-100 px-5 py-4">
-                <h2 className="text-sm font-bold text-slate-800">Resumo do faturamento</h2>
+            <div className="sticky top-[72px] space-y-3">
+
+              {/* Resumo financeiro */}
+              <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
+                <div className="border-b border-slate-100 px-5 py-4">
+                  <h2 className="text-sm font-bold text-slate-800">Resumo do faturamento</h2>
+                </div>
+                <div className="p-5 space-y-3">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-slate-500">Ambulatorial (SA)</span>
+                      <span className="font-semibold tabular-nums text-slate-800">{formatBRL(totalSA)}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-slate-500">Hospitalar (SH)</span>
+                      <span className="font-semibold tabular-nums text-slate-800">{formatBRL(totalSH)}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-slate-500">Profissional (SP)</span>
+                      <span className="font-semibold tabular-nums text-slate-800">{formatBRL(totalSP)}</span>
+                    </div>
+                  </div>
+                  <div className="border-t border-slate-200 pt-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-bold text-slate-700">Total SUS</span>
+                      <span className="text-xl font-bold tabular-nums text-emerald-600">{formatBRL(totalGeral)}</span>
+                    </div>
+                    <p className="mt-1 text-[11px] text-slate-400">
+                      {items.reduce((s, i) => s + i.qty, 0)} procedimento{items.reduce((s, i) => s + i.qty, 0) !== 1 ? 's' : ''} · {items.length} tipo{items.length !== 1 ? 's' : ''}
+                    </p>
+                  </div>
+
+                  {/* Status de compatibilidade geral */}
+                  {compatLoading && (
+                    <p className="text-xs text-slate-400">Verificando compatibilidades…</p>
+                  )}
+                  {!compatLoading && items.length > 1 && !principalItem && (
+                    <div className="rounded-lg bg-slate-50 p-3 text-xs text-slate-500">
+                      Marque um procedimento como <strong>principal</strong> para verificar compatibilidades.
+                    </div>
+                  )}
+                  {!compatLoading && compatEmpty && items.length > 1 && (
+                    <div className="rounded-lg bg-slate-50 p-3 text-xs text-slate-500">
+                      O procedimento principal não possui compatibilidades cadastradas no SIGTAP.
+                    </div>
+                  )}
+                  {!compatLoading && compatMap && !compatEmpty && items.length > 1 && items.filter(i => !i.isPrincipal).some(i => !compatMap.has(i.procedure.co_procedimento)) && (
+                    <div className="rounded-lg bg-amber-50 p-3 text-xs text-amber-700">
+                      <strong>Atenção:</strong> um ou mais procedimentos não constam na tabela de compatibilidades do SIGTAP para o procedimento principal.
+                    </div>
+                  )}
+                  {!compatLoading && compatMap && !compatEmpty && items.length > 1 && items.filter(i => !i.isPrincipal).every(i => compatMap.has(i.procedure.co_procedimento)) && (
+                    <div className="rounded-lg bg-emerald-50 p-3 text-xs text-emerald-700">
+                      Todos os procedimentos são compatíveis entre si.
+                    </div>
+                  )}
+                </div>
               </div>
 
-              <div className="p-5 space-y-3">
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-slate-500">Ambulatorial (SA)</span>
-                    <span className="font-semibold tabular-nums text-slate-800">{formatBRL(totalSA)}</span>
+              {/* Sugestões de compatíveis */}
+              {!compatLoading && compatSuggestions.length > 0 && (
+                <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
+                  <div className="border-b border-slate-100 px-5 py-3">
+                    <h2 className="text-sm font-bold text-slate-800">Compatíveis com o principal</h2>
+                    <p className="text-[11px] text-slate-400 mt-0.5">
+                      {compatSuggestions.length} procedimento{compatSuggestions.length !== 1 ? 's' : ''} ainda não adicionado{compatSuggestions.length !== 1 ? 's' : ''}
+                    </p>
                   </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-slate-500">Hospitalar (SH)</span>
-                    <span className="font-semibold tabular-nums text-slate-800">{formatBRL(totalSH)}</span>
+                  <div className="divide-y divide-slate-50">
+                    {visibleSuggestions.map((c) => {
+                      const estilo = GRUPO_MAP[c.co_procedimento_compativel?.slice(0, 2)]
+                      return (
+                        <div key={c.co_procedimento_compativel} className="flex items-center gap-2 px-4 py-2.5">
+                          {estilo && <div className={`h-5 w-1 shrink-0 rounded-full ${estilo.dot}`} />}
+                          <div className="min-w-0 flex-1">
+                            <p className="font-mono text-[10px] text-slate-400">{formatCodigo(c.co_procedimento_compativel)}</p>
+                            <p className="truncate text-xs font-medium text-slate-700">{c.no_procedimento_compativel}</p>
+                            {c.qt_permitida > 0 && (
+                              <p className="text-[10px] text-slate-400">máx. {c.qt_permitida}×</p>
+                            )}
+                          </div>
+                          <button
+                            onClick={() => addByCode(c.co_procedimento_compativel, c.no_procedimento_compativel)}
+                            className="shrink-0 rounded-lg border border-slate-200 p-1 text-slate-400
+                                       transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600"
+                            title="Adicionar"
+                          >
+                            <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                              <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
+                            </svg>
+                          </button>
+                        </div>
+                      )
+                    })}
                   </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-slate-500">Profissional (SP)</span>
-                    <span className="font-semibold tabular-nums text-slate-800">{formatBRL(totalSP)}</span>
-                  </div>
+                  {compatSuggestions.length > 5 && (
+                    <div className="border-t border-slate-50 px-4 py-2.5">
+                      <button
+                        onClick={() => setShowAllCompat(v => !v)}
+                        className="text-xs text-blue-600 hover:text-blue-700 transition"
+                      >
+                        {showAllCompat
+                          ? 'Ver menos'
+                          : `Ver mais ${compatSuggestions.length - 5} procedimentos`}
+                      </button>
+                    </div>
+                  )}
                 </div>
+              )}
 
-                <div className="border-t border-slate-200 pt-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-bold text-slate-700">Total SUS</span>
-                    <span className="text-xl font-bold tabular-nums text-emerald-600">{formatBRL(totalGeral)}</span>
-                  </div>
-                  <p className="mt-1 text-[11px] text-slate-400">
-                    {items.reduce((s, i) => s + i.qty, 0)} procedimento{items.reduce((s, i) => s + i.qty, 0) !== 1 ? 's' : ''} · {items.length} tipo{items.length !== 1 ? 's' : ''}
-                  </p>
-                </div>
-
-                {/* Alerta de compatibilidade */}
-                {compatLoading && (
-                  <p className="text-xs text-slate-400">Verificando compatibilidades…</p>
-                )}
-                {!compatLoading && items.length > 1 && !principalItem && (
-                  <div className="rounded-lg bg-slate-50 p-3 text-xs text-slate-500">
-                    Marque um procedimento como <strong>principal</strong> para verificar compatibilidades.
-                  </div>
-                )}
-                {!compatLoading && compatMap && items.filter(i => !i.isPrincipal).some(i => !compatMap.has(i.procedure.co_procedimento)) && (
-                  <div className="rounded-lg bg-amber-50 p-3 text-xs text-amber-700">
-                    <strong>Atenção:</strong> um ou mais procedimentos não constam na lista de compatíveis do procedimento principal.
-                  </div>
-                )}
-                {!compatLoading && compatMap && items.filter(i => !i.isPrincipal).every(i => compatMap.has(i.procedure.co_procedimento)) && items.length > 1 && (
-                  <div className="rounded-lg bg-emerald-50 p-3 text-xs text-emerald-700">
-                    Todos os procedimentos são compatíveis entre si.
-                  </div>
-                )}
-              </div>
             </div>
           </div>
         </main>
