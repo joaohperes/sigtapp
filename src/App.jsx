@@ -8,6 +8,9 @@ import { AnamnesePage } from './pages/AnamnesePage'
 import { FavoritosPage } from './pages/FavoritosPage'
 import { CalculadoraPage } from './pages/CalculadoraPage'
 import { AppNav } from './components/AppNav'
+import { CommandMenu } from './components/CommandMenu'
+import { TooltipProvider } from '@/components/ui/tooltip'
+import { Toaster } from 'sonner'
 
 class ErrorBoundary extends Component {
   constructor(props) { super(props); this.state = { error: null } }
@@ -34,27 +37,30 @@ class ErrorBoundary extends Component {
 export default function App() {
   return (
     <BrowserRouter>
-      <AppNav />
-      <ErrorBoundary>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/grupo/:co" element={<GroupPage />} />
-          <Route path="/procedimento/:codigo" element={<ProcedureDetail />} />
-          <Route path="/cid" element={<CidSearch />} />
-          <Route path="/anamnese" element={<AnamnesePage />} />
-          <Route path="/favoritos" element={<FavoritosPage />} />
-          <Route path="/calculadora" element={<CalculadoraPage />} />
-        </Routes>
-      </ErrorBoundary>
-      <footer className="border-t border-slate-100 bg-white py-5 text-center">
-        <p className="text-xs text-slate-400">
-          Desenvolvido por{' '}
-          <span className="font-medium text-blue-400">@joaohperes</span>
-          {' '}com{' '}
-          <img src="/claude-icon.ico" alt="Claude" className="mb-0.5 inline h-3.5 w-3.5" />
-          {' '}<span className="font-medium text-orange-400">Claude</span>
-        </p>
-      </footer>
+      <TooltipProvider delayDuration={300}>
+        <AppNav />
+        <ErrorBoundary>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/grupo/:co" element={<GroupPage />} />
+            <Route path="/procedimento/:codigo" element={<ProcedureDetail />} />
+            <Route path="/cid" element={<CidSearch />} />
+            <Route path="/anamnese" element={<AnamnesePage />} />
+            <Route path="/favoritos" element={<FavoritosPage />} />
+            <Route path="/calculadora" element={<CalculadoraPage />} />
+          </Routes>
+        </ErrorBoundary>
+        <footer className="border-t border-slate-100 bg-white py-5 text-center">
+          <p className="text-xs text-slate-400">
+            Desenvolvido por{' '}
+            <span className="font-medium text-blue-400">@joaohperes</span>
+            {' '}com{' '}
+            <img src="/claude-icon.ico" alt="Claude" className="mb-0.5 inline h-3.5 w-3.5" />
+            {' '}<span className="font-medium text-orange-400">Claude</span>
+          </p>
+        </footer>
+        <Toaster position="bottom-right" richColors />
+      </TooltipProvider>
     </BrowserRouter>
   )
 }

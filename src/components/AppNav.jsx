@@ -1,6 +1,7 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useModoUE } from '../contexts/ModoUEContext'
 import { useFavoritos } from '../contexts/FavoritosContext'
+import { CommandMenu } from './CommandMenu'
 import { cn } from '@/lib/utils'
 
 function NavLink({ to, label, active, modoUE, badge }) {
@@ -64,6 +65,9 @@ export function AppNav() {
         </div>
 
         <div className="flex-1" />
+
+        {/* Command palette trigger */}
+        {!modoUE && <CommandMenu />}
 
         {/* Modo emergência toggle */}
         <button
