@@ -141,6 +141,16 @@ export function Home() {
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Resetar ao navegar para / sem query (ex: clicar no logo)
+  useEffect(() => {
+    if (!searchParams.get('q') && searched) {
+      setSearched(false)
+      setCidResults([])
+      setShowAllCids(false)
+      search('')
+    }
+  }, [searchParams]) // eslint-disable-line react-hooks/exhaustive-deps
+
   // Resetar paginação ao mudar resultados ou filtros
   useEffect(() => {
     setVisibleCount(PAGE_SIZE)
