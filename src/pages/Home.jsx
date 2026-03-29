@@ -130,6 +130,8 @@ export function Home() {
   // CID results para busca universal
   const [cidResults, setCidResults] = useState([])
   const [cidLoading, setCidLoading] = useState(false)
+  const [showAllCids, setShowAllCids] = useState(false)
+  const CID_PREVIEW = 8
 
   // Busca inicial via URL
   useEffect(() => {
@@ -231,6 +233,7 @@ export function Home() {
       setSortKey('relevancia')
       setSelectedGroup(null)
       setSelectedSubgroup(null)
+      setShowAllCids(false)
       if (searchMode !== 'codigo') searchCids(q)
       else setCidResults([])
     } else {
@@ -378,50 +381,59 @@ export function Home() {
 
         {/* CID results — busca universal */}
         {(cidLoading || cidResults.length > 0) && (
-          <div className="mb-5 overflow-hidden rounded-xl border border-indigo-100 bg-indigo-50/60 p-4">
-            <p className="mb-2.5 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-indigo-500">
-              <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              Diagnósticos CID-10 relacionados
-            </p>
-            <div className="grid gap-x-4 gap-y-0.5 sm:grid-cols-2">
+          <div className="mb-5 overflow-hidden rounded-xl border border-indigo-100 bg-indigo-50/60">
+            <div className="flex items-center justify-between px-4 pt-3.5 pb-2">
+              <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-indigo-500">
+                <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Diagnósticos CID-10 relacionados
+              </p>
+              {!cidLoading && cidResults.length > 0 && (
+                <span className="text-[11px] text-indigo-400">{cidResults.length} resultado{cidResults.length !== 1 ? 's' : ''}</span>
+              )}
+            </div>
+
+            <div className="divide-y divide-indigo-100/80 border-t border-indigo-100">
               {cidLoading
-                ? Array.from({ length: 6 }).map((_, i) => (
-                    <div key={i} className="flex items-center gap-3 px-2 py-1.5">
+                ? Array.from({ length: 4 }).map((_, i) => (
+                    <div key={i} className="flex items-center gap-3 px-4 py-3">
                       <Skeleton className="h-4 w-10 shrink-0" />
                       <Skeleton className="h-4 flex-1" />
                       <Skeleton className="h-6 w-24 shrink-0 rounded-md" />
                     </div>
                   ))
-                : cidResults.map((cid) => (
-                    <TooltipProvider key={cid.co_cid} delayDuration={300}>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <div className="flex items-center gap-3 rounded-lg px-2 py-1.5 hover:bg-indigo-100/60 transition cursor-default">
-                            <span className="w-12 shrink-0 font-mono text-sm font-bold text-indigo-700">
-                              {cid.co_cid.trim()}
-                            </span>
-                            <span className="flex-1 text-sm text-slate-700 truncate">{cid.no_cid?.trim()}</span>
-                            <button
-                              onClick={() => handleCidSelect(cid.co_cid.trim())}
-                              className="shrink-0 rounded-md border border-blue-200 bg-white px-2.5 py-1
-                                         text-xs font-medium text-blue-600 hover:bg-blue-50 transition"
-                            >
-                              Procedimentos →
-                            </button>
-                          </div>
-                        </TooltipTrigger>
-                        <TooltipContent side="top" className="max-w-xs">
-                          <span className="font-mono font-bold mr-1">{cid.co_cid.trim()}</span>
-                          {cid.no_cid?.trim()}
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
+                : (showAllCids ? cidResults : cidResults.slice(0, CID_PREVIEW)).map((cid) => (
+                    <div key={cid.co_cid} className="flex items-center gap-3 px-4 py-2.5 hover:bg-indigo-100/50 transition">
+                      <span className="w-12 shrink-0 font-mono text-sm font-bold text-indigo-700">
+                        {cid.co_cid.trim()}
+                      </span>
+                      <span className="flex-1 text-sm text-slate-700 leading-snug">{cid.no_cid?.trim()}</span>
+                      <button
+                        onClick={() => handleCidSelect(cid.co_cid.trim())}
+                        className="shrink-0 rounded-md border border-indigo-200 bg-white px-2.5 py-1
+                                   text-xs font-medium text-indigo-600 hover:bg-indigo-50 transition"
+                      >
+                        Procedimentos →
+                      </button>
+                    </div>
                   ))
               }
             </div>
+
+            {!cidLoading && cidResults.length > CID_PREVIEW && (
+              <div className="border-t border-indigo-100 px-4 py-2.5">
+                <button
+                  onClick={() => setShowAllCids(v => !v)}
+                  className="text-xs font-medium text-indigo-600 hover:text-indigo-700 transition"
+                >
+                  {showAllCids
+                    ? 'Ver menos'
+                    : `Ver mais ${cidResults.length - CID_PREVIEW} diagnósticos`}
+                </button>
+              </div>
+            )}
           </div>
         )}
 
