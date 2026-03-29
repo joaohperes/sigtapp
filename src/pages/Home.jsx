@@ -413,7 +413,7 @@ export function Home() {
                             </button>
                           </div>
                         </TooltipTrigger>
-                        <TooltipContent side="top" className="max-w-xs text-center">
+                        <TooltipContent side="top" className="max-w-xs">
                           <span className="font-mono font-bold mr-1">{cid.co_cid.trim()}</span>
                           {cid.no_cid?.trim()}
                         </TooltipContent>
