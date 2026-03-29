@@ -1,27 +1,5 @@
 import { Link } from 'react-router-dom'
 import { toast } from 'sonner'
-
-function CopyIcon() {
-  return (
-    <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-        d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-    </svg>
-  )
-}
-
-function CopyButton({ value, className = '' }) {
-  return (
-    <button
-      type="button"
-      onClick={(e) => { e.stopPropagation(); e.preventDefault(); navigator.clipboard.writeText(value); toast.success('Código copiado!', { duration: 1500 }) }}
-      className={`rounded p-0.5 text-slate-300 transition hover:bg-slate-100 hover:text-slate-500 ${className}`}
-      title="Copiar código"
-    >
-      <CopyIcon />
-    </button>
-  )
-}
 import { formatBRL, formatCodigo } from '../utils/formatters'
 import { GRUPO_MAP } from '../data/grupos'
 import { useFavoritos } from '../contexts/FavoritosContext'
@@ -30,6 +8,27 @@ import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
+
+function CopyButton({ value, className = '' }) {
+  return (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation()
+        e.preventDefault()
+        navigator.clipboard.writeText(value)
+        toast.success('Código copiado!', { duration: 1500 })
+      }}
+      className={`rounded p-0.5 text-slate-300 transition hover:bg-slate-100 hover:text-slate-500 ${className}`}
+      title="Copiar código"
+    >
+      <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+          d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+      </svg>
+    </button>
+  )
+}
 
 function StarIcon({ filled }) {
   return (
@@ -90,27 +89,36 @@ export function ProcedureCard({ procedure, onSelect, compareMode, compareSelecte
 
   const inner = (
     <Card className={cn(
-      'overflow-hidden transition-shadow duration-200 group-hover:shadow-[0_4px_20px_rgba(15,23,42,0.09),0_1px_4px_rgba(15,23,42,0.05)]',
+      'overflow-hidden border-slate-100 bg-white transition-all duration-200',
+      'group-hover:shadow-[0_4px_20px_rgba(15,23,42,0.1),0_1px_4px_rgba(15,23,42,0.06)] group-hover:-translate-y-0.5',
       compareSelected && 'ring-2 ring-blue-500 ring-offset-1',
     )}>
-      {estilo && <div className={cn('h-1 w-full', estilo.dot)} />}
-      <CardContent className="flex flex-1 flex-col p-4">
-        <div className="flex items-start justify-between gap-3">
+      <div className="flex min-h-[88px]">
+        {/* Barra lateral colorida */}
+        {estilo && (
+          <div className={cn('w-1 shrink-0 self-stretch', estilo.dot)} />
+        )}
+
+        <CardContent className="flex flex-1 items-start gap-3 p-4">
+          {compareMode && (
+            <input
+              type="checkbox"
+              checked={!!compareSelected}
+              onChange={() => onToggleCompare?.(procedure)}
+              onClick={e => e.stopPropagation()}
+              className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-blue-600 cursor-pointer"
+            />
+          )}
+
+          {/* Conteúdo principal */}
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-1">
-              {compareMode && (
-                <input
-                  type="checkbox"
-                  checked={!!compareSelected}
-                  onChange={() => onToggleCompare?.(procedure)}
-                  onClick={e => e.stopPropagation()}
-                  className="h-4 w-4 shrink-0 rounded border-slate-300 text-blue-600 cursor-pointer"
-                />
-              )}
-              <p className="font-mono text-[11px] font-medium tracking-wider text-slate-400">{formatCodigo(co_procedimento)}</p>
+            <div className="flex items-center gap-1 mb-1">
+              <p className="font-mono text-[11px] font-medium tracking-wider text-slate-400">
+                {formatCodigo(co_procedimento)}
+              </p>
               <CopyButton value={co_procedimento} />
             </div>
-            <p className="mt-1 text-sm font-semibold leading-snug text-slate-900 line-clamp-2">
+            <p className="text-sm font-semibold leading-snug text-slate-800 line-clamp-2">
               {no_procedimento}
             </p>
             {no_financiamento && (
@@ -119,34 +127,36 @@ export function ProcedureCard({ procedure, onSelect, compareMode, compareSelecte
               </Badge>
             )}
           </div>
-          <div className="shrink-0 flex flex-col items-end gap-1">
+
+          {/* Ações + Valor */}
+          <div className="shrink-0 flex flex-col items-end gap-2">
             {!compareMode && (
               <button
                 onClick={(e) => { e.stopPropagation(); e.preventDefault(); toggleFavorito(procedure) }}
-                className={cn('rounded p-1 transition hover:bg-slate-100', !fav && 'opacity-0 group-hover:opacity-100')}
+                className={cn(
+                  'rounded p-1 transition hover:bg-slate-100',
+                  !fav && 'opacity-0 group-hover:opacity-100'
+                )}
                 title={fav ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
               >
                 <StarIcon filled={fav} />
               </button>
             )}
             <PriceTooltip total={total} vl_sa={vl_sa} vl_sh={vl_sh} vl_sp={vl_sp} qt_dias_perman={qt_dias_perman}>
-              <div className="text-right cursor-default">
+              <div className="cursor-default text-right">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Total SUS</p>
-                <p className="text-base font-bold text-emerald-600">{formatBRL(total)}</p>
+                <p className="text-base font-bold tabular-nums text-emerald-600">{formatBRL(total)}</p>
               </div>
             </PriceTooltip>
           </div>
-        </div>
-      </CardContent>
+        </CardContent>
+      </div>
     </Card>
   )
 
   if (compareMode) {
     return (
-      <div
-        className="group relative block cursor-pointer transition hover:-translate-y-0.5"
-        onClick={() => onToggleCompare?.(procedure)}
-      >
+      <div className="group relative block cursor-pointer transition-transform duration-200" onClick={() => onToggleCompare?.(procedure)}>
         {inner}
       </div>
     )
@@ -154,20 +164,14 @@ export function ProcedureCard({ procedure, onSelect, compareMode, compareSelecte
 
   if (onSelect) {
     return (
-      <div
-        className="group relative block cursor-pointer transition hover:-translate-y-0.5"
-        onClick={() => onSelect(procedure)}
-      >
+      <div className="group relative block cursor-pointer transition-transform duration-200" onClick={() => onSelect(procedure)}>
         {inner}
       </div>
     )
   }
 
   return (
-    <Link
-      to={`/procedimento/${co_procedimento}`}
-      className="group relative block transition hover:-translate-y-0.5"
-    >
+    <Link to={`/procedimento/${co_procedimento}`} className="group relative block transition-transform duration-200">
       {inner}
     </Link>
   )
@@ -175,10 +179,10 @@ export function ProcedureCard({ procedure, onSelect, compareMode, compareSelecte
 
 export function ProcedureCardSkeleton() {
   return (
-    <Card className="overflow-hidden shadow-sm">
-      <div className="h-1 w-full bg-slate-200" />
-      <CardContent className="flex flex-1 flex-col p-4">
-        <div className="flex items-start justify-between gap-3">
+    <Card className="overflow-hidden border-slate-100">
+      <div className="flex min-h-[88px]">
+        <div className="w-1 shrink-0 bg-slate-200" />
+        <CardContent className="flex flex-1 items-start gap-3 p-4">
           <div className="min-w-0 flex-1 space-y-2">
             <Skeleton className="h-3 w-24" />
             <Skeleton className="h-4 w-full" />
@@ -189,8 +193,8 @@ export function ProcedureCardSkeleton() {
             <Skeleton className="ml-auto h-3 w-14" />
             <Skeleton className="ml-auto h-5 w-20" />
           </div>
-        </div>
-      </CardContent>
+        </CardContent>
+      </div>
     </Card>
   )
 }
@@ -211,7 +215,8 @@ export function ProcedureRow({ procedure, onSelect, compareMode, compareSelected
 
   const inner = (
     <Card className={cn(
-      'transition-shadow duration-200 group-hover:shadow-[0_4px_20px_rgba(15,23,42,0.09),0_1px_4px_rgba(15,23,42,0.05)]',
+      'border-slate-100 bg-white transition-all duration-200',
+      'group-hover:shadow-[0_2px_12px_rgba(15,23,42,0.08)] group-hover:border-slate-200',
       compareSelected && 'ring-2 ring-blue-500 ring-offset-1',
     )}>
       <CardContent className="flex items-center gap-3 px-4 py-3">
@@ -251,7 +256,7 @@ export function ProcedureRow({ procedure, onSelect, compareMode, compareSelected
         <PriceTooltip total={total} vl_sa={vl_sa} vl_sh={vl_sh} vl_sp={vl_sp} qt_dias_perman={qt_dias_perman}>
           <div className="shrink-0 text-right cursor-default">
             <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Total SUS</p>
-            <p className="text-sm font-bold text-emerald-600">{formatBRL(total)}</p>
+            <p className="text-sm font-bold tabular-nums text-emerald-600">{formatBRL(total)}</p>
           </div>
         </PriceTooltip>
       </CardContent>

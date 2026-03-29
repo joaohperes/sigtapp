@@ -134,13 +134,14 @@ export function Home() {
   const [showAllCids, setShowAllCids] = useState(false)
   const CID_PREVIEW = 8
 
-  // Busca inicial via URL
+  // Busca quando ?q= muda (inclui navegação via CommandMenu)
   useEffect(() => {
-    if (initialQuery.trim().length >= 3) {
+    if (initialQuery.trim().length >= 2) {
       search(initialQuery)
       searchCids(initialQuery)
+      setSearched(true)
     }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [initialQuery]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Resetar tudo ao clicar no logo (state.reset sinalizado pelo AppNav)
   useEffect(() => {
