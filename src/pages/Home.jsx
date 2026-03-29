@@ -352,6 +352,7 @@ export function Home() {
           </p>
           <div className="mt-6">
             <SearchBar
+              key={location.state?.reset ?? 'initial'}
               onSearch={handleSearch}
               loading={loading}
               initialValue={initialQuery}
