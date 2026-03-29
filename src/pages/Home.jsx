@@ -334,6 +334,7 @@ export function Home() {
               initialValue={initialQuery}
               recentSearches={recentSearches}
               onSelectRecent={saveRecentSearch}
+              suggestions={searched && results.length > 0 ? results.slice(0, 6) : []}
             />
           </div>
 

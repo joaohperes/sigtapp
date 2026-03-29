@@ -6,6 +6,7 @@ import { GroupPage } from './pages/GroupPage'
 import { CidSearch } from './pages/CidSearch'
 import { AnamnesePage } from './pages/AnamnesePage'
 import { FavoritosPage } from './pages/FavoritosPage'
+import { CalculadoraPage } from './pages/CalculadoraPage'
 import { AppNav } from './components/AppNav'
 
 class ErrorBoundary extends Component {
@@ -42,6 +43,7 @@ export default function App() {
           <Route path="/cid" element={<CidSearch />} />
           <Route path="/anamnese" element={<AnamnesePage />} />
           <Route path="/favoritos" element={<FavoritosPage />} />
+          <Route path="/calculadora" element={<CalculadoraPage />} />
         </Routes>
       </ErrorBoundary>
       <footer className="border-t border-slate-100 bg-white py-5 text-center">

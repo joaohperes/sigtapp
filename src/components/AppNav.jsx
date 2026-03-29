@@ -52,6 +52,7 @@ export function AppNav() {
         <div className="flex items-center gap-0.5">
           <NavLink to="/" label="Busca" active={location.pathname === '/'} modoUE={modoUE} />
           <NavLink to="/anamnese" label="Anamnese IA" active={location.pathname === '/anamnese'} modoUE={modoUE} />
+          <NavLink to="/calculadora" label="Calculadora" active={location.pathname === '/calculadora'} modoUE={modoUE} />
           <NavLink
             to="/favoritos"
             label="Favoritos"
