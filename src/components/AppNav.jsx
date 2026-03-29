@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useModoUE } from '../contexts/ModoUEContext'
 import { useFavoritos } from '../contexts/FavoritosContext'
 import { cn } from '@/lib/utils'
@@ -28,6 +28,7 @@ export function AppNav() {
   const { modoUE, toggleModoUE } = useModoUE()
   const { favoritos } = useFavoritos()
   const location = useLocation()
+  const navigate = useNavigate()
 
   return (
     <nav className={cn(
@@ -38,13 +39,13 @@ export function AppNav() {
     )}>
       <div className="mx-auto flex max-w-7xl items-center gap-2 px-4 py-2 sm:px-6">
         {/* Logo */}
-        <Link
-          to="/"
+        <button
+          onClick={() => navigate('/', { state: { reset: Date.now() } })}
           className={cn('text-xl font-bold tracking-widest transition', modoUE ? 'text-white' : 'text-slate-900')}
           style={{ fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '0.12em' }}
         >
           SIGTAPP
-        </Link>
+        </button>
 
         <div className="mx-3 h-5 w-px bg-current opacity-20" />
 

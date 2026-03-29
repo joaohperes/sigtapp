@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams, useLocation } from 'react-router-dom'
 import { SearchBar } from '../components/SearchBar'
 import { ProcedureCard, ProcedureCardSkeleton } from '../components/ProcedureCard'
 import { ProcedureTable } from '../components/ProcedureTable'
@@ -77,6 +77,7 @@ function Chevron() {
 export function Home() {
   const [searchParams, setSearchParams] = useSearchParams()
   const initialQuery = searchParams.get('q') || ''
+  const location = useLocation()
 
   const { results, loading, error, search, searchMeta } = useProcedures()
   const { grupos } = useGrupos()
@@ -141,15 +142,24 @@ export function Home() {
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Resetar ao navegar para / sem query (ex: clicar no logo)
+  // Resetar tudo ao clicar no logo (state.reset sinalizado pelo AppNav)
   useEffect(() => {
-    if (!searchParams.get('q') && searched) {
-      setSearched(false)
-      setCidResults([])
-      setShowAllCids(false)
-      search('')
-    }
-  }, [searchParams]) // eslint-disable-line react-hooks/exhaustive-deps
+    if (!location.state?.reset) return
+    setSearched(false)
+    setCidResults([])
+    setShowAllCids(false)
+    setSelectedGroup(null)
+    setSelectedSubgroup(null)
+    setSubgroups([])
+    setSubgroupProcs([])
+    setSearchMode(null)
+    resetFilters()
+    setSortKey('relevancia')
+    setCompareMode(false)
+    setCompareSelection([])
+    search('')
+    setSearchParams({})
+  }, [location.state?.reset]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Resetar paginação ao mudar resultados ou filtros
   useEffect(() => {
