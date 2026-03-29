@@ -182,6 +182,7 @@ export function CalculadoraPage() {
   // Drag state
   const dragIndexRef = useRef(null)
   const [hoverIndex, setHoverIndex] = useState(null)
+  const [dragEnabledIndex, setDragEnabledIndex] = useState(null)
 
   // O item na posição 0 é sempre o principal
   const principalCo = items[0]?.procedure.co_procedimento
@@ -247,6 +248,7 @@ export function CalculadoraPage() {
     e.target.classList.remove('opacity-40')
     dragIndexRef.current = null
     setHoverIndex(null)
+    setDragEnabledIndex(null)
   }
 
   function handleDragOver(e, index) {
@@ -279,9 +281,9 @@ export function CalculadoraPage() {
 
   function getCompatWarning(co, qty, isPrincipal) {
     if (isPrincipal || !compatMap || compatEmpty) return null
-    if (!compatMap.has(co)) return 'Não listado na tabela de compatibilidades do SIGTAP — o SIGTAP só registra quais combinações são permitidas, sem indicar o motivo das demais.'
+    if (!compatMap.has(co)) return 'Não consta nas compatibilidades do SIGTAP para este procedimento principal'
     const qtMax = compatMap.get(co)
-    if (qtMax && qty > qtMax) return `Quantidade excede o limite do SIGTAP: máximo ${qtMax}× para este procedimento`
+    if (qtMax && qty > qtMax) return `Quantidade máxima permitida: ${qtMax}×`
     return null
   }
 
@@ -355,26 +357,30 @@ export function CalculadoraPage() {
                       )}
 
                       <div
-                        draggable
+                        draggable={dragEnabledIndex === index}
                         onDragStart={e => handleDragStart(e, index)}
                         onDragEnd={handleDragEnd}
                         onDragOver={e => handleDragOver(e, index)}
                         onDrop={e => handleDrop(e, index)}
                         className={cn(
-                          'rounded-xl border bg-white shadow-sm transition-all duration-150',
+                          'rounded-xl border shadow-sm transition-all duration-150',
                           isPrincipal
-                            ? 'border-blue-300 ring-1 ring-blue-200'
+                            ? 'border-slate-200 bg-blue-50/40'
                             : warning
-                              ? 'border-amber-200'
-                              : 'border-slate-200',
+                              ? 'border-amber-200 bg-white'
+                              : 'border-slate-200 bg-white',
                           isDragTarget && 'ring-2 ring-blue-300 ring-offset-1',
                         )}
                       >
                         {estilo && <div className={`h-1 w-full rounded-t-xl ${estilo.dot}`} />}
                         <div className="p-4">
                           <div className="flex items-start gap-3">
-                            {/* Drag handle */}
-                            <div className="mt-1 cursor-grab active:cursor-grabbing shrink-0 select-none">
+                            {/* Drag handle — drag só ativo ao segurar o handle */}
+                            <div
+                              className="mt-1 cursor-grab active:cursor-grabbing shrink-0 select-none"
+                              onMouseDown={() => setDragEnabledIndex(index)}
+                              onMouseUp={() => setDragEnabledIndex(null)}
+                            >
                               <DragHandle />
                             </div>
 
@@ -384,6 +390,17 @@ export function CalculadoraPage() {
                                 <span className="font-mono text-[11px] text-slate-400">
                                   {formatCodigo(proc.co_procedimento)}
                                 </span>
+                                <button
+                                  type="button"
+                                  onClick={() => { navigator.clipboard.writeText(proc.co_procedimento) }}
+                                  className="rounded p-0.5 text-slate-300 transition hover:bg-slate-100 hover:text-slate-500"
+                                  title="Copiar código"
+                                >
+                                  <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                                      d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                  </svg>
+                                </button>
                                 {isPrincipal && (
                                   <Badge className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-semibold text-blue-700 hover:bg-blue-100">
                                     Principal
@@ -526,7 +543,7 @@ export function CalculadoraPage() {
                   )}
                   {!compatLoading && compatMap && !compatEmpty && items.length > 1 && items.slice(1).some(i => !compatMap.has(i.procedure.co_procedimento)) && (
                     <div className="rounded-lg bg-amber-50 p-3 text-xs text-amber-700">
-                      <strong>Atenção:</strong> um ou mais procedimentos não constam na tabela de compatibilidades do SIGTAP para o procedimento principal. O SIGTAP não fornece o motivo — apenas lista as combinações permitidas.
+                      <strong>Atenção:</strong> um ou mais procedimentos não constam nas compatibilidades do SIGTAP para este procedimento principal.
                     </div>
                   )}
                   {!compatLoading && compatMap && !compatEmpty && items.length > 1 && items.slice(1).every(i => compatMap.has(i.procedure.co_procedimento)) && (
