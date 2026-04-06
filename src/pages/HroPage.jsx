@@ -34,46 +34,45 @@ function GrupoBadge({ grupo }) {
 function ProcCard({ p, catLabel }) {
   return (
     <div className={cn(
-      'group rounded-xl border bg-white p-4 transition-shadow hover:shadow-md',
-      p.alert ? 'border-red-200' : p.grupo === '04' ? 'border-amber-200' : 'border-slate-100'
+      'group rounded-lg border bg-white px-3.5 py-3 transition hover:shadow-sm',
+      p.alert ? 'border-red-200' : 'border-slate-200'
     )}>
-      {/* Linha topo: código + badges */}
-      <div className="flex flex-wrap items-center gap-2 mb-2">
-        <button
-          onClick={() => { navigator.clipboard.writeText(p.code); toast.success(`Copiado: ${p.code}`, { duration: 1500 }) }}
-          className="font-mono text-xs font-bold text-slate-500 hover:text-blue-600 transition rounded px-1.5 py-0.5 hover:bg-blue-50"
-          title="Copiar código"
-        >
-          {p.code}
-        </button>
-        <GrupoBadge grupo={p.grupo} />
-        <Stars n={p.priority} />
-        {catLabel && (
-          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] text-slate-500">{catLabel}</span>
-        )}
-      </div>
-
-      {/* Nome */}
-      <p className="text-sm font-semibold text-slate-800 leading-snug mb-1">{p.name}</p>
-
-      {/* CIDs */}
-      <p className="text-xs text-slate-400 leading-snug">{p.cid_text}</p>
-
-      {/* Obs */}
-      {p.obs && (
-        <p className="mt-1.5 text-xs text-slate-500 italic">{p.obs}</p>
-      )}
-
-      {/* Alerta */}
-      {p.alert && (
-        <div className="mt-2.5 flex items-start gap-2 rounded-lg bg-red-50 px-3 py-2 ring-1 ring-red-100">
-          <svg className="h-3.5 w-3.5 text-red-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-              d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-          </svg>
-          <p className="text-xs text-red-700 font-medium">{p.alert}</p>
+      <div className="flex items-start gap-3">
+        {/* Código + grupo */}
+        <div className="shrink-0 pt-0.5">
+          <button
+            onClick={() => { navigator.clipboard.writeText(p.code); toast.success(`Copiado: ${p.code}`, { duration: 1500 }) }}
+            className="font-mono text-[11px] font-bold text-slate-400 hover:text-blue-600 transition"
+            title="Copiar código"
+          >
+            {p.code}
+          </button>
+          <div className="mt-1"><GrupoBadge grupo={p.grupo} /></div>
         </div>
-      )}
+
+        {/* Separador */}
+        <div className="w-px self-stretch bg-slate-100 shrink-0" />
+
+        {/* Conteúdo */}
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start justify-between gap-2">
+            <p className="text-sm font-semibold text-slate-800 leading-snug">{p.name}</p>
+            <Stars n={p.priority} />
+          </div>
+          <p className="mt-0.5 text-xs text-slate-400 leading-snug">{p.cid_text}</p>
+          {catLabel && <span className="mt-1 inline-block rounded bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-500">{catLabel}</span>}
+          {p.obs && <p className="mt-1 text-xs text-slate-500 italic">{p.obs}</p>}
+          {p.alert && (
+            <div className="mt-2 flex items-start gap-1.5 rounded bg-red-50 px-2.5 py-1.5 ring-1 ring-red-100">
+              <svg className="h-3.5 w-3.5 text-red-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+              </svg>
+              <p className="text-xs text-red-700 font-medium">{p.alert}</p>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   )
 }
@@ -158,22 +157,12 @@ function BuscaTab() {
 
 // ── Aba 2: Por especialidade ──────────────────────────────────────────────────
 
-const COR_CARD = {
-  red:    'bg-red-50    border-red-100    text-red-700    hover:border-red-300',
-  rose:   'bg-rose-50   border-rose-100   text-rose-700   hover:border-rose-300',
-  blue:   'bg-blue-50   border-blue-100   text-blue-700   hover:border-blue-300',
-  purple: 'bg-purple-50 border-purple-100 text-purple-700 hover:border-purple-300',
-  slate:  'bg-slate-50  border-slate-200  text-slate-700  hover:border-slate-300',
-  amber:  'bg-amber-50  border-amber-100  text-amber-700  hover:border-amber-300',
-  yellow: 'bg-yellow-50 border-yellow-100 text-yellow-700 hover:border-yellow-300',
-  green:  'bg-green-50  border-green-100  text-green-700  hover:border-green-300',
-  orange: 'bg-orange-50 border-orange-100 text-orange-700 hover:border-orange-300',
-  teal:   'bg-teal-50   border-teal-100   text-teal-700   hover:border-teal-300',
-  violet: 'bg-violet-50 border-violet-100 text-violet-700 hover:border-violet-300',
-  cyan:   'bg-cyan-50   border-cyan-100   text-cyan-700   hover:border-cyan-300',
-  sky:    'bg-sky-50    border-sky-100    text-sky-700    hover:border-sky-300',
-  pink:   'bg-pink-50   border-pink-100   text-pink-700   hover:border-pink-300',
-  lime:   'bg-lime-50   border-lime-100   text-lime-700   hover:border-lime-300',
+const ACCENT = {
+  red: 'border-l-red-400', rose: 'border-l-rose-400', blue: 'border-l-blue-500',
+  purple: 'border-l-purple-500', slate: 'border-l-slate-400', amber: 'border-l-amber-400',
+  yellow: 'border-l-yellow-400', green: 'border-l-emerald-500', orange: 'border-l-orange-400',
+  teal: 'border-l-teal-500', violet: 'border-l-violet-500', cyan: 'border-l-cyan-500',
+  sky: 'border-l-sky-500', pink: 'border-l-pink-400', lime: 'border-l-lime-500',
 }
 
 function EspecialidadeTab() {
@@ -181,35 +170,35 @@ function EspecialidadeTab() {
   const cat = categorias.find(c => c.id === catId)
 
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4">
+    <div className="space-y-3">
+      <div className="grid grid-cols-2 gap-1 sm:grid-cols-3">
         {categorias.map(c => (
           <button
             key={c.id}
             onClick={() => setCatId(catId === c.id ? null : c.id)}
             className={cn(
-              'flex items-center gap-1.5 rounded-lg border p-2 text-left text-xs font-medium transition',
-              COR_CARD[c.cor] ?? COR_CARD.slate,
-              catId === c.id && 'ring-2 ring-offset-1 ring-blue-400'
+              'flex items-center gap-2.5 rounded border-l-2 border border-slate-200 bg-white py-2 pl-3 pr-2.5 text-left transition hover:bg-slate-50',
+              ACCENT[c.cor] ?? ACCENT.slate,
+              catId === c.id
+                ? 'bg-slate-50 border-blue-200 border-l-blue-500 shadow-sm'
+                : 'hover:border-slate-300'
             )}
           >
-            <span className="text-sm shrink-0">{c.icone}</span>
-            <span className="leading-tight min-w-0 flex-1">{c.nome}</span>
-            <span className="shrink-0 rounded-full bg-white/60 px-1.5 text-[10px] font-semibold">{c.procedimentos.length}</span>
+            <span className="min-w-0 flex-1 text-[11px] font-medium leading-tight text-slate-700">{c.nome}</span>
+            <span className="shrink-0 text-[10px] font-semibold tabular-nums text-slate-400">{c.procedimentos.length}</span>
           </button>
         ))}
       </div>
 
       {!cat && (
-        <p className="text-center text-sm text-slate-400 py-2">Selecione uma especialidade.</p>
+        <p className="text-xs text-slate-400 py-1">Selecione uma especialidade.</p>
       )}
 
       {cat && (
-        <div className="space-y-3">
-          <div className="flex items-center gap-2 pb-1 border-b border-slate-100">
-            <span className="text-xl">{cat.icone}</span>
-            <h3 className="font-semibold text-slate-700">{cat.nome}</h3>
-            <span className="text-xs text-slate-400 ml-1">{cat.procedimentos.length} procedimentos</span>
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 py-1.5 border-b border-slate-100">
+            <h3 className="text-sm font-semibold text-slate-700">{cat.nome}</h3>
+            <span className="text-[11px] text-slate-400">{cat.procedimentos.length} procedimentos</span>
           </div>
           {cat.procedimentos
             .sort((a, b) => b.priority - a.priority)
