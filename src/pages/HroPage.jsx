@@ -181,27 +181,27 @@ function EspecialidadeTab() {
   const cat = categorias.find(c => c.id === catId)
 
   return (
-    <div className="space-y-5">
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4">
         {categorias.map(c => (
           <button
             key={c.id}
             onClick={() => setCatId(catId === c.id ? null : c.id)}
             className={cn(
-              'flex items-center gap-2 rounded-xl border p-3 text-left text-xs font-medium transition',
+              'flex items-center gap-1.5 rounded-lg border p-2 text-left text-xs font-medium transition',
               COR_CARD[c.cor] ?? COR_CARD.slate,
               catId === c.id && 'ring-2 ring-offset-1 ring-blue-400'
             )}
           >
-            <span className="text-base shrink-0">{c.icone}</span>
-            <span className="leading-tight">{c.nome}</span>
-            <span className="ml-auto shrink-0 rounded-full bg-white/60 px-1.5 text-[10px] font-semibold">{c.procedimentos.length}</span>
+            <span className="text-sm shrink-0">{c.icone}</span>
+            <span className="leading-tight min-w-0 flex-1">{c.nome}</span>
+            <span className="shrink-0 rounded-full bg-white/60 px-1.5 text-[10px] font-semibold">{c.procedimentos.length}</span>
           </button>
         ))}
       </div>
 
       {!cat && (
-        <p className="text-center text-sm text-slate-400 py-4">Selecione uma especialidade para ver os códigos.</p>
+        <p className="text-center text-sm text-slate-400 py-2">Selecione uma especialidade.</p>
       )}
 
       {cat && (
@@ -314,38 +314,39 @@ export function HroPage() {
     <div className="min-h-screen bg-background">
       {/* Header escuro — mesmo padrão das outras páginas */}
       <div className="bg-gradient-to-br from-[#0A1628] via-[#0D2347] to-[#0F3460]">
-        <div className="mx-auto max-w-3xl px-4 py-6 sm:px-6">
-          {/* Título */}
-          <div className="flex items-center gap-3 mb-1">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10 ring-1 ring-white/20 shrink-0">
-              <svg className="h-5 w-5 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="mx-auto max-w-3xl px-4 py-4 sm:px-6">
+          {/* Título + legenda em linha */}
+          <div className="flex items-center gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 ring-1 ring-white/20 shrink-0">
+              <svg className="h-4 w-4 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
                   d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
               </svg>
             </div>
-            <div>
+            <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <h1 className="text-lg font-bold text-white">Guia de Códigos — PS</h1>
+                <h1 className="text-base font-bold text-white">Guia de Códigos — PS</h1>
                 <span className="rounded-md bg-blue-500/30 px-2 py-0.5 text-[11px] font-bold text-blue-200 ring-1 ring-blue-400/30">HRO</span>
               </div>
-              <p className="text-xs text-blue-300/70 mt-0.5">Hospital Regional do Oeste · CNES 2537788 · SIGTAP 202602</p>
+              <p className="text-[11px] text-blue-300/60 truncate">CNES 2537788 · SIGTAP 202602</p>
             </div>
           </div>
 
-          {/* Legenda */}
-          <div className="flex flex-wrap gap-x-4 gap-y-1 mt-3 text-[11px] text-blue-300/70">
-            <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-emerald-400 shrink-0" />Gr. 03 = clínico (preferir)</span>
-            <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-amber-400 shrink-0" />Gr. 04 = cirúrgico (verificar FPO)</span>
-            <span className="flex items-center gap-1.5">
-              <svg className="h-3 w-3 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          {/* Legenda compacta */}
+          <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2.5 text-[11px] text-blue-300/60">
+            <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shrink-0" />Gr.03 clínico</span>
+            <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-amber-400 shrink-0" />Gr.04 verificar FPO</span>
+            <span className="flex items-center gap-1">
+              <svg className="h-3 w-3 text-red-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
               </svg>
-              Alerta de habilitação
+              Hab. exigida
             </span>
+            <span className="flex items-center gap-1 text-amber-300/70">★★★ diário · ★★☆ semanal · ★☆☆ mensal</span>
           </div>
 
           {/* Tabs */}
-          <div className="flex gap-1 mt-5 rounded-xl bg-white/5 p-1 ring-1 ring-white/10">
+          <div className="flex gap-1 mt-4 rounded-xl bg-white/5 p-1 ring-1 ring-white/10">
             {TABS.map(t => (
               <button
                 key={t.id}
