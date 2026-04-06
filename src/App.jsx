@@ -7,6 +7,7 @@ import { CidSearch } from './pages/CidSearch'
 import { AnamnesePage } from './pages/AnamnesePage'
 import { FavoritosPage } from './pages/FavoritosPage'
 import { CalculadoraPage } from './pages/CalculadoraPage'
+import { HroPage } from './pages/HroPage'
 import { AppNav } from './components/AppNav'
 import { CommandMenu } from './components/CommandMenu'
 import { TooltipProvider } from '@/components/ui/tooltip'
@@ -48,6 +49,7 @@ export default function App() {
             <Route path="/anamnese" element={<AnamnesePage />} />
             <Route path="/favoritos" element={<FavoritosPage />} />
             <Route path="/calculadora" element={<CalculadoraPage />} />
+            <Route path="/hro" element={<HroPage />} />
           </Routes>
         </ErrorBoundary>
         <footer className="border-t border-slate-100 bg-white py-5 text-center">

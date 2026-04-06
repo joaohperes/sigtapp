@@ -62,6 +62,7 @@ export function AppNav() {
             modoUE={modoUE}
             badge={favoritos.length > 0 ? favoritos.length : null}
           />
+          <NavLink to="/hro" label="PS HRO" active={location.pathname === '/hro'} modoUE={modoUE} badge="HRO" />
         </div>
 
         <div className="flex-1" />
