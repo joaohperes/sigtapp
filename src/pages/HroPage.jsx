@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react'
 import { categorias, todosOsProcedimentos, alternativas } from '../data/hro-guia'
+import { Card, CardContent } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 
@@ -13,7 +14,7 @@ function normalize(str) {
 
 function Stars({ n }) {
   return (
-    <span className="flex items-center gap-0.5" title={['mensal', 'semanal', 'diário'][n - 1]}>
+    <span className="flex items-center gap-0.5 shrink-0" title={['mensal', 'semanal', 'diário'][n - 1]}>
       {[1, 2, 3].map(i => (
         <svg key={i} className={cn('h-3 w-3', i <= n ? 'fill-amber-400 text-amber-400' : 'fill-none text-slate-200')}
           stroke="currentColor" viewBox="0 0 24 24">
@@ -25,54 +26,63 @@ function Stars({ n }) {
   )
 }
 
-function GrupoBadge({ grupo }) {
-  return grupo === '03'
-    ? <span className="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 ring-1 ring-emerald-200">Gr. 03</span>
-    : <span className="inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700 ring-1 ring-amber-200">Gr. 04</span>
-}
-
 function ProcCard({ p, catLabel }) {
+  const dot = p.grupo === '03' ? 'bg-emerald-400' : 'bg-orange-400'
+
   return (
-    <div className={cn(
-      'group rounded-lg border bg-white px-3.5 py-3 transition hover:shadow-sm',
-      p.alert ? 'border-red-200' : 'border-slate-200'
-    )}>
-      <div className="flex items-start gap-3">
-        {/* Código + grupo */}
-        <div className="shrink-0 pt-0.5">
-          <button
-            onClick={() => { navigator.clipboard.writeText(p.code); toast.success(`Copiado: ${p.code}`, { duration: 1500 }) }}
-            className="font-mono text-[11px] font-bold text-slate-400 hover:text-blue-600 transition"
-            title="Copiar código"
-          >
-            {p.code}
-          </button>
-          <div className="mt-1"><GrupoBadge grupo={p.grupo} /></div>
-        </div>
+    <div className="group">
+      <Card className={cn(
+        'border-slate-100 bg-white transition-all duration-200',
+        'group-hover:shadow-[0_2px_12px_rgba(15,23,42,0.08)] group-hover:border-slate-200',
+        p.alert && 'border-red-100',
+      )}>
+        <CardContent className="flex items-start gap-3 px-4 py-3">
+          <div className={cn('mt-0.5 w-[3px] shrink-0 self-stretch rounded-sm', dot)} />
 
-        {/* Separador */}
-        <div className="w-px self-stretch bg-slate-100 shrink-0" />
-
-        {/* Conteúdo */}
-        <div className="min-w-0 flex-1">
-          <div className="flex items-start justify-between gap-2">
-            <p className="text-sm font-semibold text-slate-800 leading-snug">{p.name}</p>
-            <Stars n={p.priority} />
-          </div>
-          <p className="mt-0.5 text-xs text-slate-400 leading-snug">{p.cid_text}</p>
-          {catLabel && <span className="mt-1 inline-block rounded bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-500">{catLabel}</span>}
-          {p.obs && <p className="mt-1 text-xs text-slate-500 italic">{p.obs}</p>}
-          {p.alert && (
-            <div className="mt-2 flex items-start gap-1.5 rounded bg-red-50 px-2.5 py-1.5 ring-1 ring-red-100">
-              <svg className="h-3.5 w-3.5 text-red-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                  d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-              </svg>
-              <p className="text-xs text-red-700 font-medium">{p.alert}</p>
+          <div className="min-w-0 flex-1">
+            {/* Código + badges */}
+            <div className="flex flex-wrap items-center gap-1.5 mb-0.5">
+              <button
+                onClick={() => { navigator.clipboard.writeText(p.code); toast.success(`Copiado: ${p.code}`, { duration: 1500 }) }}
+                className="font-mono text-xs text-slate-400 hover:text-blue-600 transition"
+                title="Copiar código"
+              >
+                {p.code}
+              </button>
+              {p.grupo === '04' && (
+                <span className="inline-flex items-center rounded-full bg-orange-50 px-2 py-0.5 text-[10px] font-semibold text-orange-600 ring-1 ring-orange-200">
+                  Gr. 04 — verificar FPO
+                </span>
+              )}
+              {catLabel && (
+                <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-500">{catLabel}</span>
+              )}
             </div>
-          )}
-        </div>
-      </div>
+
+            {/* Nome */}
+            <p className="text-sm font-medium leading-snug text-slate-800">{p.name}</p>
+
+            {/* CID */}
+            <p className="mt-0.5 text-xs text-slate-400">{p.cid_text}</p>
+
+            {/* Obs */}
+            {p.obs && <p className="mt-0.5 text-xs text-slate-500 italic">{p.obs}</p>}
+
+            {/* Alerta habilitação */}
+            {p.alert && (
+              <div className="mt-2 flex items-start gap-1.5 rounded bg-red-50 px-2.5 py-1.5 ring-1 ring-red-100">
+                <svg className="h-3.5 w-3.5 text-red-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                    d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                </svg>
+                <p className="text-xs text-red-700">{p.alert}</p>
+              </div>
+            )}
+          </div>
+
+          <Stars n={p.priority} />
+        </CardContent>
+      </Card>
     </div>
   )
 }
@@ -157,12 +167,12 @@ function BuscaTab() {
 
 // ── Aba 2: Por especialidade ──────────────────────────────────────────────────
 
-const ACCENT = {
-  red: 'border-l-red-400', rose: 'border-l-rose-400', blue: 'border-l-blue-500',
-  purple: 'border-l-purple-500', slate: 'border-l-slate-400', amber: 'border-l-amber-400',
-  yellow: 'border-l-yellow-400', green: 'border-l-emerald-500', orange: 'border-l-orange-400',
-  teal: 'border-l-teal-500', violet: 'border-l-violet-500', cyan: 'border-l-cyan-500',
-  sky: 'border-l-sky-500', pink: 'border-l-pink-400', lime: 'border-l-lime-500',
+const ACCENT_DOT = {
+  red: 'bg-red-400', rose: 'bg-rose-400', blue: 'bg-blue-500',
+  purple: 'bg-purple-500', slate: 'bg-slate-400', amber: 'bg-amber-400',
+  yellow: 'bg-yellow-400', green: 'bg-emerald-500', orange: 'bg-orange-400',
+  teal: 'bg-teal-500', violet: 'bg-violet-500', cyan: 'bg-cyan-500',
+  sky: 'bg-sky-500', pink: 'bg-pink-400', lime: 'bg-lime-500',
 }
 
 function EspecialidadeTab() {
@@ -171,36 +181,44 @@ function EspecialidadeTab() {
 
   return (
     <div className="space-y-3">
-      <div className="grid grid-cols-2 gap-1 sm:grid-cols-3">
+      {/* Grid de especialidades */}
+      <div className="grid grid-cols-1 gap-1 sm:grid-cols-2">
         {categorias.map(c => (
           <button
             key={c.id}
             onClick={() => setCatId(catId === c.id ? null : c.id)}
             className={cn(
-              'flex items-center gap-2.5 rounded border-l-2 border border-slate-200 bg-white py-2 pl-3 pr-2.5 text-left transition hover:bg-slate-50',
-              ACCENT[c.cor] ?? ACCENT.slate,
+              'group flex items-center gap-3 rounded-lg border bg-white px-3 py-2.5 text-left transition',
               catId === c.id
-                ? 'bg-slate-50 border-blue-200 border-l-blue-500 shadow-sm'
-                : 'hover:border-slate-300'
+                ? 'border-blue-200 bg-blue-50/40 shadow-sm'
+                : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50',
             )}
           >
-            <span className="min-w-0 flex-1 text-[11px] font-medium leading-tight text-slate-700">{c.nome}</span>
-            <span className="shrink-0 text-[10px] font-semibold tabular-nums text-slate-400">{c.procedimentos.length}</span>
+            <div className={cn('h-4 w-[3px] shrink-0 rounded-sm', ACCENT_DOT[c.cor] ?? ACCENT_DOT.slate)} />
+            <span className="min-w-0 flex-1 text-xs font-medium leading-tight text-slate-700">{c.nome}</span>
+            <span className={cn(
+              'shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-semibold tabular-nums',
+              catId === c.id ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-500'
+            )}>
+              {c.procedimentos.length}
+            </span>
           </button>
         ))}
       </div>
 
+      {/* Lista de procedimentos */}
       {!cat && (
         <p className="text-xs text-slate-400 py-1">Selecione uma especialidade.</p>
       )}
 
       {cat && (
         <div className="space-y-2">
-          <div className="flex items-center gap-2 py-1.5 border-b border-slate-100">
+          <div className="flex items-center gap-2 py-1 border-b border-slate-100">
+            <div className={cn('h-3.5 w-[3px] shrink-0 rounded-sm', ACCENT_DOT[cat.cor] ?? ACCENT_DOT.slate)} />
             <h3 className="text-sm font-semibold text-slate-700">{cat.nome}</h3>
             <span className="text-[11px] text-slate-400">{cat.procedimentos.length} procedimentos</span>
           </div>
-          {cat.procedimentos
+          {[...cat.procedimentos]
             .sort((a, b) => b.priority - a.priority)
             .map(p => <ProcCard key={p.code} p={p} />)}
         </div>
@@ -249,28 +267,24 @@ function CodigoRejeitadoTab() {
 
       {resultado && (
         <div className="space-y-3">
-          {/* Código rejeitado */}
           <div className="rounded-xl border border-red-100 bg-red-50 px-4 py-3">
             <p className="text-[11px] font-semibold uppercase tracking-wider text-red-400 mb-1">Não usar</p>
             <p className="font-mono text-sm font-bold text-red-700">{resultado.naoUsar}</p>
             <p className="text-xs text-red-500 mt-0.5">{resultado.motivo}</p>
           </div>
 
-          {/* Seta */}
           <div className="flex justify-center">
             <svg className="h-5 w-5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
           </div>
 
-          {/* Alternativa */}
           <div className="rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3">
             <p className="text-[11px] font-semibold uppercase tracking-wider text-emerald-500 mb-1">Usar no lugar</p>
             <p className="font-mono text-sm font-bold text-emerald-700">{resultado.usarEm}</p>
             {resultado.cids && <p className="text-xs text-emerald-600 mt-0.5">CIDs: {resultado.cids}</p>}
           </div>
 
-          {/* Card do procedimento */}
           {procAlternativa && (
             <div>
               <p className="text-xs text-slate-400 mb-2">Detalhes do procedimento:</p>
@@ -278,7 +292,6 @@ function CodigoRejeitadoTab() {
             </div>
           )}
 
-          {/* Situação */}
           <div className="rounded-lg border border-slate-100 bg-white px-4 py-2.5">
             <p className="text-xs text-slate-400">Situação: <span className="font-medium text-slate-700">{resultado.situacao}</span></p>
           </div>
@@ -291,9 +304,9 @@ function CodigoRejeitadoTab() {
 // ── Página principal ──────────────────────────────────────────────────────────
 
 const TABS = [
-  { id: 'busca',        label: 'Busca rápida' },
+  { id: 'busca',         label: 'Busca rápida' },
   { id: 'especialidade', label: 'Por especialidade' },
-  { id: 'rejeitado',    label: 'Código rejeitado' },
+  { id: 'rejeitado',     label: 'Código rejeitado' },
 ]
 
 export function HroPage() {
@@ -301,37 +314,21 @@ export function HroPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header escuro — mesmo padrão das outras páginas */}
+      {/* Header — mesmo padrão das outras páginas */}
       <div className="bg-gradient-to-br from-[#0A1628] via-[#0D2347] to-[#0F3460]">
         <div className="mx-auto max-w-3xl px-4 py-4 sm:px-6">
-          {/* Título + legenda em linha */}
-          <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 ring-1 ring-white/20 shrink-0">
-              <svg className="h-4 w-4 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
-                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-              </svg>
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <h1 className="text-lg font-bold text-white">Guia de Códigos — PS HRO</h1>
+              <p className="mt-0.5 text-sm text-blue-200">
+                CNES 2537788 · SIGTAP 202602 · Grupo 03 preferencial
+              </p>
             </div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <h1 className="text-base font-bold text-white">Guia de Códigos — PS</h1>
-                <span className="rounded-md bg-blue-500/30 px-2 py-0.5 text-[11px] font-bold text-blue-200 ring-1 ring-blue-400/30">HRO</span>
-              </div>
-              <p className="text-[11px] text-blue-300/60 truncate">CNES 2537788 · SIGTAP 202602</p>
+            <div className="hidden sm:flex items-center gap-2 text-[11px] text-blue-300/60 shrink-0">
+              <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-emerald-400 shrink-0" />Gr.03</span>
+              <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-orange-400 shrink-0" />Gr.04</span>
+              <span className="flex items-center gap-1 text-amber-300/70">★★★ diário</span>
             </div>
-          </div>
-
-          {/* Legenda compacta */}
-          <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2.5 text-[11px] text-blue-300/60">
-            <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shrink-0" />Gr.03 clínico</span>
-            <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-amber-400 shrink-0" />Gr.04 verificar FPO</span>
-            <span className="flex items-center gap-1">
-              <svg className="h-3 w-3 text-red-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-              </svg>
-              Hab. exigida
-            </span>
-            <span className="flex items-center gap-1 text-amber-300/70">★★★ diário · ★★☆ semanal · ★☆☆ mensal</span>
           </div>
 
           {/* Tabs */}
@@ -355,7 +352,7 @@ export function HroPage() {
       </div>
 
       {/* Conteúdo */}
-      <main className="mx-auto max-w-3xl px-4 py-6 sm:px-6 sm:py-8">
+      <main className="mx-auto max-w-3xl px-4 py-6 sm:px-6">
         {tab === 'busca'         && <BuscaTab />}
         {tab === 'especialidade' && <EspecialidadeTab />}
         {tab === 'rejeitado'     && <CodigoRejeitadoTab />}
