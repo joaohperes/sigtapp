@@ -1,10 +1,12 @@
 import { useState, useMemo, useEffect, useCallback } from 'react'
+import { Link } from 'react-router-dom'
 import { categorias, todosOsProcedimentos, alternativas } from '../data/hro-guia'
 import { supabase } from '../lib/supabase'
 import { formatBRL, formatCodigo } from '../utils/formatters'
 import { Card, CardContent } from '@/components/ui/card'
 import { Sheet, SheetContent } from '@/components/ui/sheet'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 
@@ -56,12 +58,24 @@ function Stars({ n }) {
   )
 }
 
+function parseCidEntry(s) {
+  const full = s.trim()
+  const parenIdx = full.indexOf(' (')
+  const code = parenIdx > -1 ? full.slice(0, parenIdx).trim() : full
+  return { code, full }
+}
+
 function CidChips({ cidText }) {
-  const cids = cidText.split(/\s*[\/·]\s*/).map(s => s.trim()).filter(Boolean)
+  const cids = cidText.split(/\s*\/\s*/).map(parseCidEntry).filter(c => c.code)
   return (
     <div className="flex flex-wrap gap-1 mt-1">
-      {cids.map(cid => (
-        <span key={cid} title={cid} className="cursor-default rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] text-slate-500">{cid}</span>
+      {cids.map(({ code, full }) => (
+        <Tooltip key={code}>
+          <TooltipTrigger asChild>
+            <span className="cursor-default rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] text-slate-500 hover:bg-slate-200 transition-colors">{code}</span>
+          </TooltipTrigger>
+          <TooltipContent side="top" className="text-xs">{full}</TooltipContent>
+        </Tooltip>
       ))}
     </div>
   )
@@ -69,17 +83,18 @@ function CidChips({ cidText }) {
 
 // ── Linha de procedimento (igual ao ProcedureRow do site) ─────────────────────
 
-function ProcRow({ p, selected, catLabel, onClick }) {
+function ProcRow({ p, selected, catLabel, fullName, onClick }) {
   const dot = p.grupo === '03' ? 'bg-emerald-400' : 'bg-orange-400'
-  const nameUpper = p.name.toUpperCase()
+  const displayName = fullName ?? p.name.toUpperCase()
 
   return (
     <div className="group cursor-pointer" onClick={onClick}>
       <Card className={cn(
         'border-slate-100 bg-white transition-all duration-200',
         'group-hover:shadow-[0_2px_12px_rgba(15,23,42,0.08)] group-hover:border-slate-200',
-        selected && 'border-blue-200 bg-blue-50/30 shadow-[0_2px_12px_rgba(15,23,42,0.08)]',
-        p.alert && !selected && 'border-red-100',
+        selected
+          ? 'border-blue-300 shadow-[0_4px_20px_rgba(15,23,42,0.14)] -translate-y-0.5 z-10'
+          : p.alert && 'border-red-100',
       )}>
         <CardContent className="flex items-center gap-3 px-4 py-3">
           <div className={cn('self-stretch w-[3px] shrink-0 rounded-sm', dot)} />
@@ -92,11 +107,9 @@ function ProcRow({ p, selected, catLabel, onClick }) {
                 <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-500">{catLabel}</span>
               )}
             </div>
-            <p title={nameUpper} className="text-sm font-medium leading-snug text-slate-800">{nameUpper}</p>
+            <p title={displayName} className="text-sm font-medium leading-snug text-slate-800">{displayName}</p>
             <CidChips cidText={p.cid_text} />
           </div>
-
-          <Stars n={p.priority} />
         </CardContent>
       </Card>
     </div>
@@ -105,7 +118,7 @@ function ProcRow({ p, selected, catLabel, onClick }) {
 
 // ── Painel de detalhe (3ª coluna / Sheet) ─────────────────────────────────────
 
-function ProcDetailPanel({ p }) {
+function ProcDetailPanel({ p, fullName }) {
   const [fin, setFin] = useState(null)
   const [loadingFin, setLoadingFin] = useState(true)
 
@@ -114,7 +127,7 @@ function ProcDetailPanel({ p }) {
     setLoadingFin(true)
     supabase
       .from('procedimentos')
-      .select('vl_sa, vl_sh, vl_sp, qt_dias_perman, no_financiamento')
+      .select('vl_sa, vl_sh, vl_sp, qt_dias_perman, no_financiamento, no_procedimento')
       .eq('co_procedimento', p.code)
       .single()
       .then(({ data }) => {
@@ -125,6 +138,7 @@ function ProcDetailPanel({ p }) {
 
   const total = fin ? (fin.vl_sa || 0) + (fin.vl_sh || 0) + (fin.vl_sp || 0) : 0
   const dot = p.grupo === '03' ? 'bg-emerald-400' : 'bg-orange-400'
+  const displayName = fin?.no_procedimento ?? fullName ?? p.name.toUpperCase()
 
   return (
     <div className="space-y-5">
@@ -134,12 +148,18 @@ function ProcDetailPanel({ p }) {
           <div className={cn('h-3 w-[3px] rounded-sm shrink-0', dot)} />
           <p className="font-mono text-xs text-slate-400">{formatCodigo(p.code)}</p>
           <CopiarBtn code={p.code} />
+          <Link
+            to={`/procedimento/${p.code}`}
+            className="ml-auto flex items-center gap-1 rounded-md border border-slate-200 px-2 py-0.5 text-[11px] font-medium text-slate-500 hover:border-blue-300 hover:text-blue-600 transition"
+            title="Ver página completa"
+          >
+            <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+            Ver completo
+          </Link>
         </div>
-        <h2 className="text-sm font-semibold text-slate-800 leading-snug">{p.name.toUpperCase()}</h2>
-        <div className="mt-1.5 flex items-center gap-2">
-          <Stars n={p.priority} />
-          <span className="text-[11px] text-slate-400">{['mensal', 'semanal', 'diário'][p.priority - 1]}</span>
-        </div>
+        <h2 className="text-sm font-semibold text-slate-800 leading-snug">{displayName}</h2>
       </div>
 
       {/* Grupo */}
@@ -240,7 +260,7 @@ function ProcDetailPanel({ p }) {
 
 const SUGESTOES = ['IAM', 'AVC', 'sepse', 'TCE', 'fratura fêmur', 'pancreatite', 'overdose', 'eclâmpsia', 'DPOC', 'dengue']
 
-function BuscaTab() {
+function BuscaTab({ procNames }) {
   const [query, setQuery] = useState('')
   const [sheetProc, setSheetProc] = useState(null)
 
@@ -305,14 +325,14 @@ function BuscaTab() {
         <div className="space-y-2">
           <p className="text-xs text-slate-400 px-0.5">{results.length} resultado{results.length !== 1 ? 's' : ''} — clique para ver detalhes e valores</p>
           {results.map(p => (
-            <ProcRow key={p.code} p={p} catLabel={p.categoria} onClick={() => setSheetProc(p)} />
+            <ProcRow key={p.code} p={p} catLabel={p.categoria} fullName={procNames[p.code]} onClick={() => setSheetProc(p)} />
           ))}
         </div>
       )}
 
       <Sheet open={!!sheetProc} onOpenChange={open => !open && setSheetProc(null)}>
         <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto">
-          {sheetProc && <ProcDetailPanel p={sheetProc} />}
+          {sheetProc && <ProcDetailPanel p={sheetProc} fullName={procNames[sheetProc.code]} />}
         </SheetContent>
       </Sheet>
     </div>
@@ -321,7 +341,7 @@ function BuscaTab() {
 
 // ── Aba 2: Por especialidade — layout 3 colunas ───────────────────────────────
 
-function EspecialidadeTab() {
+function EspecialidadeTab({ procNames }) {
   const [catId, setCatId] = useState(null)
   const [selectedProc, setSelectedProc] = useState(null)
   const [sheetProc, setSheetProc] = useState(null)  // mobile sheet
@@ -386,6 +406,7 @@ function EspecialidadeTab() {
                   key={p.code}
                   p={p}
                   selected={selectedProc?.code === p.code}
+                  fullName={procNames[p.code]}
                   onClick={() => handleSelectProc(p)}
                 />
               ))}
@@ -398,14 +419,14 @@ function EspecialidadeTab() {
           'shrink-0 overflow-y-auto border-l border-slate-100 px-4 py-4 transition-all hidden lg:block',
           selectedProc ? 'w-72 xl:w-80' : 'w-0 px-0 overflow-hidden'
         )}>
-          {selectedProc && <ProcDetailPanel p={selectedProc} />}
+          {selectedProc && <ProcDetailPanel p={selectedProc} fullName={procNames[selectedProc.code]} />}
         </div>
       </div>
 
       {/* Mobile: Sheet para detalhe */}
       <Sheet open={!!sheetProc} onOpenChange={open => !open && setSheetProc(null)}>
         <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto lg:hidden">
-          {sheetProc && <ProcDetailPanel p={sheetProc} />}
+          {sheetProc && <ProcDetailPanel p={sheetProc} fullName={procNames[sheetProc.code]} />}
         </SheetContent>
       </Sheet>
     </>
@@ -414,7 +435,7 @@ function EspecialidadeTab() {
 
 // ── Aba 3: Código rejeitado ───────────────────────────────────────────────────
 
-function CodigoRejeitadoTab() {
+function CodigoRejeitadoTab({ procNames }) {
   const [codigo, setCodigo] = useState('')
   const [sheetProc, setSheetProc] = useState(null)
 
@@ -474,7 +495,7 @@ function CodigoRejeitadoTab() {
           {procAlternativa && (
             <div>
               <p className="text-xs text-slate-400 mb-2">Clique para ver detalhes e valores:</p>
-              <ProcRow p={procAlternativa} onClick={() => setSheetProc(procAlternativa)} />
+              <ProcRow p={procAlternativa} fullName={procNames[procAlternativa.code]} onClick={() => setSheetProc(procAlternativa)} />
             </div>
           )}
 
@@ -486,7 +507,7 @@ function CodigoRejeitadoTab() {
 
       <Sheet open={!!sheetProc} onOpenChange={open => !open && setSheetProc(null)}>
         <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto">
-          {sheetProc && <ProcDetailPanel p={sheetProc} />}
+          {sheetProc && <ProcDetailPanel p={sheetProc} fullName={procNames[sheetProc.code]} />}
         </SheetContent>
       </Sheet>
     </div>
@@ -503,6 +524,22 @@ const TABS = [
 
 export function HroPage() {
   const [tab, setTab] = useState('especialidade')
+  const [procNames, setProcNames] = useState({}) // code → full SIGTAP name
+
+  useEffect(() => {
+    const codes = todosOsProcedimentos.map(p => p.code)
+    supabase
+      .from('procedimentos')
+      .select('co_procedimento, no_procedimento')
+      .in('co_procedimento', codes)
+      .then(({ data }) => {
+        if (data) {
+          const map = {}
+          data.forEach(r => { map[r.co_procedimento] = r.no_procedimento })
+          setProcNames(map)
+        }
+      })
+  }, [])
 
   return (
     <div className="min-h-screen bg-background">
@@ -544,14 +581,13 @@ export function HroPage() {
 
       {/* Conteúdo */}
       {tab === 'especialidade' ? (
-        // Por especialidade: sem padding lateral (colunas chegam até a borda)
         <div className="mx-auto max-w-5xl">
-          <EspecialidadeTab />
+          <EspecialidadeTab procNames={procNames} />
         </div>
       ) : (
         <main className="mx-auto max-w-5xl px-4 py-6 sm:px-6">
-          {tab === 'busca'     && <BuscaTab />}
-          {tab === 'rejeitado' && <CodigoRejeitadoTab />}
+          {tab === 'busca'     && <BuscaTab procNames={procNames} />}
+          {tab === 'rejeitado' && <CodigoRejeitadoTab procNames={procNames} />}
         </main>
       )}
     </div>
