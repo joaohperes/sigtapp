@@ -61,7 +61,7 @@ function CidChips({ cidText }) {
   return (
     <div className="flex flex-wrap gap-1 mt-1">
       {cids.map(cid => (
-        <span key={cid} className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] text-slate-500">{cid}</span>
+        <span key={cid} title={cid} className="cursor-default rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] text-slate-500">{cid}</span>
       ))}
     </div>
   )
@@ -71,12 +71,10 @@ function CidChips({ cidText }) {
 
 function ProcRow({ p, selected, catLabel, onClick }) {
   const dot = p.grupo === '03' ? 'bg-emerald-400' : 'bg-orange-400'
+  const nameUpper = p.name.toUpperCase()
 
   return (
-    <div
-      className="group cursor-pointer"
-      onClick={onClick}
-    >
+    <div className="group cursor-pointer" onClick={onClick}>
       <Card className={cn(
         'border-slate-100 bg-white transition-all duration-200',
         'group-hover:shadow-[0_2px_12px_rgba(15,23,42,0.08)] group-hover:border-slate-200',
@@ -90,14 +88,11 @@ function ProcRow({ p, selected, catLabel, onClick }) {
             <div className="flex items-center gap-1">
               <p className="font-mono text-xs text-slate-400">{formatCodigo(p.code)}</p>
               <CopiarBtn code={p.code} />
-              {p.grupo === '04' && (
-                <span className="rounded-full bg-orange-50 px-1.5 py-0.5 text-[10px] font-semibold text-orange-600 ring-1 ring-orange-200">Gr.04</span>
-              )}
               {catLabel && (
                 <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-500">{catLabel}</span>
               )}
             </div>
-            <p className="text-sm font-medium leading-snug text-slate-800">{p.name}</p>
+            <p title={nameUpper} className="text-sm font-medium leading-snug text-slate-800">{nameUpper}</p>
             <CidChips cidText={p.cid_text} />
           </div>
 
@@ -140,7 +135,7 @@ function ProcDetailPanel({ p }) {
           <p className="font-mono text-xs text-slate-400">{formatCodigo(p.code)}</p>
           <CopiarBtn code={p.code} />
         </div>
-        <h2 className="text-sm font-semibold text-slate-800 leading-snug">{p.name}</h2>
+        <h2 className="text-sm font-semibold text-slate-800 leading-snug">{p.name.toUpperCase()}</h2>
         <div className="mt-1.5 flex items-center gap-2">
           <Stars n={p.priority} />
           <span className="text-[11px] text-slate-400">{['mensal', 'semanal', 'diário'][p.priority - 1]}</span>
@@ -340,7 +335,10 @@ function EspecialidadeTab() {
 
   const handleSelectProc = useCallback((p) => {
     setSelectedProc(p)
-    setSheetProc(p)  // mobile: open sheet
+    // Sheet only on mobile — desktop uses the 3rd column (avoids dark overlay on desktop)
+    if (window.innerWidth < 1024) {
+      setSheetProc(p)
+    }
   }, [])
 
   const procs = useMemo(() =>
@@ -367,14 +365,8 @@ function EspecialidadeTab() {
                     : 'text-slate-600 hover:bg-slate-50'
                 )}
               >
-                <div className={cn('h-3.5 w-[3px] shrink-0 rounded-sm', ACCENT_DOT[c.cor] ?? ACCENT_DOT.slate)} />
-                <span className={cn('flex-1 text-xs leading-tight', catId === c.id ? 'font-semibold' : 'font-medium')}>{c.nome}</span>
-                <span className={cn(
-                  'shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-semibold tabular-nums',
-                  catId === c.id ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-500'
-                )}>
-                  {c.procedimentos.length}
-                </span>
+                <div className={cn('h-3.5 w-[3px] shrink-0 rounded-sm bg-blue-900', catId === c.id && 'bg-blue-600')} />
+                <span className={cn('flex-1 text-sm leading-tight', catId === c.id ? 'font-semibold' : 'font-medium')}>{c.nome}</span>
               </button>
             ))}
           </div>

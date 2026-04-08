@@ -118,7 +118,7 @@ export function ProcedureCard({ procedure, onSelect, compareMode, compareSelecte
               </p>
               <CopyButton value={co_procedimento} />
             </div>
-            <p className="text-sm font-semibold leading-snug text-slate-800 line-clamp-2">
+            <p title={no_procedimento} className="text-sm font-semibold leading-snug text-slate-800 line-clamp-2">
               {no_procedimento}
             </p>
             {no_financiamento && (
@@ -235,7 +235,7 @@ export function ProcedureRow({ procedure, onSelect, compareMode, compareSelected
             <p className="font-mono text-xs text-slate-400">{formatCodigo(co_procedimento)}</p>
             <CopyButton value={co_procedimento} />
           </div>
-          <p className="text-sm font-medium leading-snug text-slate-800">{no_procedimento}</p>
+          <p title={no_procedimento} className="text-sm font-medium leading-snug text-slate-800">{no_procedimento}</p>
           {no_financiamento && (
             <Badge variant="secondary" className="mt-1 rounded-full px-2 py-0.5 text-xs font-normal">
               {no_financiamento}
