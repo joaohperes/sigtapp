@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Sheet, SheetContent } from '@/components/ui/sheet'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { HelpSheet, HelpButton } from '../components/HelpSheet'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 
@@ -58,32 +59,59 @@ function Stars({ n }) {
   )
 }
 
+// Split on "/" only outside parentheses to handle "T40-T50 (drogas / medicamentos)"
+function splitCids(cidText) {
+  const parts = []
+  let depth = 0
+  let current = ''
+  for (const ch of cidText) {
+    if (ch === '(') depth++
+    else if (ch === ')') depth--
+    if (ch === '/' && depth === 0) {
+      const p = current.trim()
+      if (p) parts.push(p)
+      current = ''
+    } else {
+      current += ch
+    }
+  }
+  const p = current.trim()
+  if (p) parts.push(p)
+  return parts
+}
+
 function parseCidEntry(s) {
   const full = s.trim()
   const parenIdx = full.indexOf(' (')
   const code = parenIdx > -1 ? full.slice(0, parenIdx).trim() : full
-  return { code, full }
+  const desc = parenIdx > -1 ? full.slice(parenIdx + 2, -1) : null
+  return { code, full, desc }
 }
 
-function CidChips({ cidText }) {
-  const cids = cidText.split(/\s*\/\s*/).map(parseCidEntry).filter(c => c.code)
+function CidChips({ cidText, cidNames }) {
+  const cids = splitCids(cidText).map(parseCidEntry).filter(c => c.code)
   return (
     <div className="flex flex-wrap gap-1 mt-1">
-      {cids.map(({ code, full }) => (
-        <Tooltip key={code}>
-          <TooltipTrigger asChild>
-            <span className="cursor-default rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] text-slate-500 hover:bg-slate-200 transition-colors">{code}</span>
-          </TooltipTrigger>
-          <TooltipContent side="top" className="text-xs">{full}</TooltipContent>
-        </Tooltip>
-      ))}
+      {cids.map(({ code, full, desc }) => {
+        const normCode = code.replace('.', '').toUpperCase()
+        const dbName = cidNames?.[normCode]
+        const tooltipText = dbName ? `${code} — ${dbName}` : full
+        return (
+          <Tooltip key={code}>
+            <TooltipTrigger asChild>
+              <span className="cursor-default rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] text-slate-500 hover:bg-slate-200 transition-colors">{code}</span>
+            </TooltipTrigger>
+            <TooltipContent side="top" className="text-xs max-w-56">{tooltipText}</TooltipContent>
+          </Tooltip>
+        )
+      })}
     </div>
   )
 }
 
 // ── Linha de procedimento (igual ao ProcedureRow do site) ─────────────────────
 
-function ProcRow({ p, selected, catLabel, fullName, onClick }) {
+function ProcRow({ p, selected, catLabel, fullName, cidNames, onClick }) {
   const dot = p.grupo === '03' ? 'bg-emerald-400' : 'bg-orange-400'
   const displayName = fullName ?? p.name.toUpperCase()
 
@@ -107,8 +135,8 @@ function ProcRow({ p, selected, catLabel, fullName, onClick }) {
                 <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-500">{catLabel}</span>
               )}
             </div>
-            <p title={displayName} className="text-sm font-medium leading-snug text-slate-800">{displayName}</p>
-            <CidChips cidText={p.cid_text} />
+            <p className="text-sm font-medium leading-snug text-slate-800">{displayName}</p>
+            <CidChips cidText={p.cid_text} cidNames={cidNames} />
           </div>
         </CardContent>
       </Card>
@@ -120,25 +148,32 @@ function ProcRow({ p, selected, catLabel, fullName, onClick }) {
 
 function ProcDetailPanel({ p, fullName }) {
   const [fin, setFin] = useState(null)
+  const [cids, setCids] = useState(null)
   const [loadingFin, setLoadingFin] = useState(true)
 
   useEffect(() => {
     setFin(null)
+    setCids(null)
     setLoadingFin(true)
-    supabase
-      .from('procedimentos')
-      .select('vl_sa, vl_sh, vl_sp, qt_dias_perman, no_financiamento, no_procedimento')
-      .eq('co_procedimento', p.code)
-      .single()
-      .then(({ data }) => {
-        setFin(data ?? null)
-        setLoadingFin(false)
-      })
+    Promise.all([
+      supabase
+        .from('procedimentos')
+        .select('vl_sa, vl_sh, vl_sp, qt_dias_perman, no_financiamento, no_procedimento')
+        .eq('co_procedimento', p.code)
+        .single(),
+      supabase.rpc('cids_do_procedimento', { p_co: p.code }),
+    ]).then(([{ data: finData }, { data: cidData }]) => {
+      setFin(finData ?? null)
+      setCids(cidData ?? [])
+      setLoadingFin(false)
+    })
   }, [p.code])
 
   const total = fin ? (fin.vl_sa || 0) + (fin.vl_sh || 0) + (fin.vl_sp || 0) : 0
   const dot = p.grupo === '03' ? 'bg-emerald-400' : 'bg-orange-400'
   const displayName = fin?.no_procedimento ?? fullName ?? p.name.toUpperCase()
+  const cidsPrincipais = cids?.filter(c => c.st_principal === 'S') ?? []
+  const cidsOutros = cids?.filter(c => c.st_principal !== 'S') ?? []
 
   return (
     <div className="space-y-5">
@@ -151,7 +186,6 @@ function ProcDetailPanel({ p, fullName }) {
           <Link
             to={`/procedimento/${p.code}`}
             className="ml-auto flex items-center gap-1 rounded-md border border-slate-200 px-2 py-0.5 text-[11px] font-medium text-slate-500 hover:border-blue-300 hover:text-blue-600 transition"
-            title="Ver página completa"
           >
             <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -178,16 +212,6 @@ function ProcDetailPanel({ p, fullName }) {
         )}
       </div>
 
-      {/* CIDs */}
-      <div>
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5">CIDs compatíveis</p>
-        <div className="flex flex-wrap gap-1">
-          {p.cid_text.split(/\s*[\/·]\s*/).map(cid => (
-            <span key={cid} className="rounded-md border border-slate-200 bg-white px-2 py-1 font-mono text-xs text-slate-700">{cid.trim()}</span>
-          ))}
-        </div>
-      </div>
-
       {/* Obs */}
       {p.obs && (
         <div className="rounded-lg border border-slate-100 bg-slate-50 px-3 py-2.5">
@@ -206,6 +230,50 @@ function ProcDetailPanel({ p, fullName }) {
           <p className="text-xs text-red-700">{p.alert}</p>
         </div>
       )}
+
+      {/* CIDs do SIGTAP */}
+      <div>
+        <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5">CIDs relacionados</p>
+        {cids === null ? (
+          <div className="space-y-1.5">
+            <Skeleton className="h-8 rounded-lg" />
+            <Skeleton className="h-8 rounded-lg" />
+            <Skeleton className="h-8 rounded-lg" />
+          </div>
+        ) : cids.length === 0 ? (
+          <p className="text-xs text-slate-400">Nenhum CID vinculado.</p>
+        ) : (
+          <div className="rounded-lg border border-slate-100 overflow-hidden">
+            {cidsPrincipais.length > 0 && (
+              <div className="divide-y divide-slate-50">
+                {cidsPrincipais.map(c => (
+                  <div key={c.co_cid} className="flex items-baseline gap-3 px-3 py-2">
+                    <span className="shrink-0 font-mono text-xs font-semibold text-blue-600">{c.co_cid?.trim()}</span>
+                    <span className="text-xs text-slate-600 leading-snug">{c.no_cid}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+            {cidsOutros.length > 0 && (
+              <div className={cn('divide-y divide-slate-50', cidsPrincipais.length > 0 && 'border-t border-slate-100')}>
+                {cidsOutros.slice(0, 8).map(c => (
+                  <div key={c.co_cid} className="flex items-baseline gap-3 px-3 py-2">
+                    <span className="shrink-0 font-mono text-xs font-semibold text-slate-400">{c.co_cid?.trim()}</span>
+                    <span className="text-xs text-slate-500 leading-snug">{c.no_cid}</span>
+                  </div>
+                ))}
+                {cidsOutros.length > 8 && (
+                  <div className="px-3 py-2">
+                    <Link to={`/procedimento/${p.code}`} className="text-[11px] text-blue-500 hover:underline">
+                      +{cidsOutros.length - 8} CIDs adicionais →
+                    </Link>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* Valores financeiros */}
       <div>
@@ -260,7 +328,7 @@ function ProcDetailPanel({ p, fullName }) {
 
 const SUGESTOES = ['IAM', 'AVC', 'sepse', 'TCE', 'fratura fêmur', 'pancreatite', 'overdose', 'eclâmpsia', 'DPOC', 'dengue']
 
-function BuscaTab({ procNames }) {
+function BuscaTab({ procNames, cidNames }) {
   const [query, setQuery] = useState('')
   const [sheetProc, setSheetProc] = useState(null)
 
@@ -325,7 +393,7 @@ function BuscaTab({ procNames }) {
         <div className="space-y-2">
           <p className="text-xs text-slate-400 px-0.5">{results.length} resultado{results.length !== 1 ? 's' : ''} — clique para ver detalhes e valores</p>
           {results.map(p => (
-            <ProcRow key={p.code} p={p} catLabel={p.categoria} fullName={procNames[p.code]} onClick={() => setSheetProc(p)} />
+            <ProcRow key={p.code} p={p} catLabel={p.categoria} fullName={procNames[p.code]} cidNames={cidNames} onClick={() => setSheetProc(p)} />
           ))}
         </div>
       )}
@@ -341,7 +409,7 @@ function BuscaTab({ procNames }) {
 
 // ── Aba 2: Por especialidade — layout 3 colunas ───────────────────────────────
 
-function EspecialidadeTab({ procNames }) {
+function EspecialidadeTab({ procNames, cidNames }) {
   const [catId, setCatId] = useState(null)
   const [selectedProc, setSelectedProc] = useState(null)
   const [sheetProc, setSheetProc] = useState(null)  // mobile sheet
@@ -407,6 +475,7 @@ function EspecialidadeTab({ procNames }) {
                   p={p}
                   selected={selectedProc?.code === p.code}
                   fullName={procNames[p.code]}
+                  cidNames={cidNames}
                   onClick={() => handleSelectProc(p)}
                 />
               ))}
@@ -435,7 +504,7 @@ function EspecialidadeTab({ procNames }) {
 
 // ── Aba 3: Código rejeitado ───────────────────────────────────────────────────
 
-function CodigoRejeitadoTab({ procNames }) {
+function CodigoRejeitadoTab({ procNames, cidNames }) {
   const [codigo, setCodigo] = useState('')
   const [sheetProc, setSheetProc] = useState(null)
 
@@ -495,7 +564,7 @@ function CodigoRejeitadoTab({ procNames }) {
           {procAlternativa && (
             <div>
               <p className="text-xs text-slate-400 mb-2">Clique para ver detalhes e valores:</p>
-              <ProcRow p={procAlternativa} fullName={procNames[procAlternativa.code]} onClick={() => setSheetProc(procAlternativa)} />
+              <ProcRow p={procAlternativa} fullName={procNames[procAlternativa.code]} cidNames={cidNames} onClick={() => setSheetProc(procAlternativa)} />
             </div>
           )}
 
@@ -524,9 +593,12 @@ const TABS = [
 
 export function HroPage() {
   const [tab, setTab] = useState('especialidade')
-  const [procNames, setProcNames] = useState({}) // code → full SIGTAP name
+  const [procNames, setProcNames] = useState({})  // code → full SIGTAP name
+  const [cidNames, setCidNames] = useState({})    // normalizedCode → no_cid
+  const [helpOpen, setHelpOpen] = useState(false)
 
   useEffect(() => {
+    // Fetch full SIGTAP procedure names
     const codes = todosOsProcedimentos.map(p => p.code)
     supabase
       .from('procedimentos')
@@ -539,6 +611,29 @@ export function HroPage() {
           setProcNames(map)
         }
       })
+
+    // Fetch CID names for chip tooltips (single codes only, no ranges)
+    const cidCodes = [...new Set(
+      todosOsProcedimentos.flatMap(p =>
+        splitCids(p.cid_text)
+          .map(s => s.replace(/\s*\(.*\)$/, '').trim())
+          .filter(c => !c.includes('-') && !c.includes('+') && !c.includes(' '))
+          .map(c => c.replace('.', '').toUpperCase())
+      )
+    )]
+    if (cidCodes.length) {
+      supabase
+        .from('cid')
+        .select('co_cid, no_cid')
+        .in('co_cid', cidCodes)
+        .then(({ data }) => {
+          if (data) {
+            const map = {}
+            data.forEach(r => { map[r.co_cid] = r.no_cid })
+            setCidNames(map)
+          }
+        })
+    }
   }, [])
 
   return (
@@ -549,14 +644,14 @@ export function HroPage() {
           <div className="flex items-center justify-between gap-4">
             <div>
               <h1 className="text-lg font-bold text-white">Guia de Códigos — PS HRO</h1>
-              <p className="mt-0.5 text-sm text-blue-200">
-                CNES 2537788 · SIGTAP 202602 · Grupo 03 preferencial
-              </p>
+              <p className="mt-0.5 text-sm text-blue-200">CNES 2537788 · SIGTAP 202602</p>
             </div>
-            <div className="hidden sm:flex items-center gap-3 text-[11px] text-blue-300/70 shrink-0">
-              <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-emerald-400" />Gr.03 clínico</span>
-              <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-orange-400" />Gr.04 verificar FPO</span>
-              <span className="text-amber-300/80">★★★ diário · ★★☆ semanal · ★☆☆ mensal</span>
+            <div className="flex items-center gap-3 shrink-0">
+              <div className="hidden sm:flex items-center gap-3 text-[11px] text-blue-300/70">
+                <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-emerald-400" />Gr.03 clínico</span>
+                <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-orange-400" />Gr.04 verificar FPO</span>
+              </div>
+              <HelpButton onClick={() => setHelpOpen(true)} dark />
             </div>
           </div>
 
@@ -582,14 +677,16 @@ export function HroPage() {
       {/* Conteúdo */}
       {tab === 'especialidade' ? (
         <div className="mx-auto max-w-5xl">
-          <EspecialidadeTab procNames={procNames} />
+          <EspecialidadeTab procNames={procNames} cidNames={cidNames} />
         </div>
       ) : (
         <main className="mx-auto max-w-5xl px-4 py-6 sm:px-6">
-          {tab === 'busca'     && <BuscaTab procNames={procNames} />}
-          {tab === 'rejeitado' && <CodigoRejeitadoTab procNames={procNames} />}
+          {tab === 'busca'     && <BuscaTab procNames={procNames} cidNames={cidNames} />}
+          {tab === 'rejeitado' && <CodigoRejeitadoTab procNames={procNames} cidNames={cidNames} />}
         </main>
       )}
+
+      <HelpSheet pagina="hro" open={helpOpen} onClose={() => setHelpOpen(false)} />
     </div>
   )
 }

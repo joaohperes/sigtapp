@@ -18,6 +18,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
+import { HelpSheet, HelpButton } from '../components/HelpSheet'
 
 const VIEW_MODES = ['cards', 'tabela']
 const SORT_OPTIONS = [
@@ -75,6 +76,7 @@ function Chevron() {
 }
 
 export function Home() {
+  const [helpOpen, setHelpOpen] = useState(false)
   const [searchParams, setSearchParams] = useSearchParams()
   const initialQuery = searchParams.get('q') || ''
   const location = useLocation()
@@ -373,6 +375,9 @@ export function Home() {
           <p className={cn("mt-2 text-sm font-medium tracking-wide", modoUE ? "text-red-300/70" : "text-blue-300/60")}>
             Procedimentos, Medicamentos e OPM do SUS · CID-10
           </p>
+          <div className="mt-3 flex justify-center">
+            <HelpButton onClick={() => setHelpOpen(true)} dark />
+          </div>
           <div className="mt-6">
             <SearchBar
               key={location.state?.reset ?? 'initial'}
@@ -1089,6 +1094,7 @@ export function Home() {
       )}
 
 
+      <HelpSheet pagina="home" open={helpOpen} onClose={() => setHelpOpen(false)} />
     </div>
   )
 }

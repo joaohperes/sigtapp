@@ -9,6 +9,7 @@ import { useModoUE } from '../contexts/ModoUEContext'
 import { Sheet, SheetContent } from '@/components/ui/sheet'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
+import { HelpSheet, HelpButton } from '../components/HelpSheet'
 
 const EXEMPLOS = [
   {
@@ -158,6 +159,7 @@ export function AnamnesePage() {
   const [aih, setAih] = useState(() => getSession().aih || '')
   const [analyzed, setAnalyzed] = useState(() => getSession().analyzed || false)
   const [sheetProc, setSheetProc] = useState(null)
+  const [helpOpen, setHelpOpen] = useState(false)
   const [cidProcs, setCidProcs] = useState(() => {  // { [co_cid]: { loading, data, open } }
     const saved = getSession().cidProcsData || {}
     return Object.fromEntries(Object.entries(saved).map(([k, v]) => [k, { loading: false, data: v, open: false }]))
@@ -737,7 +739,9 @@ export function AnamnesePage() {
               Cole o texto clínico e a IA identificará CIDs, procedimentos SIGTAP e gerará o texto para AIH
             </p>
           </div>
-          {showResults && (
+          <div className="flex items-center gap-2 shrink-0">
+            <HelpButton onClick={() => setHelpOpen(true)} dark />
+            {showResults && (
             <button
               onClick={handleNova}
               className={cn(
@@ -753,6 +757,7 @@ export function AnamnesePage() {
               Nova análise
             </button>
           )}
+          </div>
         </div>
       </div>
 
@@ -969,6 +974,7 @@ export function AnamnesePage() {
           {sheetProc && <ProcedureSheetContent procedure={sheetProc} />}
         </SheetContent>
       </Sheet>
+      <HelpSheet pagina="anamnese" open={helpOpen} onClose={() => setHelpOpen(false)} />
     </div>
   )
 }

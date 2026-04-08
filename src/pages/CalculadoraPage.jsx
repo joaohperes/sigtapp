@@ -7,6 +7,7 @@ import { expandirSinonimos } from '../data/sinonimos'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { HelpSheet, HelpButton } from '../components/HelpSheet'
 
 function totalOf(p) {
   return (p.vl_sa || 0) + (p.vl_sh || 0) + (p.vl_sp || 0)
@@ -173,6 +174,7 @@ function TrashIcon() {
 }
 
 export function CalculadoraPage() {
+  const [helpOpen, setHelpOpen] = useState(false)
   // items: { procedure, qty } — o primeiro é sempre o principal
   const [items, setItems] = useState([])
   const [compatList, setCompatList] = useState(null)
@@ -335,10 +337,15 @@ export function CalculadoraPage() {
               </svg>
               Voltar
             </Link>
-            <h1 className="mt-2 text-2xl font-bold text-white">Calculadora de AIH</h1>
-            <p className="mt-1 text-sm text-blue-300/70">
-              Monte um conjunto de procedimentos e calcule o valor total faturável pelo SUS.
-            </p>
+            <div className="flex items-end justify-between gap-4">
+              <div>
+                <h1 className="mt-2 text-2xl font-bold text-white">Calculadora de AIH</h1>
+                <p className="mt-1 text-sm text-blue-300/70">
+                  Monte um conjunto de procedimentos e calcule o valor total faturável pelo SUS.
+                </p>
+              </div>
+              <HelpButton onClick={() => setHelpOpen(true)} dark />
+            </div>
           </div>
         </div>
 
@@ -689,6 +696,7 @@ export function CalculadoraPage() {
           </div>
         </main>
       </div>
+      <HelpSheet pagina="calculadora" open={helpOpen} onClose={() => setHelpOpen(false)} />
     </TooltipProvider>
   )
 }
