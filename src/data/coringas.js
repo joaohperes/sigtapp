@@ -1,16 +1,16 @@
-// Procedimentos "coringa" — procedimentos terapêuticos/invasivos frequentes no PS/UTI
-// Foco: o que aparece na AIH, não exames de rotina ou medicamentos
-export const CORINGAS = [
-  { label: 'Tratamento clínico geral',       query: 'tratamento clinico',                    grupo: 'clínico' },
-  { label: 'Tratamento sepse/choque séptico', query: 'tratamento septicemia',                 grupo: 'clínico' },
-  { label: 'Tratamento pneumonia',            query: 'tratamento pneumonia',                  grupo: 'clínico' },
-  { label: 'Tratamento AVC isquêmico',        query: 'tratamento avc isquemico',              grupo: 'clínico' },
-  { label: 'Tratamento IAM',                  query: 'tratamento infarto agudo miocardio',    grupo: 'clínico' },
-  { label: 'Tratamento insuf. cardíaca',      query: 'tratamento insuficiencia cardiaca',     grupo: 'clínico' },
-  { label: 'Ventilação mecânica',             query: 'ventilacao mecanica',                   grupo: 'terapêutico' },
-  { label: 'Cateterismo vesical',             query: 'cateterismo vesical',                   grupo: 'terapêutico' },
-  { label: 'Acesso venoso central',           query: 'cateter venoso central',                grupo: 'terapêutico' },
-  { label: 'Transfusão hemácias',             query: 'transfusao concentrado hemacias',       grupo: 'terapêutico' },
-  { label: 'Endoscopia digestiva alta',       query: 'endoscopia digestiva alta',             grupo: 'terapêutico' },
-  { label: 'Drenagem torácica',               query: 'drenagem torax',                        grupo: 'terapêutico' },
+// CIDs "coringa" — diagnósticos mais frequentes no PS/UTI
+// Clique abre CID-10 com contexto clínico automático
+export const CORINGAS_CID = [
+  { co_cid: 'A419', no_cid: 'Septicemia não especificada',                       label: 'Sepse'              },
+  { co_cid: 'J189', no_cid: 'Pneumonia não especificada',                         label: 'Pneumonia'          },
+  { co_cid: 'I219', no_cid: 'Infarto agudo do miocárdio não especificado',        label: 'IAM'                },
+  { co_cid: 'I639', no_cid: 'Acidente vascular cerebral isquêmico',               label: 'AVC isquêmico'      },
+  { co_cid: 'I500', no_cid: 'Insuficiência cardíaca congestiva',                  label: 'ICC'                },
+  { co_cid: 'I269', no_cid: 'Embolia pulmonar sem cor pulmonale agudo',           label: 'TEP'                },
+  { co_cid: 'J960', no_cid: 'Insuficiência respiratória aguda',                   label: 'IRpA'               },
+  { co_cid: 'K920', no_cid: 'Hematêmese',                                         label: 'HDA'                },
+  { co_cid: 'N179', no_cid: 'Insuficiência renal aguda não especificada',         label: 'IRA'                },
+  { co_cid: 'K359', no_cid: 'Apendicite aguda não especificada',                  label: 'Apendicite'         },
+  { co_cid: 'S099', no_cid: 'Traumatismo cranioencefálico',                       label: 'TCE'                },
+  { co_cid: 'E149', no_cid: 'Diabetes mellitus não especificado — sem compl.',    label: 'DM descompensado'   },
 ]

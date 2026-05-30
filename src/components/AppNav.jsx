@@ -68,6 +68,7 @@ export function AppNav() {
         {/* Nav links */}
         <div className="flex items-center gap-0.5">
           <NavLink to="/" label="Busca" active={location.pathname === '/'} modoUE={modoUE} dark={dark} />
+          <NavLink to="/cid" label="CID-10" active={location.pathname === '/cid'} modoUE={modoUE} dark={dark} />
           <NavLink to="/anamnese" label="Anamnese IA" active={location.pathname === '/anamnese'} modoUE={modoUE} dark={dark} />
           <NavLink to="/calculadora" label="Calculadora" active={location.pathname === '/calculadora'} modoUE={modoUE} dark={dark} />
           <NavLink
@@ -78,7 +79,6 @@ export function AppNav() {
             dark={dark}
             badge={favoritos.length > 0 ? favoritos.length : null}
           />
-          <NavLink to="/cid" label="CID-10" active={location.pathname === '/cid'} modoUE={modoUE} dark={dark} />
           <NavLink to="/hro" label="PS HRO" active={location.pathname === '/hro'} modoUE={modoUE} dark={dark} badge="HRO" />
         </div>
 

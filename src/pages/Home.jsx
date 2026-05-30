@@ -10,7 +10,7 @@ import { useGrupos } from '../hooks/useGrupos'
 import { useFavoritos } from '../contexts/FavoritosContext'
 import { useModoUE } from '../contexts/ModoUEContext'
 import { GRUPO_MAP } from '../data/grupos'
-import { CORINGAS } from '../data/coringas'
+import { CORINGAS_CID } from '../data/coringas'
 import { supabase } from '../lib/supabase'
 import { expandirSinonimos } from '../data/sinonimos'
 import { formatBRL, formatCodigo } from '../utils/formatters'
@@ -764,7 +764,7 @@ export function Home() {
         {/* ── Estado inicial — grupos com drill-down ── */}
         {!searched && (
           <div>
-            {/* Coringas — procedimentos frequentes de urgência */}
+            {/* Coringas — diagnósticos frequentes do PS com contexto clínico */}
             <div className="mb-8">
               <div className="mb-3 flex items-center justify-between">
                 <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
@@ -772,25 +772,18 @@ export function Home() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                       d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
-                  Coringas
+                  Coringas do PS
                 </h2>
-                <span className="text-xs text-muted-foreground">Procedimentos frequentes no PS — clique para buscar</span>
+                <Link to="/cid" className="text-xs text-primary hover:opacity-80 transition">
+                  Busca de CID-10 →
+                </Link>
               </div>
               <div className="flex flex-wrap gap-2">
-                {CORINGAS.map(c => (
-                  <button
-                    key={c.label}
-                    onClick={() => {
-                      setSearched(true)
-                      setCidResults([])
-                      setShowAllCids(false)
-                      resetFilters()
-                      setSortKey('relevancia')
-                      setSelectedGroup(null)
-                      setSelectedSubgroup(null)
-                      setSearchParams({ q: c.query, sc: '1' })
-                      search(c.query, null)
-                    }}
+                {CORINGAS_CID.map(c => (
+                  <Link
+                    key={c.co_cid}
+                    to={`/cid?q=${encodeURIComponent(c.co_cid)}&ctx=1`}
+                    title={c.no_cid}
                     className={cn(
                       'flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition',
                       dark
@@ -798,12 +791,10 @@ export function Home() {
                         : 'border-border bg-card text-foreground hover:border-primary/40 hover:text-primary'
                     )}
                   >
-                    <span className={cn(
-                      'h-1.5 w-1.5 rounded-full shrink-0',
-                      c.grupo === 'diagnóstico' ? 'bg-[#38bdf8]' : c.grupo === 'terapêutico' ? 'bg-[#34d399]' : 'bg-[#fbbf24]'
-                    )} />
+                    <span className="font-mono text-[10px] text-muted-foreground shrink-0">{c.co_cid}</span>
+                    <span className="h-3 w-px bg-border shrink-0" />
                     {c.label}
-                  </button>
+                  </Link>
                 ))}
               </div>
             </div>

@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTheme } from '../contexts/ThemeContext'
 import { cn } from '@/lib/utils'
@@ -26,23 +26,24 @@ function PillProcedimento({ p, dark, onClick }) {
   )
 }
 
-export function ContextoClinico({ cid }) {
+export function ContextoClinico({ cid, autoOpen = false }) {
   const { dark } = useTheme()
   const navigate = useNavigate()
-  const [aberto, setAberto] = useState(false)
+  const [aberto, setAberto] = useState(autoOpen)
   const [dados, setDados] = useState(null)
   const [loading, setLoading] = useState(false)
   const [erro, setErro] = useState(null)
   const buscandoRef = useRef(false)
 
-  async function toggle() {
-    if (aberto) { setAberto(false); return }
-    setAberto(true)
+  // Se autoOpen, busca imediatamente na montagem
+  useEffect(() => {
+    if (autoOpen) buscar()
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
+  async function buscar() {
     const key = cid.co_cid?.trim()
     if (cache.has(key)) { setDados(cache.get(key)); return }
     if (buscandoRef.current) return
-
     buscandoRef.current = true
     setLoading(true)
     setErro(null)
@@ -62,6 +63,12 @@ export function ContextoClinico({ cid }) {
       setLoading(false)
       buscandoRef.current = false
     }
+  }
+
+  async function toggle() {
+    if (aberto) { setAberto(false); return }
+    setAberto(true)
+    await buscar()
   }
 
   function buscar(termo) {

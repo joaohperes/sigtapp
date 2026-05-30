@@ -12,6 +12,7 @@ export function CidSearch() {
   const { dark } = useTheme()
   const [searchParams, setSearchParams] = useSearchParams()
   const initialQuery = searchParams.get('q') || ''
+  const autoCtx = searchParams.get('ctx') === '1'
 
   const { results, loading, error, meta, search } = useCidSearch()
   const [value, setValue] = useState(initialQuery)
@@ -145,8 +146,8 @@ export function CidSearch() {
               <span className="ml-1 text-muted-foreground/60">para ver procedimentos sugeridos por IA</span>
             </p>
             <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
-              {results.map((cid) => (
-                <CidRow key={cid.co_cid} cid={cid} dark={dark} />
+              {results.map((cid, i) => (
+                <CidRow key={cid.co_cid} cid={cid} dark={dark} autoCtx={autoCtx && i === 0} />
               ))}
             </div>
           </>
@@ -179,7 +180,7 @@ export function CidSearch() {
   )
 }
 
-function CidRow({ cid, dark }) {
+function CidRow({ cid, dark, autoCtx = false }) {
   const sexo = SEXO_LABEL[cid.tp_sexo]
   const isCidCategory = cid.co_cid.trim().length === 3
 
@@ -220,7 +221,7 @@ function CidRow({ cid, dark }) {
       </div>
 
       {/* Contexto clínico — botão + painel colapsável */}
-      <ContextoClinico cid={cid} />
+      <ContextoClinico cid={cid} autoOpen={autoCtx} />
     </div>
   )
 }
