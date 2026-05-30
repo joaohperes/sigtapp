@@ -35,7 +35,7 @@ function CopiarBtn({ code }) {
         navigator.clipboard.writeText(code)
         toast.success('Código copiado!', { duration: 1500 })
       }}
-      className="rounded p-0.5 text-slate-300 transition hover:bg-slate-100 hover:text-slate-500"
+      className="rounded p-0.5 text-muted-foreground/50 transition hover:bg-slate-100 hover:text-muted-foreground"
       title="Copiar código"
     >
       <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -100,7 +100,7 @@ function CidChips({ cidText, cidNames }) {
         return (
           <Tooltip key={code}>
             <TooltipTrigger asChild>
-              <span className="cursor-default rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] text-slate-500 hover:bg-slate-200 transition-colors">{code}</span>
+              <span className="cursor-default rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground hover:bg-slate-200 transition-colors">{code}</span>
             </TooltipTrigger>
             <TooltipContent side="top" className="text-xs max-w-56">{tooltipText}</TooltipContent>
           </Tooltip>
@@ -130,13 +130,13 @@ function ProcRow({ p, selected, catLabel, fullName, cidNames, onClick }) {
 
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1">
-              <p className="font-mono text-xs text-slate-400">{formatCodigo(p.code)}</p>
+              <p className="font-mono text-xs text-muted-foreground/70">{formatCodigo(p.code)}</p>
               <CopiarBtn code={p.code} />
               {catLabel && (
-                <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-500">{catLabel}</span>
+                <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] text-muted-foreground">{catLabel}</span>
               )}
             </div>
-            <p className="text-sm font-medium leading-snug text-slate-800">{displayName}</p>
+            <p className="text-sm font-medium leading-snug text-foreground">{displayName}</p>
             <CidChips cidText={p.cid_text} cidNames={cidNames} />
           </div>
         </CardContent>
@@ -182,11 +182,11 @@ function ProcDetailPanel({ p, fullName }) {
       <div>
         <div className="flex items-center gap-1.5 mb-1">
           <div className={cn('h-3 w-[3px] rounded-sm shrink-0', dot)} />
-          <p className="font-mono text-xs text-slate-400">{formatCodigo(p.code)}</p>
+          <p className="font-mono text-xs text-muted-foreground/70">{formatCodigo(p.code)}</p>
           <CopiarBtn code={p.code} />
           <Link
             to={`/procedimento/${p.code}`}
-            className="ml-auto flex items-center gap-1 rounded-md border border-slate-200 px-2 py-0.5 text-[11px] font-medium text-slate-500 hover:border-blue-300 hover:text-blue-600 transition"
+            className="ml-auto flex items-center gap-1 rounded-md border border-slate-200 px-2 py-0.5 text-[11px] font-medium text-muted-foreground hover:border-blue-300 hover:text-blue-600 transition"
           >
             <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -194,12 +194,12 @@ function ProcDetailPanel({ p, fullName }) {
             Ver completo
           </Link>
         </div>
-        <h2 className="text-sm font-semibold text-slate-800 leading-snug">{displayName}</h2>
+        <h2 className="text-sm font-semibold text-foreground leading-snug">{displayName}</h2>
       </div>
 
       {/* Grupo */}
       <div className="rounded-lg border border-border bg-card px-3 py-2.5">
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Grupo SIGTAP</p>
+        <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70 mb-1">Grupo SIGTAP</p>
         {p.grupo === '03' ? (
           <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700">
             <span className="h-2 w-2 rounded-full bg-emerald-400" />
@@ -216,8 +216,8 @@ function ProcDetailPanel({ p, fullName }) {
       {/* Obs */}
       {p.obs && (
         <div className="rounded-lg border border-slate-100 bg-slate-50 px-3 py-2.5">
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Observação</p>
-          <p className="text-xs text-slate-600 italic">{p.obs}</p>
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70 mb-1">Observação</p>
+          <p className="text-xs text-muted-foreground italic">{p.obs}</p>
         </div>
       )}
 
@@ -234,7 +234,7 @@ function ProcDetailPanel({ p, fullName }) {
 
       {/* CIDs do SIGTAP */}
       <div>
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5">CIDs relacionados</p>
+        <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70 mb-1.5">CIDs relacionados</p>
         {cids === null ? (
           <div className="space-y-1.5">
             <Skeleton className="h-8 rounded-lg" />
@@ -242,7 +242,7 @@ function ProcDetailPanel({ p, fullName }) {
             <Skeleton className="h-8 rounded-lg" />
           </div>
         ) : cids.length === 0 ? (
-          <p className="text-xs text-slate-400">Nenhum CID vinculado.</p>
+          <p className="text-xs text-muted-foreground/70">Nenhum CID vinculado.</p>
         ) : (
           <div className="rounded-lg border border-slate-100 overflow-hidden">
             {cidsPrincipais.length > 0 && (
@@ -250,7 +250,7 @@ function ProcDetailPanel({ p, fullName }) {
                 {cidsPrincipais.map(c => (
                   <div key={c.co_cid} className="flex items-baseline gap-3 px-3 py-2">
                     <span className="shrink-0 font-mono text-xs font-semibold text-blue-600">{c.co_cid?.trim()}</span>
-                    <span className="text-xs text-slate-600 leading-snug">{c.no_cid}</span>
+                    <span className="text-xs text-muted-foreground leading-snug">{c.no_cid}</span>
                   </div>
                 ))}
               </div>
@@ -259,8 +259,8 @@ function ProcDetailPanel({ p, fullName }) {
               <div className={cn('divide-y divide-slate-50', cidsPrincipais.length > 0 && 'border-t border-slate-100')}>
                 {cidsOutros.slice(0, 8).map(c => (
                   <div key={c.co_cid} className="flex items-baseline gap-3 px-3 py-2">
-                    <span className="shrink-0 font-mono text-xs font-semibold text-slate-400">{c.co_cid?.trim()}</span>
-                    <span className="text-xs text-slate-500 leading-snug">{c.no_cid}</span>
+                    <span className="shrink-0 font-mono text-xs font-semibold text-muted-foreground/70">{c.co_cid?.trim()}</span>
+                    <span className="text-xs text-muted-foreground leading-snug">{c.no_cid}</span>
                   </div>
                 ))}
                 {cidsOutros.length > 8 && (
@@ -278,7 +278,7 @@ function ProcDetailPanel({ p, fullName }) {
 
       {/* Valores financeiros */}
       <div>
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Valores SUS</p>
+        <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70 mb-1.5">Valores SUS</p>
         {loadingFin ? (
           <div className="space-y-2">
             <Skeleton className="h-4 w-full" />
@@ -294,31 +294,31 @@ function ProcDetailPanel({ p, fullName }) {
                 { label: 'Profissional', val: fin.vl_sp },
               ].map(({ label, val }) => (
                 <div key={label} className="flex justify-between px-3 py-2">
-                  <span className="text-xs text-slate-400">{label}</span>
-                  <span className="text-xs tabular-nums text-slate-600">{formatBRL(val)}</span>
+                  <span className="text-xs text-muted-foreground/70">{label}</span>
+                  <span className="text-xs tabular-nums text-muted-foreground">{formatBRL(val)}</span>
                 </div>
               ))}
             </div>
             <div className="flex justify-between border-t border-slate-200 bg-slate-50 px-3 py-2">
-              <span className="text-xs font-semibold text-slate-700">Total</span>
+              <span className="text-xs font-semibold text-foreground/90">Total</span>
               <span className="text-sm font-bold tabular-nums text-emerald-600">{formatBRL(total)}</span>
             </div>
             {fin.qt_dias_perman > 0 && fin.qt_dias_perman < 9999 && (
               <div className="border-t border-slate-100 px-3 py-2">
-                <p className="text-[11px] text-slate-400">
+                <p className="text-[11px] text-muted-foreground/70">
                   Permanência mín. <span className="font-semibold text-blue-600">{fin.qt_dias_perman} {fin.qt_dias_perman === 1 ? 'dia' : 'dias'}</span>
-                  <span className="ml-1 text-slate-300">· paga a partir de {fin.qt_dias_perman + 1}</span>
+                  <span className="ml-1 text-muted-foreground/50">· paga a partir de {fin.qt_dias_perman + 1}</span>
                 </p>
               </div>
             )}
             {fin.no_financiamento && (
               <div className="border-t border-slate-100 px-3 py-1.5">
-                <span className="text-[10px] text-slate-400">{fin.no_financiamento}</span>
+                <span className="text-[10px] text-muted-foreground/70">{fin.no_financiamento}</span>
               </div>
             )}
           </div>
         ) : (
-          <p className="text-xs text-slate-400">Dados financeiros não encontrados.</p>
+          <p className="text-xs text-muted-foreground/70">Dados financeiros não encontrados.</p>
         )}
       </div>
     </div>
@@ -349,7 +349,7 @@ function BuscaTab({ procNames, cidNames }) {
   return (
     <div className="space-y-4">
       <div className="relative">
-        <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none"
+        <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/70 pointer-events-none"
           fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
@@ -362,7 +362,7 @@ function BuscaTab({ procNames, cidNames }) {
         />
         {query && (
           <button onClick={() => setQuery('')}
-            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-0.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition">
+            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-0.5 text-muted-foreground/70 hover:bg-slate-100 hover:text-muted-foreground transition">
             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -372,7 +372,7 @@ function BuscaTab({ procNames, cidNames }) {
 
       {!query && (
         <div className="rounded-xl border border-slate-100 bg-slate-50 px-5 py-6 text-center">
-          <p className="text-sm text-slate-500 mb-3">Exemplos de busca:</p>
+          <p className="text-sm text-muted-foreground mb-3">Exemplos de busca:</p>
           <div className="flex flex-wrap justify-center gap-2">
             {SUGESTOES.map(s => (
               <button key={s} onClick={() => setQuery(s)}
@@ -386,13 +386,13 @@ function BuscaTab({ procNames, cidNames }) {
 
       {query && results.length === 0 && (
         <div className="rounded-xl border border-slate-100 bg-slate-50 py-12 text-center">
-          <p className="text-sm text-slate-400">Nenhum resultado para <strong className="text-slate-600">"{query}"</strong></p>
+          <p className="text-sm text-muted-foreground/70">Nenhum resultado para <strong className="text-muted-foreground">"{query}"</strong></p>
         </div>
       )}
 
       {results.length > 0 && (
         <div className="space-y-2">
-          <p className="text-xs text-slate-400 px-0.5">{results.length} resultado{results.length !== 1 ? 's' : ''} — clique para ver detalhes e valores</p>
+          <p className="text-xs text-muted-foreground/70 px-0.5">{results.length} resultado{results.length !== 1 ? 's' : ''} — clique para ver detalhes e valores</p>
           {results.map(p => (
             <ProcRow key={p.code} p={p} catLabel={p.categoria} fullName={procNames[p.code]} cidNames={cidNames} onClick={() => setSheetProc(p)} />
           ))}
@@ -451,7 +451,7 @@ function EspecialidadeTab({ procNames, cidNames }) {
                   'flex w-full items-center gap-2.5 px-3 py-2 text-left transition',
                   catId === c.id
                     ? 'bg-blue-50 text-blue-700'
-                    : 'text-slate-600 hover:bg-slate-50'
+                    : 'text-muted-foreground hover:bg-slate-50'
                 )}
               >
                 <div className={cn('h-3.5 w-[3px] shrink-0 rounded-sm bg-blue-900', catId === c.id && 'bg-blue-600')} />
@@ -465,11 +465,11 @@ function EspecialidadeTab({ procNames, cidNames }) {
         <div className="flex-1 min-w-0 overflow-y-auto px-4 py-3">
           {!cat ? (
             <div className="flex h-full items-center justify-center">
-              <p className="text-sm text-slate-400">Selecione uma especialidade.</p>
+              <p className="text-sm text-muted-foreground/70">Selecione uma especialidade.</p>
             </div>
           ) : (
             <div className="space-y-1.5">
-              <p className="text-xs text-slate-400 mb-2 px-0.5">{cat.nome} · {cat.procedimentos.length} procedimentos · clique para detalhes</p>
+              <p className="text-xs text-muted-foreground/70 mb-2 px-0.5">{cat.nome} · {cat.procedimentos.length} procedimentos · clique para detalhes</p>
               {procs.map(p => (
                 <ProcRow
                   key={p.code}
@@ -523,8 +523,8 @@ function CodigoRejeitadoTab({ procNames, cidNames }) {
 
   return (
     <div className="space-y-4">
-      <div className="rounded-xl border border-slate-100 bg-slate-50 px-4 py-3 text-sm text-slate-600">
-        Digite o código que foi <strong className="text-slate-800">rejeitado na AIH</strong>. O sistema mostra a melhor alternativa do grupo 03 para o HRO.
+      <div className="rounded-xl border border-slate-100 bg-slate-50 px-4 py-3 text-sm text-muted-foreground">
+        Digite o código que foi <strong className="text-foreground">rejeitado na AIH</strong>. O sistema mostra a melhor alternativa do grupo 03 para o HRO.
       </div>
 
       <input
@@ -551,7 +551,7 @@ function CodigoRejeitadoTab({ procNames, cidNames }) {
           </div>
 
           <div className="flex justify-center">
-            <svg className="h-5 w-5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="h-5 w-5 text-muted-foreground/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
           </div>
@@ -564,13 +564,13 @@ function CodigoRejeitadoTab({ procNames, cidNames }) {
 
           {procAlternativa && (
             <div>
-              <p className="text-xs text-slate-400 mb-2">Clique para ver detalhes e valores:</p>
+              <p className="text-xs text-muted-foreground/70 mb-2">Clique para ver detalhes e valores:</p>
               <ProcRow p={procAlternativa} fullName={procNames[procAlternativa.code]} cidNames={cidNames} onClick={() => setSheetProc(procAlternativa)} />
             </div>
           )}
 
           <div className="rounded-lg border border-border bg-card px-4 py-2.5">
-            <p className="text-xs text-slate-400">Situação: <span className="font-medium text-slate-700">{resultado.situacao}</span></p>
+            <p className="text-xs text-muted-foreground/70">Situação: <span className="font-medium text-foreground/90">{resultado.situacao}</span></p>
           </div>
         </div>
       )}
@@ -665,7 +665,7 @@ export function HroPage() {
                 className={cn(
                   'flex-1 rounded-lg py-2 text-xs font-medium transition',
                   tab === t.id
-                    ? dark ? 'bg-white text-slate-800 shadow-sm' : 'bg-card text-foreground shadow-sm'
+                    ? dark ? 'bg-white text-foreground shadow-sm' : 'bg-card text-foreground shadow-sm'
                     : dark ? 'text-blue-200/70 hover:text-white' : 'text-muted-foreground hover:text-foreground'
                 )}
               >

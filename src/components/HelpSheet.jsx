@@ -158,7 +158,7 @@ export function HelpSheet({ pagina, open, onClose }) {
                     d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <h2 className="text-base font-semibold text-slate-800">{guide.titulo}</h2>
+              <h2 className="text-base font-semibold text-foreground">{guide.titulo}</h2>
             </div>
             <div className="h-px bg-slate-100 mt-3" />
           </div>
@@ -167,12 +167,12 @@ export function HelpSheet({ pagina, open, onClose }) {
           <div className="space-y-6">
             {guide.secoes.map((s, i) => (
               <div key={i}>
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-2">{s.titulo}</p>
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/70 mb-2">{s.titulo}</p>
                 <ul className="space-y-2">
                   {s.itens.map((item, j) => (
                     <li key={j} className="flex items-start gap-2.5">
                       <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-400" />
-                      <span className="text-sm text-slate-600 leading-snug">{item}</span>
+                      <span className="text-sm text-muted-foreground leading-snug">{item}</span>
                     </li>
                   ))}
                 </ul>
@@ -193,7 +193,7 @@ export function HelpButton({ onClick, dark = false }) {
       onClick={onClick}
       className={dark
         ? 'flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-medium text-white/80 hover:bg-white/20 transition'
-        : 'flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 hover:border-blue-300 hover:text-blue-600 transition shadow-sm'
+        : 'flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-muted-foreground hover:border-blue-300 hover:text-blue-600 transition shadow-sm'
       }
       title="Como usar"
     >

@@ -13,7 +13,7 @@ export function ProcedureTable({ results, onSelect, compareMode, compareSelectio
         <button
           onClick={() => exportCsv(results)}
           className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5
-                     text-xs font-medium text-slate-600 shadow-sm transition hover:border-slate-300 hover:text-slate-800"
+                     text-xs font-medium text-muted-foreground shadow-sm transition hover:border-slate-300 hover:text-foreground"
         >
           <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -29,12 +29,12 @@ export function ProcedureTable({ results, onSelect, compareMode, compareSelectio
             <tr className="border-b border-slate-100 bg-slate-50 text-left">
               <th className="w-[3px] p-0" />
               {compareMode && <th className="w-10 px-4 py-3" />}
-              <th className="px-4 py-3 text-xs font-medium uppercase tracking-wide text-slate-500 whitespace-nowrap">Código</th>
-              <th className="px-4 py-3 text-xs font-medium uppercase tracking-wide text-slate-500">Procedimento</th>
-              <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wide text-slate-500 whitespace-nowrap">SA</th>
-              <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wide text-slate-500 whitespace-nowrap">SH</th>
-              <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wide text-slate-500 whitespace-nowrap">SP</th>
-              <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wide text-slate-500 whitespace-nowrap">Total</th>
+              <th className="px-4 py-3 text-xs font-medium uppercase tracking-wide text-muted-foreground whitespace-nowrap">Código</th>
+              <th className="px-4 py-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">Procedimento</th>
+              <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wide text-muted-foreground whitespace-nowrap">SA</th>
+              <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wide text-muted-foreground whitespace-nowrap">SH</th>
+              <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wide text-muted-foreground whitespace-nowrap">SP</th>
+              <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wide text-muted-foreground whitespace-nowrap">Total</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -64,14 +64,14 @@ export function ProcedureTable({ results, onSelect, compareMode, compareSelectio
                     </td>
                   )}
                   <td className="px-4 py-3 whitespace-nowrap">
-                    <span className={`font-mono text-xs ${estilo?.text ?? 'text-slate-400'}`}>
+                    <span className={`font-mono text-xs ${estilo?.text ?? 'text-muted-foreground/70'}`}>
                       {formatCodigo(p.co_procedimento)}
                     </span>
                   </td>
-                  <td className="px-4 py-3 font-medium text-slate-800">{p.no_procedimento}</td>
-                  <td className="px-4 py-3 text-right tabular-nums text-slate-600 whitespace-nowrap">{formatBRL(p.vl_sa)}</td>
-                  <td className="px-4 py-3 text-right tabular-nums text-slate-600 whitespace-nowrap">{formatBRL(p.vl_sh)}</td>
-                  <td className="px-4 py-3 text-right tabular-nums text-slate-600 whitespace-nowrap">{formatBRL(p.vl_sp)}</td>
+                  <td className="px-4 py-3 font-medium text-foreground">{p.no_procedimento}</td>
+                  <td className="px-4 py-3 text-right tabular-nums text-muted-foreground whitespace-nowrap">{formatBRL(p.vl_sa)}</td>
+                  <td className="px-4 py-3 text-right tabular-nums text-muted-foreground whitespace-nowrap">{formatBRL(p.vl_sh)}</td>
+                  <td className="px-4 py-3 text-right tabular-nums text-muted-foreground whitespace-nowrap">{formatBRL(p.vl_sp)}</td>
                   <td className="px-4 py-3 text-right tabular-nums font-semibold text-emerald-700 whitespace-nowrap">
                     {formatBRL(total)}
                   </td>

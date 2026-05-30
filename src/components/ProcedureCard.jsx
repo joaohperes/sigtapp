@@ -19,7 +19,7 @@ function CopyButton({ value, className = '' }) {
         navigator.clipboard.writeText(value)
         toast.success('Código copiado!', { duration: 1500 })
       }}
-      className={`rounded p-0.5 text-slate-300 transition hover:bg-slate-100 hover:text-slate-500 ${className}`}
+      className={`rounded p-0.5 text-muted-foreground/50 transition hover:bg-slate-100 hover:text-muted-foreground ${className}`}
       title="Copiar código"
     >
       <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -33,7 +33,7 @@ function CopyButton({ value, className = '' }) {
 function StarIcon({ filled }) {
   return (
     <svg
-      className={cn('h-4 w-4 transition', filled ? 'fill-amber-400 text-amber-400' : 'fill-none text-slate-300 hover:text-amber-400')}
+      className={cn('h-4 w-4 transition', filled ? 'fill-amber-400 text-amber-400' : 'fill-none text-muted-foreground/50 hover:text-amber-400')}
       stroke="currentColor" viewBox="0 0 24 24"
     >
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
@@ -51,15 +51,15 @@ function PriceTooltip({ total, vl_sa, vl_sh, vl_sp, qt_dias_perman, children }) 
         className="bg-slate-900 text-white px-3 py-2 rounded-lg shadow-xl text-xs space-y-1 min-w-[160px]"
       >
         <div className="flex justify-between gap-4">
-          <span className="text-slate-400">Ambulatorial</span>
+          <span className="text-muted-foreground/70">Ambulatorial</span>
           <span className="tabular-nums">{formatBRL(vl_sa)}</span>
         </div>
         <div className="flex justify-between gap-4">
-          <span className="text-slate-400">Hospitalar</span>
+          <span className="text-muted-foreground/70">Hospitalar</span>
           <span className="tabular-nums">{formatBRL(vl_sh)}</span>
         </div>
         <div className="flex justify-between gap-4">
-          <span className="text-slate-400">Profissional</span>
+          <span className="text-muted-foreground/70">Profissional</span>
           <span className="tabular-nums">{formatBRL(vl_sp)}</span>
         </div>
         <div className="flex justify-between gap-4 border-t border-slate-700 pt-1 mt-1">
@@ -69,10 +69,10 @@ function PriceTooltip({ total, vl_sa, vl_sh, vl_sp, qt_dias_perman, children }) 
         {qt_dias_perman > 0 && qt_dias_perman < 9999 && (
           <div className="border-t border-slate-700 pt-1 mt-1 space-y-0.5">
             <div className="flex justify-between gap-4">
-              <span className="text-slate-400">Permanência mín.</span>
+              <span className="text-muted-foreground/70">Permanência mín.</span>
               <span className="tabular-nums text-blue-300">{qt_dias_perman} {qt_dias_perman === 1 ? 'dia' : 'dias'}</span>
             </div>
-            <p className="text-slate-500 text-right">Paga a partir de {qt_dias_perman + 1} dias</p>
+            <p className="text-muted-foreground text-right">Paga a partir de {qt_dias_perman + 1} dias</p>
           </div>
         )}
       </TooltipContent>
@@ -232,10 +232,10 @@ export function ProcedureRow({ procedure, onSelect, compareMode, compareSelected
         {estilo && <div className={cn('self-stretch w-[3px] shrink-0 rounded-sm', estilo.dot)} />}
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1">
-            <p className="font-mono text-xs text-slate-400">{formatCodigo(co_procedimento)}</p>
+            <p className="font-mono text-xs text-muted-foreground/70">{formatCodigo(co_procedimento)}</p>
             <CopyButton value={co_procedimento} />
           </div>
-          <p title={no_procedimento} className="text-sm font-medium leading-snug text-slate-800">{no_procedimento}</p>
+          <p title={no_procedimento} className="text-sm font-medium leading-snug text-foreground">{no_procedimento}</p>
           {no_financiamento && (
             <Badge variant="secondary" className="mt-1 rounded-full px-2 py-0.5 text-xs font-normal">
               {no_financiamento}
@@ -255,7 +255,7 @@ export function ProcedureRow({ procedure, onSelect, compareMode, compareSelected
         </button>
         <PriceTooltip total={total} vl_sa={vl_sa} vl_sh={vl_sh} vl_sp={vl_sp} qt_dias_perman={qt_dias_perman}>
           <div className="shrink-0 text-right cursor-default">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Total SUS</p>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">Total SUS</p>
             <p className="text-sm font-bold tabular-nums text-emerald-600">{formatBRL(total)}</p>
           </div>
         </PriceTooltip>

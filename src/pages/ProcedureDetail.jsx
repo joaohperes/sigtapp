@@ -175,14 +175,14 @@ export function ProcedureDetail() {
           {/* Coluna esquerda — Valores */}
           <div className="space-y-3">
             <div className="rounded-xl bg-slate-900 p-5 shadow-lg">
-              <p className="mb-4 text-[10px] font-semibold uppercase tracking-widest text-slate-500">Composição do valor</p>
+              <p className="mb-4 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Composição do valor</p>
               <div className="space-y-3">
                 <ValueRow label="Ambulatorial (SA)" value={data.vl_sa} />
                 <ValueRow label="Hospitalar (SH)" value={data.vl_sh} />
                 <ValueRow label="Profissional (SP)" value={data.vl_sp} />
               </div>
               <div className="mt-4 flex items-center justify-between border-t border-white/10 pt-4">
-                <p className="text-sm font-semibold text-slate-300">Total SUS</p>
+                <p className="text-sm font-semibold text-muted-foreground/50">Total SUS</p>
                 <p className="text-xl font-bold tabular-nums text-emerald-400">{formatBRL(total)}</p>
               </div>
             </div>
@@ -203,7 +203,7 @@ export function ProcedureDetail() {
           <div className="space-y-4">
             {(data.no_grupo || data.no_subgrupo || data.no_forma_org) && (
               <div className="rounded-xl bg-white p-5 shadow-[0_2px_8px_rgba(15,23,42,0.06),0_1px_2px_rgba(15,23,42,0.04)]">
-                <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                   Classificação
                 </h2>
                 <dl className="space-y-2">
@@ -221,7 +221,7 @@ export function ProcedureDetail() {
                   )}
                   {(data.in_sia || data.in_sih) && (
                     <div className="flex flex-col gap-0.5 text-sm sm:flex-row sm:gap-2">
-                      <dt className="shrink-0 text-slate-400 sm:w-44">Sistema</dt>
+                      <dt className="shrink-0 text-muted-foreground/70 sm:w-44">Sistema</dt>
                       <dd className="flex gap-1.5">
                         {data.in_sia && (
                           <TooltipProvider>
@@ -256,10 +256,10 @@ export function ProcedureDetail() {
 
             {data.ds_procedimento && (
               <div className="rounded-xl bg-white p-5 shadow-[0_2px_8px_rgba(15,23,42,0.06),0_1px_2px_rgba(15,23,42,0.04)]">
-                <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                   Descrição
                 </h2>
-                <p className="text-sm leading-relaxed text-slate-700">{toSentenceCase(data.ds_procedimento)}</p>
+                <p className="text-sm leading-relaxed text-foreground/90">{toSentenceCase(data.ds_procedimento)}</p>
               </div>
             )}
           </div>
@@ -271,16 +271,16 @@ export function ProcedureDetail() {
           {cids.length > 0 && (
             <div className="rounded-xl bg-white p-5 shadow-[0_2px_8px_rgba(15,23,42,0.06),0_1px_2px_rgba(15,23,42,0.04)]">
               <div className="mb-3 flex items-center justify-between">
-                <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <h2 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                   CIDs relacionados
                 </h2>
-                <span className="text-xs text-slate-400">{cids.length} código{cids.length !== 1 ? 's' : ''}</span>
+                <span className="text-xs text-muted-foreground/70">{cids.length} código{cids.length !== 1 ? 's' : ''}</span>
               </div>
 
               <div className="max-h-[70vh] overflow-y-auto space-y-4">
                 {cidsPrincipais.length > 0 && (
                   <div>
-                    <p className="mb-2 text-xs font-medium text-slate-400">Principais</p>
+                    <p className="mb-2 text-xs font-medium text-muted-foreground/70">Principais</p>
                     <div className="divide-y divide-slate-100 rounded-lg border border-slate-100">
                       {cidsPrincipais.map((c) => (
                         <CidRow key={c.co_cid} cid={c} principal />
@@ -292,7 +292,7 @@ export function ProcedureDetail() {
                 {cidsSecundarios.length > 0 && (
                   <div>
                     {cidsPrincipais.length > 0 && (
-                      <p className="mb-2 text-xs font-medium text-slate-400">Secundários</p>
+                      <p className="mb-2 text-xs font-medium text-muted-foreground/70">Secundários</p>
                     )}
                     <div className="divide-y divide-slate-100 rounded-lg border border-slate-100">
                       {cidsSecundarios.map((c) => (
@@ -325,7 +325,7 @@ export function ProcedureDetail() {
 function ValueRow({ label, value }) {
   return (
     <div className="flex items-center justify-between">
-      <p className="text-xs text-slate-400">{label}</p>
+      <p className="text-xs text-muted-foreground/70">{label}</p>
       <p className="tabular-nums text-sm font-medium text-slate-200">{formatBRL(value)}</p>
     </div>
   )
@@ -335,11 +335,11 @@ function CidRow({ cid, principal }) {
   return (
     <div className="flex items-baseline gap-3 px-3 py-2">
       <span className={`shrink-0 font-mono text-xs font-semibold ${
-        principal ? 'text-blue-600' : 'text-slate-500'
+        principal ? 'text-blue-600' : 'text-muted-foreground'
       }`}>
         {cid.co_cid.trim()}
       </span>
-      <span className="text-sm text-slate-700">{cid.no_cid}</span>
+      <span className="text-sm text-foreground/90">{cid.no_cid}</span>
     </div>
   )
 }
@@ -347,8 +347,8 @@ function CidRow({ cid, principal }) {
 function Row({ label, value }) {
   return (
     <div className="flex flex-col gap-0.5 text-sm sm:flex-row sm:gap-2">
-      <dt className="shrink-0 text-slate-400 sm:w-44">{label}</dt>
-      <dd className="text-slate-700">{value}</dd>
+      <dt className="shrink-0 text-muted-foreground/70 sm:w-44">{label}</dt>
+      <dd className="text-foreground/90">{value}</dd>
     </div>
   )
 }
@@ -362,7 +362,7 @@ function HabRow({ h }) {
   return (
     <div className="flex items-center gap-3 px-3 py-2">
       <span className="shrink-0 font-mono text-xs font-semibold text-teal-600">{h.co_habilitacao}</span>
-      <span className="text-sm text-slate-700">{toSentenceCase(h.no_habilitacao)}</span>
+      <span className="text-sm text-foreground/90">{toSentenceCase(h.no_habilitacao)}</span>
     </div>
   )
 }
@@ -376,8 +376,8 @@ function HabilitacoesCard({ habilitacoes }) {
       {reais.length > 0 && (
         <div className="rounded-xl bg-white p-5 shadow-[0_2px_8px_rgba(15,23,42,0.06),0_1px_2px_rgba(15,23,42,0.04)]">
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-500">Habilitações necessárias</h2>
-            <span className="text-xs text-slate-400">{reais.length}</span>
+            <h2 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Habilitações necessárias</h2>
+            <span className="text-xs text-muted-foreground/70">{reais.length}</span>
           </div>
           <div className="divide-y divide-slate-100 rounded-lg border border-slate-100">
             {reais.map(h => <HabRow key={h.co_habilitacao} h={h} />)}
@@ -449,9 +449,9 @@ function CompatCard({ compatibilidades }) {
                 className="flex items-baseline gap-3 px-5 py-2.5 hover:bg-blue-50 transition"
               >
                 <span className="shrink-0 font-mono text-xs font-semibold text-blue-600">{formatCodigo(c.co_procedimento_compativel)}</span>
-                <span className="flex-1 text-sm text-slate-700">{toSentenceCase(c.no_procedimento_compativel)}</span>
+                <span className="flex-1 text-sm text-foreground/90">{toSentenceCase(c.no_procedimento_compativel)}</span>
                 {c.qt_permitida > 0 && (
-                  <span className="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-500">máx {c.qt_permitida}x</span>
+                  <span className="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-xs text-muted-foreground">máx {c.qt_permitida}x</span>
                 )}
               </Link>
             ))}

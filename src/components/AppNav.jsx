@@ -16,12 +16,12 @@ function NavLink({ to, label, active, modoUE, dark, badge }) {
             ? 'bg-red-800 text-white'
             : dark
               ? 'bg-[rgba(56,189,248,0.12)] text-[#38bdf8] border border-[rgba(56,189,248,0.25)]'
-              : 'bg-blue-50 text-blue-700'
+              : 'bg-primary/10 text-primary border border-primary/20'
           : modoUE
             ? 'text-red-200 hover:bg-red-800 hover:text-white'
             : dark
               ? 'text-[#8896a8] hover:bg-[rgba(255,255,255,0.05)] hover:text-[#e8edf5]'
-              : 'text-slate-600 hover:bg-slate-100 hover:text-slate-800'
+              : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
       )}
     >
       {label}
@@ -96,7 +96,7 @@ export function AppNav() {
               ? 'border-red-700 text-red-200 hover:bg-red-800'
               : dark
                 ? 'border-[rgba(255,255,255,0.1)] bg-[#1a2236] text-[#8896a8] hover:border-[rgba(56,189,248,0.4)] hover:text-[#38bdf8]'
-                : 'border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:text-slate-700'
+                : 'border-border bg-secondary text-muted-foreground hover:border-border hover:text-foreground'
           )}
         >
           {dark ? (
@@ -120,7 +120,9 @@ export function AppNav() {
             'flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition',
             modoUE
               ? 'border-red-500/50 bg-red-700 text-white hover:bg-red-600'
-              : 'border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-300 hover:bg-white'
+              : dark
+                ? 'border-[rgba(255,255,255,0.1)] bg-[#1a2236] text-[#8896a8] hover:border-[rgba(255,255,255,0.2)] hover:text-[#e8edf5]'
+                : 'border-border bg-secondary text-muted-foreground hover:border-border hover:bg-secondary/80'
           )}
         >
           <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -136,7 +136,7 @@ export function CidSearch() {
         {/* Resultados */}
         {results.length > 0 && (
           <>
-            <p className="mb-3 text-sm text-slate-500">
+            <p className="mb-3 text-sm text-muted-foreground">
               {results.length} código{results.length !== 1 ? 's' : ''} encontrado{results.length !== 1 ? 's' : ''}
             </p>
             <div className="divide-y divide-slate-100 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
@@ -150,8 +150,8 @@ export function CidSearch() {
         {/* Sem resultados */}
         {!loading && searched && results.length === 0 && !error && (
           <div className="py-20 text-center">
-            <p className="text-sm font-medium text-slate-600">Nenhum CID encontrado</p>
-            <p className="mt-1 text-xs text-slate-400">Tente outros termos ou o código diretamente (ex: C56)</p>
+            <p className="text-sm font-medium text-muted-foreground">Nenhum CID encontrado</p>
+            <p className="mt-1 text-xs text-muted-foreground/70">Tente outros termos ou o código diretamente (ex: C56)</p>
           </div>
         )}
 
@@ -164,8 +164,8 @@ export function CidSearch() {
                   d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             </div>
-            <p className="text-sm font-medium text-slate-700">Busque pelo nome da doença</p>
-            <p className="mt-1 text-xs text-slate-400 max-w-xs mx-auto">
+            <p className="text-sm font-medium text-foreground/90">Busque pelo nome da doença</p>
+            <p className="mt-1 text-xs text-muted-foreground/70 max-w-xs mx-auto">
               Use termos comuns como "câncer", "infarto" ou "derrame" —
               o sistema encontra o CID correto automaticamente.
             </p>
@@ -184,16 +184,16 @@ function CidRow({ cid }) {
     <div className="flex items-center gap-3 px-4 py-3.5 hover:bg-slate-50 transition-colors">
       {/* Código */}
       <div className="w-14 shrink-0">
-        <span className={`font-mono text-sm font-semibold ${isCidCategory ? 'text-indigo-700' : 'text-slate-700'}`}>
+        <span className={`font-mono text-sm font-semibold ${isCidCategory ? 'text-indigo-700' : 'text-foreground/90'}`}>
           {cid.co_cid.trim()}
         </span>
       </div>
 
       {/* Nome */}
       <div className="flex-1 min-w-0">
-        <p className="text-sm text-slate-800 leading-snug">{cid.no_cid?.trim()}</p>
+        <p className="text-sm text-foreground leading-snug">{cid.no_cid?.trim()}</p>
         {sexo && (
-          <span className="mt-0.5 inline-block rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-500">
+          <span className="mt-0.5 inline-block rounded-full bg-slate-100 px-2 py-0.5 text-xs text-muted-foreground">
             {sexo}
           </span>
         )}

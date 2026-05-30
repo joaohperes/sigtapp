@@ -432,9 +432,9 @@ export function Home() {
 
         {/* CID results — busca universal */}
         {(cidLoading || cidResults.length > 0) && (
-          <div className="mb-5 overflow-hidden rounded-xl border border-indigo-100 bg-indigo-50/60">
+          <div className="mb-5 overflow-hidden rounded-xl border border-border bg-card">
             <div className="flex items-center justify-between px-4 pt-3.5 pb-2">
-              <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-indigo-500">
+              <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-primary">
                 <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                     d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -442,11 +442,11 @@ export function Home() {
                 Diagnósticos CID-10 relacionados
               </p>
               {!cidLoading && cidResults.length > 0 && (
-                <span className="text-[11px] text-indigo-400">{cidResults.length} resultado{cidResults.length !== 1 ? 's' : ''}</span>
+                <span className="text-[11px] text-muted-foreground">{cidResults.length} resultado{cidResults.length !== 1 ? 's' : ''}</span>
               )}
             </div>
 
-            <div className="divide-y divide-indigo-100/80 border-t border-indigo-100">
+            <div className="divide-y divide-border border-t border-border">
               {cidLoading
                 ? Array.from({ length: 4 }).map((_, i) => (
                     <div key={i} className="flex items-center gap-3 px-4 py-3">
@@ -456,15 +456,15 @@ export function Home() {
                     </div>
                   ))
                 : (showAllCids ? cidResults : cidResults.slice(0, CID_PREVIEW)).map((cid) => (
-                    <div key={cid.co_cid} className="flex items-center gap-3 px-4 py-2.5 hover:bg-indigo-100/50 transition">
-                      <span className="w-12 shrink-0 font-mono text-sm font-bold text-indigo-700">
+                    <div key={cid.co_cid} className="flex items-center gap-3 px-4 py-2.5 hover:bg-secondary transition">
+                      <span className="w-12 shrink-0 font-mono text-sm font-bold text-primary">
                         {cid.co_cid.trim()}
                       </span>
-                      <span className="flex-1 text-sm text-slate-700 leading-snug">{cid.no_cid?.trim()}</span>
+                      <span className="flex-1 text-sm text-foreground leading-snug">{cid.no_cid?.trim()}</span>
                       <button
                         onClick={() => handleCidSelect(cid.co_cid.trim())}
-                        className="shrink-0 rounded-md border border-indigo-200 bg-white px-2.5 py-1
-                                   text-xs font-medium text-indigo-600 hover:bg-indigo-50 transition"
+                        className="shrink-0 rounded-md border border-primary/30 bg-primary/10 px-2.5 py-1
+                                   text-xs font-medium text-primary hover:bg-primary/20 transition"
                       >
                         Procedimentos →
                       </button>
@@ -474,10 +474,10 @@ export function Home() {
             </div>
 
             {!cidLoading && cidResults.length > CID_PREVIEW && (
-              <div className="border-t border-indigo-100 px-4 py-2.5">
+              <div className="border-t border-border px-4 py-2.5">
                 <button
                   onClick={() => setShowAllCids(v => !v)}
-                  className="text-xs font-medium text-indigo-600 hover:text-indigo-700 transition"
+                  className="text-xs font-medium text-primary hover:opacity-80 transition"
                 >
                   {showAllCids
                     ? 'Ver menos'
@@ -872,8 +872,10 @@ export function Home() {
                           key={g.co_grupo}
                           onClick={() => handleGroupClick(g)}
                           className={cn(
-                            "relative flex w-full items-center gap-2.5 overflow-hidden border-b border-slate-50 px-3 py-2.5 text-left transition last:border-0",
-                            isActive ? cn(estilo.bg, estilo.text, "font-medium") : "text-slate-500 hover:bg-secondary hover:text-foreground"
+                            "relative flex w-full items-center gap-2.5 overflow-hidden border-b border-border px-3 py-2.5 text-left transition last:border-0",
+                            isActive
+                              ? dark ? cn("bg-[rgba(56,189,248,0.08)]", estilo.text, "font-medium") : cn(estilo.bg, estilo.text, "font-medium")
+                              : "text-muted-foreground hover:bg-secondary hover:text-foreground"
                           )}
                         >
                           <div className={cn("absolute left-0 top-0 h-full w-[3px]", isActive ? estilo.dot : "bg-slate-100")} />
@@ -920,8 +922,10 @@ export function Home() {
                               className={cn(
                                 "relative flex w-full items-center justify-between gap-3 overflow-hidden px-4 py-3 text-left transition",
                                 isActive
-                                  ? cn(selectedEstilo?.bg ?? "bg-blue-50", selectedEstilo?.text ?? "text-blue-700", "font-medium")
-                                  : "text-slate-600 hover:bg-secondary hover:text-foreground"
+                                  ? dark
+                                    ? cn("bg-[rgba(56,189,248,0.1)]", selectedEstilo?.text ?? "text-primary", "font-medium")
+                                    : cn(selectedEstilo?.bg ?? "bg-primary/10", selectedEstilo?.text ?? "text-primary", "font-medium")
+                                  : "text-muted-foreground hover:bg-secondary hover:text-foreground"
                               )}
                             >
                               <div className={cn("absolute left-0 top-0 h-full w-[3px]", isActive ? selectedEstilo?.dot : "bg-transparent")} />
@@ -929,8 +933,10 @@ export function Home() {
                               <span className={cn(
                                 "shrink-0 rounded-full px-2 py-0.5 text-xs tabular-nums",
                                 isActive
-                                  ? cn("font-semibold", selectedEstilo?.bg, selectedEstilo?.text)
-                                  : "bg-slate-100 text-slate-400"
+                                  ? dark
+                                    ? cn("font-semibold bg-[rgba(56,189,248,0.15)]", selectedEstilo?.text ?? "text-primary")
+                                    : cn("font-semibold", selectedEstilo?.bg, selectedEstilo?.text)
+                                  : "bg-secondary text-muted-foreground"
                               )}>
                                 {Number(s.qt_procedimentos).toLocaleString('pt-BR')}
                               </span>

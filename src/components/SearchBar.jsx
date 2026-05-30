@@ -71,9 +71,9 @@ export function SearchBar({ onSearch, loading, initialValue = '', recentSearches
           onFocus={() => { if (value.trim().length >= 2 && suggestions.length > 0) setOpen(true) }}
           onKeyDown={handleKeyDown}
           placeholder="Buscar por nome, código ou CID  (ex: colecistectomia, 0407010005, J94)"
-          className="w-full rounded-xl border-0 bg-white/95 py-4 pl-12 pr-10
-                     text-sm shadow-[0_4px_24px_rgba(0,0,0,0.25)] placeholder:text-slate-400
-                     focus:outline-none focus:ring-2 focus:ring-white/40 focus:ring-offset-0
+          className="w-full rounded-xl border-0 bg-[#1a2236] text-[#e8edf5] py-4 pl-12 pr-10
+                     text-sm shadow-[0_4px_24px_rgba(0,0,0,0.35)] placeholder:text-[#8896a8]
+                     focus:outline-none focus:ring-2 focus:ring-[#38bdf8]/40 focus:ring-offset-0
                      transition-shadow duration-200"
         />
 
@@ -90,7 +90,7 @@ export function SearchBar({ onSearch, loading, initialValue = '', recentSearches
 
         {/* Dropdown de sugestões */}
         {showSuggestions && (
-          <div className="absolute left-0 right-0 top-full z-50 mt-1.5 overflow-hidden rounded-xl bg-white shadow-[0_8px_32px_rgba(0,0,0,0.18)] ring-1 ring-black/5">
+          <div className="absolute left-0 right-0 top-full z-50 mt-1.5 overflow-hidden rounded-xl bg-[#111827] shadow-[0_8px_32px_rgba(0,0,0,0.4)] ring-1 ring-white/10">
             {suggestions.map((proc) => {
               const estilo = GRUPO_MAP[proc.co_procedimento?.slice(0, 2)]
               return (
@@ -98,12 +98,12 @@ export function SearchBar({ onSearch, loading, initialValue = '', recentSearches
                   key={proc.co_procedimento}
                   to={`/procedimento/${proc.co_procedimento}`}
                   onClick={() => setOpen(false)}
-                  className="flex items-center gap-3 px-4 py-2.5 text-left transition hover:bg-slate-50 first:pt-3 last:pb-3"
+                  className="flex items-center gap-3 px-4 py-2.5 text-left transition hover:bg-[#1a2236] first:pt-3 last:pb-3"
                 >
                   {estilo && <div className={`h-6 w-1 shrink-0 rounded-full ${estilo.dot}`} />}
                   <div className="min-w-0 flex-1">
-                    <p className="font-mono text-[10px] text-slate-400">{formatCodigo(proc.co_procedimento)}</p>
-                    <p className="truncate text-sm font-medium text-slate-800">{proc.no_procedimento}</p>
+                    <p className="font-mono text-[10px] text-[#8896a8]">{formatCodigo(proc.co_procedimento)}</p>
+                    <p className="truncate text-sm font-medium text-[#e8edf5]">{proc.no_procedimento}</p>
                   </div>
                 </Link>
               )

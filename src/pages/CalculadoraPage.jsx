@@ -82,7 +82,7 @@ function ProcSearchInput({ onAdd, existingCodes }) {
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
             </svg>
           ) : (
-            <svg className="h-4 w-4 text-slate-400" viewBox="0 0 20 20" fill="currentColor">
+            <svg className="h-4 w-4 text-muted-foreground/70" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clipRule="evenodd" />
             </svg>
           )}
@@ -95,15 +95,15 @@ function ProcSearchInput({ onAdd, existingCodes }) {
           onKeyDown={e => e.key === 'Escape' && setOpen(false)}
           placeholder="Buscar procedimento por nome ou código..."
           autoComplete="off"
-          className="w-full rounded-xl border border-slate-200 bg-white py-3 pl-10 pr-4 text-sm
-                     shadow-sm placeholder:text-slate-400 focus:border-blue-400 focus:outline-none
-                     focus:ring-2 focus:ring-blue-100 transition"
+          className="w-full rounded-xl border border-border bg-background text-foreground py-3 pl-10 pr-4 text-sm
+                     shadow-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none
+                     focus:ring-2 focus:ring-primary/20 transition"
         />
       </div>
 
       {open && results.length > 0 && (
         <div className="absolute left-0 right-0 top-full z-50 mt-1.5 max-h-72 overflow-y-auto
-                        rounded-xl bg-white shadow-[0_8px_32px_rgba(0,0,0,0.14)] ring-1 ring-black/5">
+                        rounded-xl bg-card border border-border shadow-[0_8px_32px_rgba(0,0,0,0.3)] ring-1 ring-border">
           {results.map((proc) => {
             const estilo = GRUPO_MAP[proc.co_procedimento?.slice(0, 2)]
             const alreadyAdded = existingCodes.has(proc.co_procedimento)
@@ -115,19 +115,19 @@ function ProcSearchInput({ onAdd, existingCodes }) {
                 disabled={alreadyAdded}
                 className={cn(
                   'flex w-full items-center gap-3 px-4 py-2.5 text-left transition first:pt-3 last:pb-3',
-                  alreadyAdded ? 'opacity-40 cursor-not-allowed' : 'hover:bg-slate-50',
+                  alreadyAdded ? 'opacity-40 cursor-not-allowed' : 'hover:bg-secondary',
                 )}
               >
                 {estilo && <div className={`h-6 w-1 shrink-0 rounded-full ${estilo.dot}`} />}
                 <div className="min-w-0 flex-1">
-                  <p className="font-mono text-[10px] text-slate-400">{formatCodigo(proc.co_procedimento)}</p>
-                  <p className="truncate text-sm font-medium text-slate-800">{proc.no_procedimento}</p>
+                  <p className="font-mono text-[10px] text-muted-foreground/70">{formatCodigo(proc.co_procedimento)}</p>
+                  <p className="truncate text-sm font-medium text-foreground">{proc.no_procedimento}</p>
                 </div>
                 <span className="shrink-0 text-xs font-semibold text-emerald-600">
                   {formatBRL(totalOf(proc))}
                 </span>
                 {alreadyAdded && (
-                  <span className="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] text-slate-500">
+                  <span className="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] text-muted-foreground">
                     já adicionado
                   </span>
                 )}
@@ -142,7 +142,7 @@ function ProcSearchInput({ onAdd, existingCodes }) {
 
 function DragHandle() {
   return (
-    <svg className="h-4 w-4 text-slate-300" viewBox="0 0 20 20" fill="currentColor">
+    <svg className="h-4 w-4 text-muted-foreground/50" viewBox="0 0 20 20" fill="currentColor">
       <path d="M7 2a2 2 0 1 0 .001 4.001A2 2 0 0 0 7 2zm0 6a2 2 0 1 0 .001 4.001A2 2 0 0 0 7 8zm0 6a2 2 0 1 0 .001 4.001A2 2 0 0 0 7 14zm6-8a2 2 0 1 0-.001-4.001A2 2 0 0 0 13 6zm0 2a2 2 0 1 0 .001 4.001A2 2 0 0 0 13 8zm0 6a2 2 0 1 0 .001 4.001A2 2 0 0 0 13 14z" />
     </svg>
   )
@@ -359,7 +359,7 @@ export function CalculadoraPage() {
               <p className="mb-3 text-sm font-semibold text-foreground">Adicionar procedimento</p>
               <ProcSearchInput onAdd={addProcedure} existingCodes={existingCodes} />
               {items.length === 0 && (
-                <p className="mt-3 text-xs text-slate-400">
+                <p className="mt-3 text-xs text-muted-foreground/70">
                   O primeiro procedimento adicionado será o <strong>procedimento principal</strong>. Arraste os cards para reordenar.
                 </p>
               )}
@@ -369,13 +369,13 @@ export function CalculadoraPage() {
             {items.length > 0 && (
               <div className="space-y-1">
                 <div className="flex items-center justify-between px-1 pb-1">
-                  <p className="text-sm font-semibold text-slate-700">
+                  <p className="text-sm font-semibold text-foreground/90">
                     {items.length} procedimento{items.length !== 1 ? 's' : ''}
                     {items.length > 1 && (
-                      <span className="ml-2 text-xs font-normal text-slate-400">— arraste para reordenar</span>
+                      <span className="ml-2 text-xs font-normal text-muted-foreground/70">— arraste para reordenar</span>
                     )}
                   </p>
-                  <button onClick={clearAll} className="text-xs text-slate-400 hover:text-red-500 transition">
+                  <button onClick={clearAll} className="text-xs text-muted-foreground/70 hover:text-red-500 transition">
                     Limpar tudo
                   </button>
                 </div>
@@ -428,13 +428,13 @@ export function CalculadoraPage() {
                             {/* Info */}
                             <div className="min-w-0 flex-1">
                               <div className="flex flex-wrap items-center gap-2">
-                                <span className="font-mono text-[11px] text-slate-400">
+                                <span className="font-mono text-[11px] text-muted-foreground/70">
                                   {formatCodigo(proc.co_procedimento)}
                                 </span>
                                 <button
                                   type="button"
                                   onClick={() => { navigator.clipboard.writeText(proc.co_procedimento) }}
-                                  className="rounded p-0.5 text-slate-300 transition hover:bg-slate-100 hover:text-slate-500"
+                                  className="rounded p-0.5 text-muted-foreground/50 transition hover:bg-slate-100 hover:text-muted-foreground"
                                   title="Copiar código"
                                 >
                                   <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -455,15 +455,15 @@ export function CalculadoraPage() {
                               </div>
                               <Link
                                 to={`/procedimento/${proc.co_procedimento}`}
-                                className="mt-1 block text-sm font-semibold text-slate-900 hover:text-blue-600 transition"
+                                className="mt-1 block text-sm font-semibold text-foreground hover:text-blue-600 transition"
                               >
                                 {proc.no_procedimento}
                               </Link>
 
-                              <div className="mt-2 flex flex-wrap gap-3 text-xs text-slate-500">
-                                {proc.vl_sa > 0 && <span>Amb: <strong className="text-slate-700">{formatBRL(proc.vl_sa)}</strong></span>}
-                                {proc.vl_sh > 0 && <span>Hosp: <strong className="text-slate-700">{formatBRL(proc.vl_sh)}</strong></span>}
-                                {proc.vl_sp > 0 && <span>Prof: <strong className="text-slate-700">{formatBRL(proc.vl_sp)}</strong></span>}
+                              <div className="mt-2 flex flex-wrap gap-3 text-xs text-muted-foreground">
+                                {proc.vl_sa > 0 && <span>Amb: <strong className="text-foreground/90">{formatBRL(proc.vl_sa)}</strong></span>}
+                                {proc.vl_sh > 0 && <span>Hosp: <strong className="text-foreground/90">{formatBRL(proc.vl_sh)}</strong></span>}
+                                {proc.vl_sp > 0 && <span>Prof: <strong className="text-foreground/90">{formatBRL(proc.vl_sp)}</strong></span>}
                               </div>
 
                               {warning && (
@@ -483,30 +483,30 @@ export function CalculadoraPage() {
                             {/* Controles direita */}
                             <div className="flex shrink-0 flex-col items-end gap-2">
                               <div className="text-right">
-                                <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Total</p>
+                                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">Total</p>
                                 <p className="text-base font-bold text-emerald-600">{formatBRL(total)}</p>
                               </div>
 
                               {/* Contador de quantidade */}
                               <div className="flex flex-col items-end gap-1">
                                 <div className="flex items-center gap-1">
-                                  <span className="text-[10px] text-slate-400 mr-0.5">Qtd</span>
+                                  <span className="text-[10px] text-muted-foreground/70 mr-0.5">Qtd</span>
                                   <button
                                     onClick={() => setQty(proc.co_procedimento, qty - 1)}
                                     disabled={qty <= 1}
                                     className="flex h-6 w-6 items-center justify-center rounded-md border border-slate-200
-                                               text-slate-600 transition hover:bg-secondary disabled:opacity-40"
+                                               text-muted-foreground transition hover:bg-secondary disabled:opacity-40"
                                   >
                                     <svg className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
                                       <path fillRule="evenodd" d="M3 10a.75.75 0 01.75-.75h12.5a.75.75 0 010 1.5H3.75A.75.75 0 013 10z" clipRule="evenodd" />
                                     </svg>
                                   </button>
-                                  <span className="w-6 text-center text-sm font-semibold tabular-nums text-slate-800">{qty}</span>
+                                  <span className="w-6 text-center text-sm font-semibold tabular-nums text-foreground">{qty}</span>
                                   <button
                                     onClick={() => setQty(proc.co_procedimento, qty + 1)}
                                     disabled={qty >= 99}
                                     className="flex h-6 w-6 items-center justify-center rounded-md border border-slate-200
-                                               text-slate-600 transition hover:bg-secondary disabled:opacity-40"
+                                               text-muted-foreground transition hover:bg-secondary disabled:opacity-40"
                                   >
                                     <svg className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
                                       <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
@@ -519,7 +519,7 @@ export function CalculadoraPage() {
                                   <div className="flex items-center gap-1">
                                     <Tooltip>
                                       <TooltipTrigger asChild>
-                                        <span className="text-[10px] text-slate-400 mr-0.5 cursor-help underline decoration-dotted">
+                                        <span className="text-[10px] text-muted-foreground/70 mr-0.5 cursor-help underline decoration-dotted">
                                           Diárias
                                         </span>
                                       </TooltipTrigger>
@@ -531,7 +531,7 @@ export function CalculadoraPage() {
                                       onClick={() => setDias(proc.co_procedimento, dias - 1)}
                                       disabled={dias <= 1}
                                       className="flex h-6 w-6 items-center justify-center rounded-md border border-slate-200
-                                                 text-slate-600 transition hover:bg-secondary disabled:opacity-40"
+                                                 text-muted-foreground transition hover:bg-secondary disabled:opacity-40"
                                     >
                                       <svg className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
                                         <path fillRule="evenodd" d="M3 10a.75.75 0 01.75-.75h12.5a.75.75 0 010 1.5H3.75A.75.75 0 013 10z" clipRule="evenodd" />
@@ -539,13 +539,13 @@ export function CalculadoraPage() {
                                     </button>
                                     <span className={cn(
                                       'w-6 text-center text-sm font-semibold tabular-nums',
-                                      dias < proc.qt_dias_perman ? 'text-amber-600' : 'text-slate-800',
+                                      dias < proc.qt_dias_perman ? 'text-amber-600' : 'text-foreground',
                                     )}>{dias}</span>
                                     <button
                                       onClick={() => setDias(proc.co_procedimento, dias + 1)}
                                       disabled={dias >= 999}
                                       className="flex h-6 w-6 items-center justify-center rounded-md border border-slate-200
-                                                 text-slate-600 transition hover:bg-secondary disabled:opacity-40"
+                                                 text-muted-foreground transition hover:bg-secondary disabled:opacity-40"
                                     >
                                       <svg className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
                                         <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
@@ -557,7 +557,7 @@ export function CalculadoraPage() {
 
                               <button
                                 onClick={() => removeItem(proc.co_procedimento)}
-                                className="rounded-md p-1 text-slate-400 transition hover:bg-red-50 hover:text-red-500"
+                                className="rounded-md p-1 text-muted-foreground/70 transition hover:bg-red-50 hover:text-red-500"
                                 title="Remover"
                               >
                                 <TrashIcon />
@@ -578,8 +578,8 @@ export function CalculadoraPage() {
 
             {items.length === 0 && (
               <div className="rounded-xl border border-dashed border-border bg-card p-12 text-center">
-                <p className="text-sm text-slate-400">Nenhum procedimento adicionado ainda.</p>
-                <p className="mt-1 text-xs text-slate-300">Use o campo acima para buscar e adicionar procedimentos.</p>
+                <p className="text-sm text-muted-foreground/70">Nenhum procedimento adicionado ainda.</p>
+                <p className="mt-1 text-xs text-muted-foreground/50">Use o campo acima para buscar e adicionar procedimentos.</p>
               </div>
             )}
           </div>
@@ -591,38 +591,38 @@ export function CalculadoraPage() {
               {/* Resumo financeiro */}
               <div className="rounded-xl border border-border bg-card shadow-sm">
                 <div className="border-b border-slate-100 px-5 py-4">
-                  <h2 className="text-sm font-bold text-slate-800">Resumo do faturamento</h2>
+                  <h2 className="text-sm font-bold text-foreground">Resumo do faturamento</h2>
                 </div>
                 <div className="p-5 space-y-3">
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-slate-500">Ambulatorial (SA)</span>
-                      <span className="font-semibold tabular-nums text-slate-800">{formatBRL(totalSA)}</span>
+                      <span className="text-muted-foreground">Ambulatorial (SA)</span>
+                      <span className="font-semibold tabular-nums text-foreground">{formatBRL(totalSA)}</span>
                     </div>
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-slate-500">Hospitalar (SH)</span>
-                      <span className="font-semibold tabular-nums text-slate-800">{formatBRL(totalSH)}</span>
+                      <span className="text-muted-foreground">Hospitalar (SH)</span>
+                      <span className="font-semibold tabular-nums text-foreground">{formatBRL(totalSH)}</span>
                     </div>
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-slate-500">Profissional (SP)</span>
-                      <span className="font-semibold tabular-nums text-slate-800">{formatBRL(totalSP)}</span>
+                      <span className="text-muted-foreground">Profissional (SP)</span>
+                      <span className="font-semibold tabular-nums text-foreground">{formatBRL(totalSP)}</span>
                     </div>
                   </div>
                   <div className="border-t border-slate-200 pt-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-bold text-slate-700">Total SUS</span>
+                      <span className="text-sm font-bold text-foreground/90">Total SUS</span>
                       <span className="text-xl font-bold tabular-nums text-emerald-600">{formatBRL(totalGeral)}</span>
                     </div>
-                    <p className="mt-1 text-[11px] text-slate-400">
+                    <p className="mt-1 text-[11px] text-muted-foreground/70">
                       {items.reduce((s, i) => s + i.qty, 0)} procedimento{items.reduce((s, i) => s + i.qty, 0) !== 1 ? 's' : ''} · {items.length} tipo{items.length !== 1 ? 's' : ''}
                     </p>
                   </div>
 
                   {compatLoading && (
-                    <p className="text-xs text-slate-400">Verificando compatibilidades…</p>
+                    <p className="text-xs text-muted-foreground/70">Verificando compatibilidades…</p>
                   )}
                   {!compatLoading && compatEmpty && items.length > 1 && (
-                    <div className="rounded-lg bg-slate-50 p-3 text-xs text-slate-500">
+                    <div className="rounded-lg bg-slate-50 p-3 text-xs text-muted-foreground">
                       O procedimento principal não possui compatibilidades cadastradas no SIGTAP.
                     </div>
                   )}
@@ -640,15 +640,15 @@ export function CalculadoraPage() {
                   <div className="border-b border-slate-100 px-5 py-3">
                     <div className="flex items-center justify-between gap-2">
                       <div>
-                        <h2 className="text-sm font-bold text-slate-800">Compatíveis com o principal</h2>
-                        <p className="text-[11px] text-slate-400 mt-0.5">
+                        <h2 className="text-sm font-bold text-foreground">Compatíveis com o principal</h2>
+                        <p className="text-[11px] text-muted-foreground/70 mt-0.5">
                           {compatSuggestions.length} ainda não adicionado{compatSuggestions.length !== 1 ? 's' : ''}
                         </p>
                       </div>
                       <button
                         onClick={addAllCompatible}
                         className="shrink-0 rounded-lg border border-slate-200 px-2.5 py-1 text-[11px] font-medium
-                                   text-slate-600 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700"
+                                   text-muted-foreground transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700"
                       >
                         Adicionar todos
                       </button>
@@ -661,15 +661,15 @@ export function CalculadoraPage() {
                         <div key={c.co_procedimento_compativel} className="flex items-center gap-2 px-4 py-2.5">
                           {estilo && <div className={`h-5 w-1 shrink-0 rounded-full ${estilo.dot}`} />}
                           <div className="min-w-0 flex-1">
-                            <p className="font-mono text-[10px] text-slate-400">{formatCodigo(c.co_procedimento_compativel)}</p>
-                            <p className="truncate text-xs font-medium text-slate-700">{c.no_procedimento_compativel}</p>
+                            <p className="font-mono text-[10px] text-muted-foreground/70">{formatCodigo(c.co_procedimento_compativel)}</p>
+                            <p className="truncate text-xs font-medium text-foreground/90">{c.no_procedimento_compativel}</p>
                             {c.qt_permitida > 0 && (
-                              <p className="text-[10px] text-slate-400">máx. {c.qt_permitida}×</p>
+                              <p className="text-[10px] text-muted-foreground/70">máx. {c.qt_permitida}×</p>
                             )}
                           </div>
                           <button
                             onClick={() => addByCode(c.co_procedimento_compativel)}
-                            className="shrink-0 rounded-lg border border-slate-200 p-1 text-slate-400
+                            className="shrink-0 rounded-lg border border-slate-200 p-1 text-muted-foreground/70
                                        transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600"
                             title="Adicionar"
                           >
