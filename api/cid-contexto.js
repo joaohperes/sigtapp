@@ -17,32 +17,41 @@ export default async function handler(req, res) {
 
   const client = new Groq({ apiKey })
 
-  const prompt = `Você é um especialista em codificação médica no SUS brasileiro (SIGTAP/CID-10), com foco em faturamento hospitalar via AIH.
+  const prompt = `Você é um médico intensivista e codificador do SUS com 20 anos de experiência preenchendo AIH (Autorização de Internação Hospitalar) no Brasil.
 
-Para o CID-10 "${co_cid}" — "${no_cid}", gere sugestões de PROCEDIMENTOS SIGTAP que aparecem na AIH (Autorização de Internação Hospitalar), agrupados por cenário clínico.
+Para o CID-10 "${co_cid}" — "${no_cid}", liste os PROCEDIMENTOS SIGTAP que um médico colocaria na AIH deste paciente, agrupados por cenário clínico.
 
-FOCO OBRIGATÓRIO — inclua APENAS:
-- Procedimentos terapêuticos (tratamentos, cirurgias, intervenções)
-- Procedimentos invasivos (ventilação mecânica, drenagens, cateterismos terapêuticos, diálise)
-- Transfusões e hemoterapia
-- Procedimentos de reabilitação quando relevantes
+REGRAS ABSOLUTAS — o que PODE estar na AIH:
+✓ Tratamentos clínicos específicos da condição (ex: "tratamento de pneumonia", "tratamento de septicemia")
+✓ Cirurgias e intervenções cirúrgicas (ex: "apendicectomia", "drenagem de empiema")
+✓ Ventilação mecânica invasiva ou não invasiva — SÓ quando o quadro requer suporte ventilatório
+✓ Diálise/hemodiálise — SÓ quando há IRA ou DRC dialítica no quadro
+✓ Transfusão de concentrado de hemácias — SÓ quando há sangramento ativo ou anemia grave
+✓ Trombolítico sistêmico — SÓ em TEP maciço, AVC isquêmico, IAM com indicação
+✓ Cardioversão elétrica — SÓ em arritmias com instabilidade
+✓ Drenagem torácica — SÓ em pneumotórax, hemotórax, empiema
+✓ Filtro de veia cava — SÓ em TEP com contraindicação a anticoagulação
 
-NÃO inclua:
-- Exames laboratoriais (hemograma, gasometria, troponina, PCR, culturas etc.)
-- Exames de imagem (raio-X, tomografia, ressonância, ecocardiograma etc.)
-- Medicamentos ou infusões (antibióticos, hidratação, analgesia, anticoagulantes etc.)
-- Monitoramento (oximetria, ECG, balanço hídrico etc.)
+PROIBIDO — NUNCA inclua:
+✗ Exames laboratoriais (hemograma, gasometria, troponina, PCR, lactato, culturas)
+✗ Exames de imagem (raio-X, TC, RNM, ECG, ecocardiograma, USG)
+✗ Medicamentos e infusões (antibióticos, anticoagulantes, vasopressores, analgésicos, hidratação)
+✗ Monitoramento (oximetria, PVC, débito urinário, sinais vitais)
+✗ Suporte nutricional, cateter venoso central isolado, acesso periférico
+✗ Procedimentos não relacionados ao CID em questão (ex: diálise para TEP, transfusão para pneumonia sem sangramento)
 
-Retorne APENAS JSON válido com este formato:
+TESTE ANTES DE INCLUIR cada procedimento: "Este procedimento estaria na AIH de um paciente com ${co_cid} internado por ${no_cid}?" — se a resposta não for "sim, na maioria ou em cenário específico bem definido", EXCLUA.
+
+Retorne APENAS JSON válido:
 {
   "cenarios": [
     {
-      "titulo": "nome curto do cenário clínico (ex: Foco pulmonar, Choque séptico, Trauma abdominal)",
-      "descricao": "uma frase sobre quando usar este cenário",
+      "titulo": "cenário clínico específico (ex: TEP maciço com instabilidade, AVC isquêmico com trombolítico)",
+      "descricao": "uma frase objetiva sobre quando este cenário se aplica",
       "procedimentos": [
         {
-          "nome": "nome do procedimento em linguagem SIGTAP",
-          "termos_busca": ["termo1", "termo2"],
+          "nome": "nome exato do procedimento SIGTAP",
+          "termos_busca": ["termo1 para busca"],
           "grupo": "clínico | cirúrgico | terapêutico"
         }
       ]
@@ -50,20 +59,19 @@ Retorne APENAS JSON válido com este formato:
   ],
   "coringas": [
     {
-      "nome": "nome do procedimento",
+      "nome": "procedimento presente em quase todos os casos deste CID",
       "termos_busca": ["termo1"],
       "grupo": "clínico | cirúrgico | terapêutico"
     }
   ]
 }
 
-Regras:
-- "cenarios": 2 a 4 cenários clínicos relevantes para este CID. Cada cenário com 2 a 4 procedimentos (apenas terapêuticos/cirúrgicos).
-- "coringas": 2 a 4 procedimentos terapêuticos que aparecem em quase todos os casos deste CID (ex: tratamento clínico da condição principal, ventilação mecânica se aplicável, cirurgia de urgência se aplicável).
-- Se o CID raramente gera procedimento específico (ex: condição ambulatorial), retorne cenarios e coringas vazios.
-- Use terminologia SUS: "tratamento" não "manejo", "drenagem" não "dreno", "hemácias" não "eritrócitos"
-- "termos_busca": termos curtos para busca na tabela SIGTAP (ex: ["tratamento pneumonia", "ventilacao mecanica"])
-- Use acentuação correta do português em todos os textos`
+Regras finais:
+- "coringas": máximo 3. Apenas procedimentos que aparecem em >80% das AIH deste CID.
+- "cenarios": 2 a 3 cenários. Cada um com 2 a 3 procedimentos realmente específicos.
+- Se o CID não gera internação hospitalar tipicamente, retorne coringas:[] e cenarios:[].
+- Terminologia SUS: "tratamento de" não "manejo de", use nomes que aparecem na tabela SIGTAP.
+- Use acentuação correta em português em todos os textos.`
 
   try {
     const completion = await client.chat.completions.create({
@@ -76,7 +84,7 @@ Regras:
         { role: 'user', content: prompt },
       ],
       response_format: { type: 'json_object' },
-      temperature: 0.2,
+      temperature: 0.0,
     })
 
     const text = completion.choices[0]?.message?.content
