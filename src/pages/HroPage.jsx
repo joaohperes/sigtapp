@@ -35,7 +35,7 @@ function CopiarBtn({ code }) {
         navigator.clipboard.writeText(code)
         toast.success('Código copiado!', { duration: 1500 })
       }}
-      className="rounded p-0.5 text-muted-foreground/50 transition hover:bg-slate-100 hover:text-muted-foreground"
+      className="rounded p-0.5 text-muted-foreground/50 transition hover:bg-secondary hover:text-muted-foreground"
       title="Copiar código"
     >
       <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -362,7 +362,7 @@ function BuscaTab({ procNames, cidNames }) {
         />
         {query && (
           <button onClick={() => setQuery('')}
-            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-0.5 text-muted-foreground/70 hover:bg-slate-100 hover:text-muted-foreground transition">
+            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-0.5 text-muted-foreground/70 hover:bg-secondary hover:text-muted-foreground transition">
             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>

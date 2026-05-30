@@ -982,7 +982,7 @@ export function Home() {
                             const { scrollTop, scrollHeight, clientHeight } = e.currentTarget
                             setProcsAtBottom(scrollTop + clientHeight >= scrollHeight - 10)
                           }}
-                          className="max-h-96 overflow-y-auto divide-y divide-slate-50"
+                          className="max-h-96 overflow-y-auto divide-y divide-border"
                         >
                           {subgroupProcs.map((p) => (
                             <button
@@ -990,14 +990,14 @@ export function Home() {
                               onClick={() => setSheetProc(p)}
                               className="group relative flex w-full items-center gap-3 overflow-hidden px-4 py-3 text-left transition hover:bg-secondary"
                             >
-                              <div className={cn("absolute left-0 top-0 h-full w-[3px]", selectedEstilo?.dot ?? "bg-slate-200")} />
+                              <div className={cn("absolute left-0 top-0 h-full w-[3px]", selectedEstilo?.dot ?? "bg-border")} />
                               <div className="min-w-0 flex-1 pl-1">
-                                <p className="font-mono text-[10px] text-slate-400">{formatCodigo(p.co_procedimento)}</p>
-                                <p className="mt-0.5 text-sm leading-snug text-slate-700 group-hover:text-slate-900">
+                                <p className="font-mono text-[10px] text-muted-foreground">{formatCodigo(p.co_procedimento)}</p>
+                                <p className="mt-0.5 text-sm leading-snug text-foreground">
                                   {p.no_procedimento}
                                 </p>
                               </div>
-                              <svg className="h-3.5 w-3.5 shrink-0 text-slate-200 transition group-hover:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <svg className="h-3.5 w-3.5 shrink-0 text-muted-foreground/30 transition group-hover:text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                               </svg>
                             </button>

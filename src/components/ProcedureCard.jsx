@@ -19,7 +19,7 @@ function CopyButton({ value, className = '' }) {
         navigator.clipboard.writeText(value)
         toast.success('Código copiado!', { duration: 1500 })
       }}
-      className={`rounded p-0.5 text-muted-foreground/50 transition hover:bg-slate-100 hover:text-muted-foreground ${className}`}
+      className={`rounded p-0.5 text-muted-foreground/50 transition hover:bg-secondary hover:text-muted-foreground ${className}`}
       title="Copiar código"
     >
       <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -246,7 +246,7 @@ export function ProcedureRow({ procedure, onSelect, compareMode, compareSelected
           type="button"
           onClick={(e) => { e.stopPropagation(); e.preventDefault(); toggleFavorito(procedure) }}
           className={cn(
-            'shrink-0 rounded p-1 transition hover:bg-slate-100',
+            'shrink-0 rounded p-1 transition hover:bg-secondary',
             !fav && 'opacity-0 group-hover:opacity-100',
           )}
           title={fav ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
