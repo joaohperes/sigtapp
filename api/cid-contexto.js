@@ -91,10 +91,34 @@ Regras finais:
     if (!text) return res.status(502).json({ error: 'Resposta vazia da IA' })
 
     const raw = JSON.parse(text)
-    return res.status(200).json({
-      cenarios: raw.cenarios || [],
-      coringas: raw.coringas || [],
-    })
+
+    // Filtro pós-geração: remove procedimentos proibidos independente do que o modelo gerou
+    const BLOQUEADOS = [
+      'monitoriz', 'monitoring', 'acompanhamento', 'suporte clínico', 'suporte geral',
+      'suporte nutricional', 'oxigenoterapia', 'oxigenio', 'oxigênio',
+      'laboratorial', 'laboratorio', 'eletrocardiograma', 'ecocardiograma',
+      'tomografia', 'radiografia', 'raio-x', 'ultrassom', 'ressonância',
+      'anticoagulação', 'anticoagulacao', 'anticoagulante',
+      'cateter venoso', 'acesso venoso', 'hidratação', 'hidratacao',
+      'analgesia', 'sedação', 'sedacao', 'vasopressor',
+    ]
+
+    function ehBloqueado(nome) {
+      const n = nome.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+      return BLOQUEADOS.some(b => n.includes(b.normalize('NFD').replace(/[̀-ͯ]/g, '')))
+    }
+
+    function filtrarProcs(procs) {
+      return (procs || []).filter(p => !ehBloqueado(p.nome))
+    }
+
+    const cenarios = (raw.cenarios || [])
+      .map(c => ({ ...c, procedimentos: filtrarProcs(c.procedimentos) }))
+      .filter(c => c.procedimentos.length > 0)
+
+    const coringas = filtrarProcs(raw.coringas)
+
+    return res.status(200).json({ cenarios, coringas })
   } catch (err) {
     console.error('Erro cid-contexto:', err)
     return res.status(500).json({ error: 'Falha ao processar' })
