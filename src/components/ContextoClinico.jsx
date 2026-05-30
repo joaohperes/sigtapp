@@ -71,7 +71,7 @@ export function ContextoClinico({ cid, autoOpen = false }) {
     await buscar()
   }
 
-  function buscar(termo) {
+  function irParaBusca(termo) {
     navigate(`/?q=${encodeURIComponent(termo)}&sc=1`)
   }
 
@@ -136,7 +136,7 @@ export function ContextoClinico({ cid, autoOpen = false }) {
                   </p>
                   <div className="flex flex-wrap gap-1.5">
                     {dados.coringas.map((p, i) => (
-                      <PillProcedimento key={i} p={p} dark={dark} onClick={buscar} />
+                      <PillProcedimento key={i} p={p} dark={dark} onClick={irParaBusca} />
                     ))}
                   </div>
                 </div>
@@ -157,7 +157,7 @@ export function ContextoClinico({ cid, autoOpen = false }) {
                   )}
                   <div className="flex flex-wrap gap-1.5">
                     {c.procedimentos?.map((p, j) => (
-                      <PillProcedimento key={j} p={p} dark={dark} onClick={buscar} />
+                      <PillProcedimento key={j} p={p} dark={dark} onClick={irParaBusca} />
                     ))}
                   </div>
                 </div>
