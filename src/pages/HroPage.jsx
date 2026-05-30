@@ -10,6 +10,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { HelpSheet, HelpButton } from '../components/HelpSheet'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
+import { useTheme } from '../contexts/ThemeContext'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -118,7 +119,7 @@ function ProcRow({ p, selected, catLabel, fullName, cidNames, onClick }) {
   return (
     <div className="group cursor-pointer" onClick={onClick}>
       <Card className={cn(
-        'border-slate-100 bg-white transition-all duration-200',
+        'border-border bg-card transition-all duration-200',
         'group-hover:shadow-[0_2px_12px_rgba(15,23,42,0.08)] group-hover:border-slate-200',
         selected
           ? 'border-blue-300 shadow-[0_4px_20px_rgba(15,23,42,0.14)] -translate-y-0.5 z-10'
@@ -197,7 +198,7 @@ function ProcDetailPanel({ p, fullName }) {
       </div>
 
       {/* Grupo */}
-      <div className="rounded-lg border border-slate-100 bg-white px-3 py-2.5">
+      <div className="rounded-lg border border-border bg-card px-3 py-2.5">
         <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Grupo SIGTAP</p>
         {p.grupo === '03' ? (
           <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700">
@@ -285,7 +286,7 @@ function ProcDetailPanel({ p, fullName }) {
             <Skeleton className="h-6 w-1/2" />
           </div>
         ) : fin ? (
-          <div className="rounded-lg border border-slate-100 bg-white overflow-hidden">
+          <div className="rounded-lg border border-border bg-card overflow-hidden">
             <div className="divide-y divide-slate-50">
               {[
                 { label: 'Ambulatorial', val: fin.vl_sa },
@@ -357,7 +358,7 @@ function BuscaTab({ procNames, cidNames }) {
           value={query}
           onChange={e => setQuery(e.target.value)}
           placeholder="Diagnóstico, situação clínica, sigla ou código…"
-          className="w-full rounded-xl border border-slate-200 bg-white py-3 pl-10 pr-10 text-sm shadow-sm placeholder:text-slate-400 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 transition"
+          className="w-full rounded-xl border border-border bg-background py-3 pl-10 pr-10 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition"
         />
         {query && (
           <button onClick={() => setQuery('')}
@@ -375,7 +376,7 @@ function BuscaTab({ procNames, cidNames }) {
           <div className="flex flex-wrap justify-center gap-2">
             {SUGESTOES.map(s => (
               <button key={s} onClick={() => setQuery(s)}
-                className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600 shadow-sm hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 transition">
+                className="rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground shadow-sm hover:border-primary/50 hover:text-primary transition">
                 {s}
               </button>
             ))}
@@ -531,7 +532,7 @@ function CodigoRejeitadoTab({ procNames, cidNames }) {
         onChange={e => setCodigo(e.target.value)}
         placeholder="Ex: 0401010104"
         maxLength={15}
-        className="w-full rounded-xl border border-slate-200 bg-white py-3 px-4 font-mono text-sm shadow-sm placeholder:font-sans placeholder:text-slate-400 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 transition"
+        className="w-full rounded-xl border border-border bg-background py-3 px-4 font-mono text-sm text-foreground shadow-sm placeholder:font-sans placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition"
       />
 
       {codigo.trim().length >= 4 && !resultado && (
@@ -568,7 +569,7 @@ function CodigoRejeitadoTab({ procNames, cidNames }) {
             </div>
           )}
 
-          <div className="rounded-lg border border-slate-100 bg-white px-4 py-2.5">
+          <div className="rounded-lg border border-border bg-card px-4 py-2.5">
             <p className="text-xs text-slate-400">Situação: <span className="font-medium text-slate-700">{resultado.situacao}</span></p>
           </div>
         </div>
@@ -592,6 +593,7 @@ const TABS = [
 ]
 
 export function HroPage() {
+  const { dark } = useTheme()
   const [tab, setTab] = useState('especialidade')
   const [procNames, setProcNames] = useState({})  // code → full SIGTAP name
   const [cidNames, setCidNames] = useState({})    // normalizedCode → no_cid
@@ -639,12 +641,12 @@ export function HroPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-gradient-to-br from-[#0A1628] via-[#0D2347] to-[#0F3460]">
+      <div className={dark ? "bg-gradient-to-br from-[#0A1628] via-[#0D2347] to-[#0F3460]" : "border-b border-border bg-card"}>
         <div className="mx-auto max-w-5xl px-4 py-4 sm:px-6">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <h1 className="text-lg font-bold text-white">Guia de Códigos — PS HRO</h1>
-              <p className="mt-0.5 text-sm text-blue-200">CNES 2537788 · SIGTAP 202602</p>
+              <h1 className={cn("text-lg font-bold", dark ? "text-white" : "text-foreground")}>Guia de Códigos — PS HRO</h1>
+              <p className={cn("mt-0.5 text-sm", dark ? "text-blue-200" : "text-muted-foreground")}>CNES 2537788 · SIGTAP 202602</p>
             </div>
             <div className="flex items-center gap-3 shrink-0">
               <div className="hidden sm:flex items-center gap-3 text-[11px] text-blue-300/70">
@@ -655,7 +657,7 @@ export function HroPage() {
             </div>
           </div>
 
-          <div className="flex gap-1 mt-4 rounded-xl bg-white/5 p-1 ring-1 ring-white/10">
+          <div className={cn("flex gap-1 mt-4 rounded-xl p-1", dark ? "bg-white/5 ring-1 ring-white/10" : "bg-secondary border border-border")}>
             {TABS.map(t => (
               <button
                 key={t.id}
@@ -663,8 +665,8 @@ export function HroPage() {
                 className={cn(
                   'flex-1 rounded-lg py-2 text-xs font-medium transition',
                   tab === t.id
-                    ? 'bg-white text-slate-800 shadow-sm'
-                    : 'text-blue-200/70 hover:text-white'
+                    ? dark ? 'bg-white text-slate-800 shadow-sm' : 'bg-card text-foreground shadow-sm'
+                    : dark ? 'text-blue-200/70 hover:text-white' : 'text-muted-foreground hover:text-foreground'
                 )}
               >
                 {t.label}

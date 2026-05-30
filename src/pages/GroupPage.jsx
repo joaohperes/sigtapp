@@ -11,6 +11,7 @@ import { Sheet, SheetContent } from '@/components/ui/sheet'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
+import { useTheme } from '../contexts/ThemeContext'
 
 const VIEW_MODES = ['cards', 'tabela']
 const SORT_OPTIONS = [
@@ -35,6 +36,7 @@ function applySort(arr, key) {
 }
 
 export function GroupPage() {
+  const { dark } = useTheme()
   const { co } = useParams()
   const [subgrupoAtivo, setSubgrupoAtivo] = useState(null)
   const [view, setView] = useState('cards')
@@ -123,18 +125,18 @@ export function GroupPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-gradient-to-br from-[#0A1628] via-[#0D2347] to-[#0F3460]">
+      <div className={dark ? "bg-gradient-to-br from-[#0A1628] via-[#0D2347] to-[#0F3460]" : "border-b border-border bg-card"}>
         <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6">
-          <nav className="flex items-center gap-1.5 text-xs text-blue-300">
-            <Link to="/" className="hover:text-white transition">Busca</Link>
-            <span className="text-blue-600">/</span>
-            <span className="text-white/80">Grupos</span>
+          <nav className={cn("flex items-center gap-1.5 text-xs", dark ? "text-blue-300" : "text-muted-foreground")}>
+            <Link to="/" className={cn("transition", dark ? "hover:text-white" : "hover:text-foreground")}>Busca</Link>
+            <span className={dark ? "text-blue-600" : "text-border"}>/</span>
+            <span className={dark ? "text-white/80" : "text-foreground"}>Grupos</span>
           </nav>
           <div className="mt-2 flex items-center gap-3">
             <span className={`rounded-lg px-2.5 py-1 text-sm font-bold ${grupo.bg} ${grupo.text}`}>
               {grupo.co}
             </span>
-            <h1 className="text-xl font-semibold text-white">{grupo.no}</h1>
+            <h1 className={cn("text-xl font-semibold", dark ? "text-white" : "text-foreground")}>{grupo.no}</h1>
           </div>
         </div>
       </div>
@@ -145,7 +147,7 @@ export function GroupPage() {
           {/* Sidebar — subgrupos */}
           {subgrupos.length > 0 && (
             <aside className="hidden lg:block w-56 shrink-0">
-              <div className="sticky top-[60px] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+              <div className="sticky top-[60px] overflow-hidden rounded-xl border border-border bg-card shadow-sm">
                 <div className="border-b border-slate-100 px-4 py-3">
                   <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Subgrupos</p>
                 </div>
@@ -198,7 +200,7 @@ export function GroupPage() {
                   value={filtroTexto}
                   onChange={(e) => setFiltroTexto(e.target.value)}
                   placeholder="Filtrar por nome neste grupo..."
-                  className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-9 pr-4 text-sm shadow-sm
+                  className="w-full rounded-xl border border-border bg-background text-foreground py-2.5 pl-9 pr-4 text-sm shadow-sm
                              placeholder:text-slate-400 focus:border-blue-500 focus:outline-none
                              focus:ring-2 focus:ring-blue-500/20"
                 />
@@ -223,7 +225,7 @@ export function GroupPage() {
                   className={`flex items-center gap-1.5 rounded-xl border px-3 py-2.5 text-xs font-medium transition ${
                     showFilters || filtrosAtivos > 0
                       ? 'border-blue-300 bg-blue-50 text-blue-700'
-                      : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
+                      : 'border-border bg-card text-muted-foreground hover:border-border/80'
                   }`}
                 >
                   <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -245,7 +247,7 @@ export function GroupPage() {
                 className={`flex items-center gap-1.5 rounded-xl border px-3 py-2.5 text-xs font-medium transition ${
                   compareMode
                     ? 'border-blue-300 bg-blue-50 text-blue-700'
-                    : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
+                    : 'border-border bg-card text-muted-foreground hover:border-border/80'
                 }`}
               >
                 <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -255,7 +257,7 @@ export function GroupPage() {
               </button>
 
               {/* View toggle */}
-              <div className="flex rounded-xl border border-slate-200 bg-white p-0.5 shadow-sm">
+              <div className="flex rounded-xl border border-border bg-card p-0.5 shadow-sm">
                 {VIEW_MODES.map((m) => (
                   <button
                     key={m}
@@ -274,7 +276,7 @@ export function GroupPage() {
 
             {/* Filter panel */}
             {showFilters && (
-              <div className="mb-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm space-y-5">
+              <div className="mb-4 rounded-xl border border-border bg-card p-5 shadow-sm space-y-5">
                 {financiamentosPresentes.length > 1 && (
                   <div>
                     <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Financiamento</p>
@@ -288,7 +290,7 @@ export function GroupPage() {
                             className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
                               active
                                 ? 'border-transparent bg-slate-700 text-white'
-                                : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
+                                : 'border-border bg-card text-muted-foreground hover:border-border/80'
                             }`}
                           >
                             {no || tp}
@@ -381,7 +383,7 @@ export function GroupPage() {
               <div className="mt-6 text-center">
                 <button
                   onClick={() => setVisibleCount(c => c + PAGE_SIZE)}
-                  className="rounded-lg border border-slate-200 bg-white px-6 py-2.5 text-sm font-medium
+                  className="rounded-lg border border-border bg-card px-6 py-2.5 text-sm font-medium
                              text-slate-600 shadow-sm transition hover:border-slate-300 hover:text-slate-800"
                 >
                   Carregar mais ({sortedResults.length - visibleCount} restantes)
@@ -454,7 +456,7 @@ export function GroupPage() {
 
       {compareMode && compareSelection.length > 0 && (
         <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2">
-          <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-5 py-3 shadow-xl">
+          <div className="flex items-center gap-3 rounded-2xl border border-border bg-card px-5 py-3 shadow-xl">
             <span className="text-sm text-slate-600">
               {compareSelection.length}/3 selecionado{compareSelection.length > 1 ? 's' : ''}
             </span>

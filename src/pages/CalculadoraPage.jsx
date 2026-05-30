@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { HelpSheet, HelpButton } from '../components/HelpSheet'
+import { useTheme } from '../contexts/ThemeContext'
 
 function totalOf(p) {
   return (p.vl_sa || 0) + (p.vl_sh || 0) + (p.vl_sp || 0)
@@ -174,6 +175,7 @@ function TrashIcon() {
 }
 
 export function CalculadoraPage() {
+  const { dark } = useTheme()
   const [helpOpen, setHelpOpen] = useState(false)
   // items: { procedure, qty } — o primeiro é sempre o principal
   const [items, setItems] = useState([])
@@ -327,11 +329,11 @@ export function CalculadoraPage() {
 
   return (
     <TooltipProvider>
-      <div className="min-h-screen bg-slate-50">
+      <div className="min-h-screen bg-background">
         {/* Header */}
-        <div className="bg-[#0A1628] bg-gradient-to-br from-[#0A1628] via-[#0D2347] to-[#0F3460]">
+        <div className={dark ? "bg-gradient-to-br from-[#0A1628] via-[#0D2347] to-[#0F3460]" : "border-b border-border bg-card"}>
           <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
-            <Link to="/" className="inline-flex items-center gap-1.5 text-xs text-blue-300/70 hover:text-blue-200 transition">
+            <Link to="/" className={cn("inline-flex items-center gap-1.5 text-xs transition", dark ? "text-blue-300/70 hover:text-blue-200" : "text-muted-foreground hover:text-foreground")}>
               <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
@@ -339,12 +341,12 @@ export function CalculadoraPage() {
             </Link>
             <div className="flex items-end justify-between gap-4">
               <div>
-                <h1 className="mt-2 text-2xl font-bold text-white">Calculadora de AIH</h1>
-                <p className="mt-1 text-sm text-blue-300/70">
+                <h1 className={cn("mt-2 text-2xl font-bold", dark ? "text-white" : "text-foreground")}>Calculadora de AIH</h1>
+                <p className={cn("mt-1 text-sm", dark ? "text-blue-300/70" : "text-muted-foreground")}>
                   Monte um conjunto de procedimentos e calcule o valor total faturável pelo SUS.
                 </p>
               </div>
-              <HelpButton onClick={() => setHelpOpen(true)} dark />
+              <HelpButton onClick={() => setHelpOpen(true)} dark={dark} />
             </div>
           </div>
         </div>
@@ -353,8 +355,8 @@ export function CalculadoraPage() {
           {/* Coluna principal */}
           <div className="space-y-4">
             {/* Campo de busca */}
-            <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-              <p className="mb-3 text-sm font-semibold text-slate-700">Adicionar procedimento</p>
+            <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
+              <p className="mb-3 text-sm font-semibold text-foreground">Adicionar procedimento</p>
               <ProcSearchInput onAdd={addProcedure} existingCodes={existingCodes} />
               {items.length === 0 && (
                 <p className="mt-3 text-xs text-slate-400">
@@ -404,10 +406,10 @@ export function CalculadoraPage() {
                         className={cn(
                           'rounded-xl border shadow-sm transition-all duration-150',
                           isPrincipal
-                            ? 'border-slate-200 bg-white'
+                            ? 'border-border bg-card'
                             : warning
                               ? 'border-amber-200 bg-white'
-                              : 'border-slate-200 bg-white',
+                              : 'border-border bg-card',
                           isDragTarget && 'ring-2 ring-blue-300 ring-offset-1',
                         )}
                       >
@@ -493,7 +495,7 @@ export function CalculadoraPage() {
                                     onClick={() => setQty(proc.co_procedimento, qty - 1)}
                                     disabled={qty <= 1}
                                     className="flex h-6 w-6 items-center justify-center rounded-md border border-slate-200
-                                               text-slate-600 transition hover:bg-slate-100 disabled:opacity-40"
+                                               text-slate-600 transition hover:bg-secondary disabled:opacity-40"
                                   >
                                     <svg className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
                                       <path fillRule="evenodd" d="M3 10a.75.75 0 01.75-.75h12.5a.75.75 0 010 1.5H3.75A.75.75 0 013 10z" clipRule="evenodd" />
@@ -504,7 +506,7 @@ export function CalculadoraPage() {
                                     onClick={() => setQty(proc.co_procedimento, qty + 1)}
                                     disabled={qty >= 99}
                                     className="flex h-6 w-6 items-center justify-center rounded-md border border-slate-200
-                                               text-slate-600 transition hover:bg-slate-100 disabled:opacity-40"
+                                               text-slate-600 transition hover:bg-secondary disabled:opacity-40"
                                   >
                                     <svg className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
                                       <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
@@ -529,7 +531,7 @@ export function CalculadoraPage() {
                                       onClick={() => setDias(proc.co_procedimento, dias - 1)}
                                       disabled={dias <= 1}
                                       className="flex h-6 w-6 items-center justify-center rounded-md border border-slate-200
-                                                 text-slate-600 transition hover:bg-slate-100 disabled:opacity-40"
+                                                 text-slate-600 transition hover:bg-secondary disabled:opacity-40"
                                     >
                                       <svg className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
                                         <path fillRule="evenodd" d="M3 10a.75.75 0 01.75-.75h12.5a.75.75 0 010 1.5H3.75A.75.75 0 013 10z" clipRule="evenodd" />
@@ -543,7 +545,7 @@ export function CalculadoraPage() {
                                       onClick={() => setDias(proc.co_procedimento, dias + 1)}
                                       disabled={dias >= 999}
                                       className="flex h-6 w-6 items-center justify-center rounded-md border border-slate-200
-                                                 text-slate-600 transition hover:bg-slate-100 disabled:opacity-40"
+                                                 text-slate-600 transition hover:bg-secondary disabled:opacity-40"
                                     >
                                       <svg className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
                                         <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
@@ -575,7 +577,7 @@ export function CalculadoraPage() {
             )}
 
             {items.length === 0 && (
-              <div className="rounded-xl border border-dashed border-slate-300 bg-white p-12 text-center">
+              <div className="rounded-xl border border-dashed border-border bg-card p-12 text-center">
                 <p className="text-sm text-slate-400">Nenhum procedimento adicionado ainda.</p>
                 <p className="mt-1 text-xs text-slate-300">Use o campo acima para buscar e adicionar procedimentos.</p>
               </div>
@@ -587,7 +589,7 @@ export function CalculadoraPage() {
             <div className="sticky top-[72px] space-y-3">
 
               {/* Resumo financeiro */}
-              <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
+              <div className="rounded-xl border border-border bg-card shadow-sm">
                 <div className="border-b border-slate-100 px-5 py-4">
                   <h2 className="text-sm font-bold text-slate-800">Resumo do faturamento</h2>
                 </div>
@@ -634,7 +636,7 @@ export function CalculadoraPage() {
 
               {/* Sugestões de compatíveis */}
               {!compatLoading && compatSuggestions.length > 0 && (
-                <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
+                <div className="rounded-xl border border-border bg-card shadow-sm">
                   <div className="border-b border-slate-100 px-5 py-3">
                     <div className="flex items-center justify-between gap-2">
                       <div>

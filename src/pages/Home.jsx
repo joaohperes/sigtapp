@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { useTheme } from '../contexts/ThemeContext'
 import { Link, useSearchParams, useLocation } from 'react-router-dom'
 import { SearchBar } from '../components/SearchBar'
 import { ProcedureCard, ProcedureCardSkeleton } from '../components/ProcedureCard'
@@ -108,6 +109,7 @@ export function Home() {
 
   // Modo Urgência/Emergência (global via contexto)
   const { modoUE } = useModoUE()
+  const { dark } = useTheme()
 
   // Paginação client-side
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
@@ -788,7 +790,9 @@ export function Home() {
             {selectedGroup && (
               <div className={cn(
                 "mb-4 flex items-center rounded-xl px-4 py-2.5 border transition-colors",
-                cn(selectedEstilo?.bg, selectedEstilo?.border)
+                dark
+                  ? "bg-card border-border"
+                  : cn(selectedEstilo?.bg, selectedEstilo?.border)
               )}>
                 <nav className="flex items-center gap-1.5 text-sm">
                   <button
@@ -796,18 +800,19 @@ export function Home() {
                       setSelectedGroup(null); setSelectedSubgroup(null)
                       setSubgroups([]); setSubgroupProcs([])
                     }}
-                    className={cn("font-medium hover:underline", selectedEstilo?.text ?? "text-blue-600")}
+                    className={cn("font-medium hover:underline", dark ? "text-primary" : (selectedEstilo?.text ?? "text-blue-600"))}
                   >
                     Grupos
                   </button>
-                  <svg className={cn("h-3.5 w-3.5 opacity-50", selectedEstilo?.text ?? "text-slate-400")} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className={cn("h-3.5 w-3.5 opacity-50", dark ? "text-muted-foreground" : (selectedEstilo?.text ?? "text-slate-400"))} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                   <button
                     onClick={() => { setSelectedSubgroup(null); setSubgroupProcs([]) }}
                     className={cn(
                       "font-medium",
-                      selectedSubgroup ? cn(selectedEstilo?.text, "hover:underline") : cn(selectedEstilo?.text, "cursor-default")
+                      dark ? (selectedSubgroup ? "text-primary hover:underline" : "text-foreground cursor-default")
+                           : (selectedSubgroup ? cn(selectedEstilo?.text, "hover:underline") : cn(selectedEstilo?.text, "cursor-default"))
                     )}
                   >
                     {selectedGroup.no_grupo}
@@ -993,7 +998,7 @@ export function Home() {
                           ))}
                         </div>
                         {!procsAtBottom && subgroupProcs.length > 7 && (
-                          <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-14 bg-gradient-to-t from-white to-transparent" />
+                          <div className={cn("pointer-events-none absolute bottom-0 left-0 right-0 h-14 bg-gradient-to-t to-transparent", dark ? "from-[#111827]" : "from-white")} />
                         )}
                       </div>
                     )}

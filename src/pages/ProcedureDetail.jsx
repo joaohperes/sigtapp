@@ -6,6 +6,7 @@ import { formatBRL, formatCodigo, toSentenceCase } from '../utils/formatters'
 import { GRUPO_MAP } from '../data/grupos'
 import { useFavoritos } from '../contexts/FavoritosContext'
 import { useModoUE } from '../contexts/ModoUEContext'
+import { useTheme } from '../contexts/ThemeContext'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
@@ -57,7 +58,7 @@ export function ProcedureDetail() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <div className="bg-gradient-to-br from-[#0A1628] via-[#0D2347] to-[#0F3460]">
+        <div className={dark ? "bg-gradient-to-br from-[#0A1628] via-[#0D2347] to-[#0F3460]" : "border-b border-border bg-card"}>
           <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6">
             <Skeleton className="h-4 w-24 bg-white/10" />
             <div className="mt-4 space-y-2">
@@ -96,6 +97,7 @@ export function ProcedureDetail() {
   const estilo = GRUPO_MAP[data.co_grupo]
   const { isFavorito, toggleFavorito } = useFavoritos()
   const { modoUE } = useModoUE()
+  const { dark } = useTheme()
   const fav = isFavorito(data.co_procedimento)
   const cidsPrincipais = cids.filter((c) => c.st_principal === 'S')
   const cidsSecundarios = cids.filter((c) => c.st_principal !== 'S')
@@ -103,19 +105,19 @@ export function ProcedureDetail() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className={modoUE ? "bg-gradient-to-br from-red-950 via-red-900 to-red-800" : "bg-gradient-to-br from-[#0A1628] via-[#0D2347] to-[#0F3460]"}>
+      <div className={modoUE ? "bg-gradient-to-br from-red-950 via-red-900 to-red-800" : dark ? "bg-gradient-to-br from-[#0A1628] via-[#0D2347] to-[#0F3460]" : "border-b border-border bg-card"}>
         <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6">
           {/* Breadcrumb */}
           <nav className="flex items-center gap-1.5 text-xs">
-            <Link to="/" className={cn("transition", modoUE ? "text-red-300 hover:text-white" : "text-blue-300 hover:text-white")}>
+            <Link to="/" className={cn("transition", modoUE ? "text-red-300 hover:text-white" : (dark ? "text-blue-300 hover:text-white" : "text-muted-foreground hover:text-foreground"))}>
               Busca
             </Link>
             {data.co_grupo && (
               <>
-                <span className={modoUE ? "text-red-600" : "text-blue-600"}>/</span>
+                <span className={modoUE ? "text-red-600" : (dark ? "text-blue-600" : "text-border")}>/</span>
                 <Link
                   to={`/grupo/${data.co_grupo}`}
-                  className={cn("transition", modoUE ? "text-red-300 hover:text-white" : "text-blue-300 hover:text-white")}
+                  className={cn("transition", modoUE ? "text-red-300 hover:text-white" : (dark ? "text-blue-300 hover:text-white" : "text-muted-foreground hover:text-foreground"))}
                 >
                   {data.no_grupo}
                 </Link>
@@ -127,11 +129,11 @@ export function ProcedureDetail() {
             <div className="flex items-start justify-between gap-3">
               <div>
                 <div className="flex items-center gap-1">
-                  <p className={cn("font-mono text-xs", modoUE ? "text-red-300" : "text-blue-300")}>{formatCodigo(data.co_procedimento)}</p>
+                  <p className={cn("font-mono text-xs", modoUE ? "text-red-300" : (dark ? "text-blue-300" : "text-primary"))}>{formatCodigo(data.co_procedimento)}</p>
                   <button
                     type="button"
                     onClick={() => { navigator.clipboard.writeText(data.co_procedimento); toast.success('Código copiado!', { duration: 1500 }) }}
-                    className="rounded p-0.5 text-white/40 transition hover:text-white/80"
+                    className={cn("rounded p-0.5 transition", (modoUE || dark) ? "text-white/40 hover:text-white/80" : "text-muted-foreground/50 hover:text-muted-foreground")}
                     title="Copiar código"
                   >
                     <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -140,17 +142,17 @@ export function ProcedureDetail() {
                     </svg>
                   </button>
                 </div>
-                <h1 className="mt-0.5 text-xl font-bold leading-snug text-white">
+                <h1 className={cn("mt-0.5 text-xl font-bold leading-snug", (modoUE || dark) ? "text-white" : "text-foreground")}>
                   {data.no_procedimento}
                 </h1>
               </div>
               <button
                 onClick={() => toggleFavorito(data)}
-                className="mt-1 shrink-0 rounded-xl bg-white/10 p-2.5 transition hover:bg-white/20"
+                className={cn("mt-1 shrink-0 rounded-xl p-2.5 transition", (modoUE || dark) ? "bg-white/10 hover:bg-white/20" : "bg-secondary hover:bg-secondary/80")}
                 title={fav ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
               >
                 <svg
-                  className={cn('h-5 w-5 transition', fav ? 'fill-amber-400 text-amber-400' : 'fill-none text-white')}
+                  className={cn('h-5 w-5 transition', fav ? 'fill-amber-400 text-amber-400' : (modoUE || dark) ? 'fill-none text-white' : 'fill-none text-muted-foreground')}
                   stroke="currentColor" viewBox="0 0 24 24"
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
@@ -159,7 +161,7 @@ export function ProcedureDetail() {
               </button>
             </div>
             {data.dt_competencia && (
-              <p className={cn("mt-1.5 text-xs", modoUE ? "text-red-300" : "text-blue-300")}>
+              <p className={cn("mt-1.5 text-xs", modoUE ? "text-red-300" : dark ? "text-blue-300" : "text-muted-foreground")}>
                 Competência {data.dt_competencia.slice(0, 4)}/{data.dt_competencia.slice(4)}
               </p>
             )}

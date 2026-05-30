@@ -1,11 +1,14 @@
 import { useState, useRef, useEffect } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { useCidSearch } from '../hooks/useCidSearch'
+import { useTheme } from '../contexts/ThemeContext'
+import { cn } from '@/lib/utils'
 
 const SEXO_LABEL = { M: 'Masculino', F: 'Feminino', I: null, A: null } // I/A = Indiferente, não exibe badge
 const EXEMPLOS = ['câncer de ovário', 'infarto', 'diabetes', 'derrame cerebral', 'pneumonia']
 
 export function CidSearch() {
+  const { dark } = useTheme()
   const [searchParams, setSearchParams] = useSearchParams()
   const initialQuery = searchParams.get('q') || ''
 
@@ -48,13 +51,13 @@ export function CidSearch() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-gradient-to-br from-[#0A1628] via-[#0D2347] to-[#0F3460]">
+      <div className={dark ? "bg-gradient-to-br from-[#0A1628] via-[#0D2347] to-[#0F3460]" : "border-b border-border bg-card"}>
         <div className="mx-auto max-w-3xl px-4 pb-12 pt-10 text-center">
-          <Link to="/" className="text-xs font-semibold uppercase tracking-widest text-indigo-300 hover:text-white transition">
+          <Link to="/" className={cn("text-xs font-semibold uppercase tracking-widest transition", dark ? "text-indigo-300 hover:text-white" : "text-muted-foreground hover:text-foreground")}>
             ← SIGTAP
           </Link>
-          <h1 className="mt-3 text-3xl font-bold tracking-tight text-white">Busca de CID-10</h1>
-          <p className="mt-1.5 text-sm text-indigo-200">
+          <h1 className={cn("mt-3 text-3xl font-bold tracking-tight", dark ? "text-white" : "text-foreground")}>Busca de CID-10</h1>
+          <p className={cn("mt-1.5 text-sm", dark ? "text-indigo-200" : "text-muted-foreground")}>
             Encontre códigos usando linguagem comum — "câncer", "infarto", "derrame"
           </p>
 
@@ -78,9 +81,12 @@ export function CidSearch() {
               onChange={handleChange}
               autoFocus
               placeholder="Ex: câncer de ovário, infarto, pressão alta..."
-              className="w-full rounded-xl border border-gray-200 bg-white py-3.5 pl-12 pr-4
-                         text-sm shadow-sm placeholder:text-gray-400
-                         focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+              className={cn(
+                "w-full rounded-xl border py-3.5 pl-12 pr-4 text-sm focus:outline-none focus:ring-2",
+                dark
+                  ? "border-[rgba(255,255,255,0.1)] bg-[#1a2236] text-[#e8edf5] placeholder:text-[#8896a8] focus:border-[#38bdf8] focus:ring-[#38bdf8]/20"
+                  : "border-border bg-background text-foreground placeholder:text-muted-foreground shadow-sm focus:border-primary focus:ring-primary/20"
+              )}
             />
           </div>
 
@@ -90,7 +96,7 @@ export function CidSearch() {
                 <button
                   key={term}
                   onClick={() => handleExemplo(term)}
-                  className="rounded-full bg-white/10 px-3 py-1 text-xs text-indigo-100 hover:bg-white/20 transition"
+                  className={cn("rounded-full px-3 py-1 text-xs transition", dark ? "bg-white/10 text-indigo-100 hover:bg-white/20" : "bg-secondary text-muted-foreground hover:bg-secondary/80")}
                 >
                   {term}
                 </button>
