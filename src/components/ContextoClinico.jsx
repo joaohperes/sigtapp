@@ -1,11 +1,14 @@
 import { useState, useRef, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { useTheme } from '../contexts/ThemeContext'
+import { supabase } from '../lib/supabase'
+import { formatBRL, formatCodigo } from '../utils/formatters'
 import { cn } from '@/lib/utils'
 
-const cache = new Map()
+const cacheIA = new Map()
+const cacheReg = new Map()
 
-function PillProcedimento({ p, dark, onClick }) {
+function PillIA({ p, dark, onClick }) {
   return (
     <button
       onClick={() => onClick(p.termos_busca?.[0] || p.nome)}
@@ -26,27 +29,68 @@ function PillProcedimento({ p, dark, onClick }) {
   )
 }
 
+function ProcReg({ p, dark }) {
+  const total = (parseFloat(p.vl_sh) || 0) + (parseFloat(p.vl_sa) || 0) + (parseFloat(p.vl_sp) || 0)
+  const grupo = p.grupo === '03' ? 'Clínico' : 'Cirúrgico'
+  const corGrupo = p.grupo === '03' ? 'text-[#38bdf8]' : 'text-[#fb923c]'
+
+  return (
+    <Link
+      to={`/procedimento/${p.co_procedimento}`}
+      className={cn(
+        'flex items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition',
+        dark
+          ? 'border-[rgba(255,255,255,0.07)] bg-[#1a2236] hover:border-[rgba(56,189,248,0.3)]'
+          : 'border-border bg-secondary/50 hover:border-primary/30'
+      )}
+    >
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2 mb-0.5">
+          <span className="font-mono text-[10px] text-muted-foreground">{formatCodigo(p.co_procedimento)}</span>
+          <span className={cn('text-[10px] font-semibold', corGrupo)}>{grupo}</span>
+        </div>
+        <p className="text-xs font-medium text-foreground leading-snug">{p.no_procedimento}</p>
+      </div>
+      <div className="shrink-0 text-right">
+        <p className="text-[10px] text-muted-foreground">Total SUS</p>
+        <p className="text-xs font-bold text-emerald-500 tabular-nums">{formatBRL(total)}</p>
+      </div>
+    </Link>
+  )
+}
+
 export function ContextoClinico({ cid, autoOpen = false }) {
   const { dark } = useTheme()
   const navigate = useNavigate()
   const [aberto, setAberto] = useState(autoOpen)
-  const [dados, setDados] = useState(null)
-  const [loading, setLoading] = useState(false)
-  const [erro, setErro] = useState(null)
-  const buscandoRef = useRef(false)
+  const [aba, setAba] = useState('regulacao') // 'ia' | 'regulacao'
 
-  // Se autoOpen, busca imediatamente na montagem
+  // IA state
+  const [dadosIA, setDadosIA] = useState(null)
+  const [loadingIA, setLoadingIA] = useState(false)
+  const [erroIA, setErroIA] = useState(null)
+  const buscandoIARef = useRef(false)
+
+  // Regulação state
+  const [procsReg, setProcsReg] = useState(null)
+  const [loadingReg, setLoadingReg] = useState(false)
+  const [erroReg, setErroReg] = useState(null)
+  const buscandoRegRef = useRef(false)
+
   useEffect(() => {
-    if (autoOpen) buscar()
+    if (autoOpen) {
+      setAberto(true)
+      buscarReg()
+    }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  async function buscar() {
+  async function buscarIA() {
     const key = cid.co_cid?.trim()
-    if (cache.has(key)) { setDados(cache.get(key)); return }
-    if (buscandoRef.current) return
-    buscandoRef.current = true
-    setLoading(true)
-    setErro(null)
+    if (cacheIA.has(key)) { setDadosIA(cacheIA.get(key)); return }
+    if (buscandoIARef.current) return
+    buscandoIARef.current = true
+    setLoadingIA(true)
+    setErroIA(null)
     try {
       const res = await fetch('/api/cid-contexto', {
         method: 'POST',
@@ -55,34 +99,62 @@ export function ContextoClinico({ cid, autoOpen = false }) {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Falha na API')
-      cache.set(key, data)
-      setDados(data)
+      cacheIA.set(key, data)
+      setDadosIA(data)
     } catch (err) {
-      setErro(err.message)
+      setErroIA(err.message)
     } finally {
-      setLoading(false)
-      buscandoRef.current = false
+      setLoadingIA(false)
+      buscandoIARef.current = false
+    }
+  }
+
+  async function buscarReg() {
+    const key = cid.co_cid?.trim()
+    if (cacheReg.has(key)) { setProcsReg(cacheReg.get(key)); return }
+    if (buscandoRegRef.current) return
+    buscandoRegRef.current = true
+    setLoadingReg(true)
+    setErroReg(null)
+    try {
+      // Usa os primeiros 3 chars do CID para pegar o grupo (ex: I63 de I639)
+      const cidBase = key.slice(0, 3)
+      const { data, error } = await supabase.rpc('procedimentos_por_cid_regulacao', { p_co_cid: cidBase })
+      if (error) throw new Error(error.message)
+      cacheReg.set(key, data || [])
+      setProcsReg(data || [])
+    } catch (err) {
+      setErroReg(err.message)
+    } finally {
+      setLoadingReg(false)
+      buscandoRegRef.current = false
     }
   }
 
   async function toggle() {
     if (aberto) { setAberto(false); return }
     setAberto(true)
-    await buscar()
+    buscarReg()
+  }
+
+  function mudarAba(novaAba) {
+    setAba(novaAba)
+    if (novaAba === 'ia' && !dadosIA && !loadingIA) buscarIA()
+    if (novaAba === 'regulacao' && !procsReg && !loadingReg) buscarReg()
   }
 
   function irParaBusca(termo) {
     navigate(`/?q=${encodeURIComponent(termo)}&sc=1`)
   }
 
-  const temConteudo = dados && (dados.coringas?.length > 0 || dados.cenarios?.length > 0)
+  const temIA = dadosIA && (dadosIA.coringas?.length > 0 || dadosIA.cenarios?.length > 0)
 
   return (
     <div>
       {/* Botão trigger */}
       <button
         onClick={toggle}
-        title="Ver procedimentos SIGTAP por contexto clínico"
+        title="Ver procedimentos SIGTAP por contexto clínico e regulação"
         className={cn(
           'flex items-center gap-1 rounded-lg border px-2.5 py-1 text-xs font-medium transition whitespace-nowrap',
           aberto
@@ -106,66 +178,114 @@ export function ContextoClinico({ cid, autoOpen = false }) {
           'mt-2 rounded-xl border overflow-hidden',
           dark ? 'border-[rgba(56,189,248,0.15)] bg-[#111827]' : 'border-primary/15 bg-card'
         )}>
-          {loading && (
-            <div className="flex items-center gap-2 px-4 py-3">
-              <svg className="h-4 w-4 animate-spin text-primary" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-              </svg>
-              <span className="text-xs text-muted-foreground">Consultando IA...</span>
+          {/* Abas */}
+          <div className={cn('flex border-b', dark ? 'border-[rgba(255,255,255,0.06)]' : 'border-border')}>
+            <button
+              onClick={() => mudarAba('regulacao')}
+              className={cn(
+                'flex-1 px-4 py-2.5 text-xs font-semibold transition',
+                aba === 'regulacao'
+                  ? dark ? 'text-[#38bdf8] border-b-2 border-[#38bdf8]' : 'text-primary border-b-2 border-primary'
+                  : 'text-muted-foreground hover:text-foreground'
+              )}
+            >
+              Regulação · SIGTAP
+            </button>
+            <button
+              onClick={() => mudarAba('ia')}
+              className={cn(
+                'flex-1 px-4 py-2.5 text-xs font-semibold transition',
+                aba === 'ia'
+                  ? dark ? 'text-[#38bdf8] border-b-2 border-[#38bdf8]' : 'text-primary border-b-2 border-primary'
+                  : 'text-muted-foreground hover:text-foreground'
+              )}
+            >
+              Contexto clínico · IA
+            </button>
+          </div>
+
+          {/* Aba Regulação */}
+          {aba === 'regulacao' && (
+            <div className="p-4">
+              {loadingReg && (
+                <div className="flex items-center gap-2 py-2">
+                  <svg className="h-4 w-4 animate-spin text-primary" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                  </svg>
+                  <span className="text-xs text-muted-foreground">Buscando na tabela SIGTAP...</span>
+                </div>
+              )}
+              {erroReg && <p className="text-xs text-red-400">{erroReg}</p>}
+              {procsReg && procsReg.length === 0 && (
+                <p className="text-xs text-muted-foreground">Nenhum procedimento grupo 03/04 vinculado a este CID na tabela SIGTAP.</p>
+              )}
+              {procsReg && procsReg.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+                    Procedimentos grupo 03/04 vinculados a este CID na tabela SIGTAP
+                  </p>
+                  {procsReg.map(p => (
+                    <ProcReg key={p.co_procedimento} p={p} dark={dark} />
+                  ))}
+                  <p className="text-[10px] text-muted-foreground/60 pt-1">
+                    Dados da tabela SIGTAP · clique para ver detalhes do procedimento
+                  </p>
+                </div>
+              )}
             </div>
           )}
 
-          {erro && (
-            <p className="px-4 py-3 text-xs text-red-400">{erro}</p>
-          )}
-
-          {!loading && !erro && !temConteudo && dados && (
-            <p className="px-4 py-3 text-xs text-muted-foreground">
-              Nenhum procedimento específico identificado para este CID.
-            </p>
-          )}
-
-          {temConteudo && (
+          {/* Aba IA */}
+          {aba === 'ia' && (
             <div className="p-4 space-y-4">
-              {/* Coringas */}
-              {dados.coringas?.length > 0 && (
-                <div>
-                  <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                    Base — presentes na maioria dos casos
-                  </p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {dados.coringas.map((p, i) => (
-                      <PillProcedimento key={i} p={p} dark={dark} onClick={irParaBusca} />
-                    ))}
-                  </div>
+              {loadingIA && (
+                <div className="flex items-center gap-2 py-2">
+                  <svg className="h-4 w-4 animate-spin text-primary" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                  </svg>
+                  <span className="text-xs text-muted-foreground">Consultando IA...</span>
                 </div>
               )}
-
-              {/* Cenários */}
-              {dados.cenarios?.map((c, i) => (
-                <div key={i}>
-                  <div className="mb-1.5 flex items-center gap-2">
-                    <div className={cn('h-px flex-1', dark ? 'bg-[rgba(255,255,255,0.06)]' : 'bg-border')} />
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground px-1">
-                      {c.titulo}
-                    </span>
-                    <div className={cn('h-px flex-1', dark ? 'bg-[rgba(255,255,255,0.06)]' : 'bg-border')} />
-                  </div>
-                  {c.descricao && (
-                    <p className="mb-1.5 text-[11px] text-muted-foreground">{c.descricao}</p>
+              {erroIA && <p className="text-xs text-red-400">{erroIA}</p>}
+              {!loadingIA && !erroIA && !temIA && dadosIA && (
+                <p className="text-xs text-muted-foreground">Nenhum procedimento específico identificado para este CID.</p>
+              )}
+              {temIA && (
+                <>
+                  {dadosIA.coringas?.length > 0 && (
+                    <div>
+                      <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                        Base — presentes na maioria dos casos
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {dadosIA.coringas.map((p, i) => (
+                          <PillIA key={i} p={p} dark={dark} onClick={irParaBusca} />
+                        ))}
+                      </div>
+                    </div>
                   )}
-                  <div className="flex flex-wrap gap-1.5">
-                    {c.procedimentos?.map((p, j) => (
-                      <PillProcedimento key={j} p={p} dark={dark} onClick={irParaBusca} />
-                    ))}
-                  </div>
-                </div>
-              ))}
-
-              <p className="text-[10px] text-muted-foreground/60 border-t border-border pt-2">
-                Sugestões por IA · clique para buscar no SIGTAP
-              </p>
+                  {dadosIA.cenarios?.map((c, i) => (
+                    <div key={i}>
+                      <div className="mb-1.5 flex items-center gap-2">
+                        <div className={cn('h-px flex-1', dark ? 'bg-[rgba(255,255,255,0.06)]' : 'bg-border')} />
+                        <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground px-1">{c.titulo}</span>
+                        <div className={cn('h-px flex-1', dark ? 'bg-[rgba(255,255,255,0.06)]' : 'bg-border')} />
+                      </div>
+                      {c.descricao && <p className="mb-1.5 text-[11px] text-muted-foreground">{c.descricao}</p>}
+                      <div className="flex flex-wrap gap-1.5">
+                        {c.procedimentos?.map((p, j) => (
+                          <PillIA key={j} p={p} dark={dark} onClick={irParaBusca} />
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                  <p className="text-[10px] text-muted-foreground/60 border-t border-border pt-2">
+                    Sugestões por IA · clique para buscar no SIGTAP
+                  </p>
+                </>
+              )}
             </div>
           )}
         </div>

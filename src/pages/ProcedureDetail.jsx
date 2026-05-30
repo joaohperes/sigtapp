@@ -333,13 +333,23 @@ function ValueRow({ label, value }) {
 
 function CidRow({ cid, principal }) {
   return (
-    <div className="flex items-baseline gap-3 px-3 py-2">
+    <div className="flex items-center gap-2 px-3 py-2">
       <span className={`shrink-0 font-mono text-xs font-semibold ${
-        principal ? 'text-blue-600' : 'text-muted-foreground'
+        principal ? 'text-primary' : 'text-muted-foreground'
       }`}>
         {cid.co_cid.trim()}
       </span>
-      <span className="text-sm text-foreground/90">{cid.no_cid}</span>
+      <span className="flex-1 text-sm text-foreground/90 leading-snug">{cid.no_cid}</span>
+      <Link
+        to={`/cid?q=${encodeURIComponent(cid.co_cid.trim())}&ctx=1`}
+        title="Ver procedimentos alternativos para regulação"
+        className="shrink-0 flex items-center gap-1 rounded border border-border px-2 py-0.5 text-[10px] font-medium text-muted-foreground hover:border-primary/40 hover:text-primary transition whitespace-nowrap"
+      >
+        <svg className="h-2.5 w-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+        Alternativos
+      </Link>
     </div>
   )
 }
