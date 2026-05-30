@@ -97,7 +97,7 @@ export function CidSearch() {
   }
 
   function handleBuscarProcedimento(termo) {
-    navigate(`/?q=${encodeURIComponent(termo)}`)
+    navigate(`/?q=${encodeURIComponent(termo)}&sc=1`)
   }
 
   const searched = value.trim().length >= 2

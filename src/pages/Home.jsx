@@ -142,8 +142,9 @@ export function Home() {
   // Busca quando ?q= muda (inclui navegação via CommandMenu)
   useEffect(() => {
     if (initialQuery.trim().length >= 2) {
+      const skipCid = searchParams.get('sc') === '1'
       search(initialQuery)
-      searchCids(initialQuery)
+      if (!skipCid) searchCids(initialQuery)
       setSearched(true)
     }
   }, [initialQuery]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -775,7 +776,13 @@ export function Home() {
                     key={c.label}
                     onClick={() => {
                       setSearched(true)
-                      setSearchParams({ q: c.query })
+                      setCidResults([])
+                      setShowAllCids(false)
+                      resetFilters()
+                      setSortKey('relevancia')
+                      setSelectedGroup(null)
+                      setSelectedSubgroup(null)
+                      setSearchParams({ q: c.query, sc: '1' })
                       search(c.query, null)
                     }}
                     className={cn(
