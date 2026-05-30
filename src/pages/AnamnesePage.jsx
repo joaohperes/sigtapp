@@ -6,6 +6,7 @@ import { formatBRL, formatCodigo } from '../utils/formatters'
 import { ProcedureRow } from '../components/ProcedureCard'
 import { ProcedureSheetContent } from '../components/ProcedureSheetContent'
 import { useModoUE } from '../contexts/ModoUEContext'
+import { useTheme } from '../contexts/ThemeContext'
 import { Sheet, SheetContent } from '@/components/ui/sheet'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
@@ -151,6 +152,7 @@ function getSession() {
 
 export function AnamnesePage() {
   const { modoUE } = useModoUE()
+  const { dark } = useTheme()
   const [anamnese, setAnamnese] = useState(() => getSession().anamnese || '')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -731,16 +733,21 @@ export function AnamnesePage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className={modoUE ? "bg-gradient-to-br from-red-950 via-red-900 to-red-800" : "bg-gradient-to-br from-[#0A1628] via-[#0D2347] to-[#0F3460]"}>
+      <div className={modoUE
+        ? "bg-gradient-to-br from-red-950 via-red-900 to-red-800"
+        : dark
+          ? "bg-[#111827] border-b border-[rgba(255,255,255,0.06)]"
+          : "bg-white border-b border-slate-200"
+      }>
         <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 flex items-center justify-between gap-4">
           <div>
-            <h1 className="text-lg font-bold text-white sm:text-xl">Análise de Anamnese</h1>
-            <p className={cn("mt-0.5 text-sm", modoUE ? "text-red-200" : "text-blue-200")}>
+            <h1 className={cn("text-lg font-bold sm:text-xl", modoUE || dark ? "text-white" : "text-slate-800")}>Análise de Anamnese</h1>
+            <p className={cn("mt-0.5 text-sm", modoUE ? "text-red-200" : dark ? "text-[#8896a8]" : "text-slate-500")}>
               Cole o texto clínico e a IA identificará CIDs, procedimentos SIGTAP e gerará o texto para AIH
             </p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            <HelpButton onClick={() => setHelpOpen(true)} dark />
+            <HelpButton onClick={() => setHelpOpen(true)} dark={modoUE || dark} />
             {showResults && (
             <button
               onClick={handleNova}
@@ -748,7 +755,9 @@ export function AnamnesePage() {
                 "shrink-0 flex items-center gap-1.5 rounded-full border px-4 py-1.5 text-xs font-medium transition",
                 modoUE
                   ? "border-red-300/50 bg-red-900/30 text-red-100 hover:bg-red-900/50"
-                  : "border-white/30 bg-white/15 text-white hover:bg-white/25"
+                  : dark
+                    ? "border-[rgba(255,255,255,0.15)] bg-[rgba(255,255,255,0.07)] text-[#e8edf5] hover:bg-[rgba(255,255,255,0.12)]"
+                    : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
               )}
             >
               <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -774,15 +783,18 @@ export function AnamnesePage() {
           <div className={`space-y-4 ${!showResults ? 'lg:col-span-2 xl:col-span-3' : ''}`}>
 
             <div className={!showResults ? 'mx-auto max-w-2xl' : ''}>
-              <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div className={cn(
+                "rounded-xl border p-6 shadow-sm",
+                dark ? "border-[rgba(255,255,255,0.08)] bg-[#111827]" : "border-slate-200 bg-white"
+              )}>
                 <div className="mb-3 flex items-center justify-between">
-                  <label className="text-sm font-semibold text-slate-700">
+                  <label className={cn("text-sm font-semibold", dark ? "text-[#e8edf5]" : "text-slate-700")}>
                     Texto clínico / Anamnese
                   </label>
                   {!anamnese && (
                     <button
                       onClick={() => setAnamnese(EXEMPLO)}
-                      className={cn("text-xs hover:underline", modoUE ? "text-red-500" : "text-blue-500")}
+                      className={cn("text-xs hover:underline", modoUE ? "text-red-500" : "text-[#38bdf8]")}
                     >
                       Usar exemplo
                     </button>
@@ -795,8 +807,11 @@ export function AnamnesePage() {
                   placeholder="Descreva o quadro clínico do paciente: queixas, história, exame físico, hipóteses diagnósticas..."
                   rows={8}
                   className={cn(
-                    "w-full resize-y rounded-lg border border-slate-200 p-3 text-sm leading-relaxed text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2",
-                    modoUE ? "focus:border-red-400 focus:ring-red-400/20" : "focus:border-blue-400 focus:ring-blue-400/20"
+                    "w-full resize-y rounded-lg border p-3 text-sm leading-relaxed focus:outline-none focus:ring-2",
+                    dark
+                      ? "border-[rgba(255,255,255,0.1)] bg-[#1a2236] text-[#e8edf5] placeholder:text-[#8896a8] focus:border-[#38bdf8] focus:ring-[#38bdf8]/20"
+                      : "border-slate-200 bg-white text-slate-700 placeholder:text-slate-400 focus:border-blue-400 focus:ring-blue-400/20",
+                    modoUE && "focus:border-red-400 focus:ring-red-400/20"
                   )}
                 />
 
@@ -875,7 +890,7 @@ export function AnamnesePage() {
             {/* Cards de exemplo — visíveis apenas antes da análise */}
             {!showResults && (
               <div className="mt-4">
-                <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+                <p className={cn("mb-2 text-[11px] font-semibold uppercase tracking-wide", dark ? "text-[#8896a8]" : "text-slate-400")}>
                   Exemplos clínicos
                 </p>
                 <div className="grid grid-cols-2 gap-2">
@@ -884,14 +899,16 @@ export function AnamnesePage() {
                       key={ex.titulo}
                       onClick={() => setAnamnese(ex.texto)}
                       className={cn(
-                        'rounded-xl border bg-white p-3 text-left shadow-sm transition hover:shadow',
-                        modoUE
-                          ? 'border-slate-200 hover:border-red-300'
-                          : 'border-slate-200 hover:border-blue-300'
+                        'rounded-xl border p-3 text-left transition',
+                        dark
+                          ? 'border-[rgba(255,255,255,0.08)] bg-[#1a2236] hover:border-[rgba(56,189,248,0.3)]'
+                          : modoUE
+                            ? 'border-slate-200 bg-white hover:border-red-300 shadow-sm'
+                            : 'border-slate-200 bg-white hover:border-blue-300 shadow-sm'
                       )}
                     >
-                      <p className="text-xs font-semibold text-slate-700">{ex.titulo}</p>
-                      <p className="mt-0.5 text-[11px] text-slate-400 leading-snug">{ex.subtitulo}</p>
+                      <p className={cn("text-xs font-semibold", dark ? "text-[#e8edf5]" : "text-slate-700")}>{ex.titulo}</p>
+                      <p className={cn("mt-0.5 text-[11px] leading-snug", dark ? "text-[#8896a8]" : "text-slate-400")}>{ex.subtitulo}</p>
                     </button>
                   ))}
                 </div>

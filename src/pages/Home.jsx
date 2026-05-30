@@ -501,21 +501,21 @@ export function Home() {
             {/* Sidebar — grupos presentes nos resultados */}
             {gruposPresentes.length > 1 && (
               <aside className="hidden lg:block w-56 shrink-0">
-                <div className="sticky top-[60px] overflow-hidden rounded-xl bg-white shadow-[0_2px_8px_rgba(15,23,42,0.06),0_1px_2px_rgba(15,23,42,0.04)]">
-                  <div className="border-b border-slate-100 px-4 py-3">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Grupos</p>
+                <div className="sticky top-[60px] overflow-hidden rounded-xl bg-card border border-border shadow-[0_2px_8px_rgba(15,23,42,0.06),0_1px_2px_rgba(15,23,42,0.04)]">
+                  <div className="border-b border-border px-4 py-3">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Grupos</p>
                   </div>
-                  <div className="divide-y divide-slate-50 max-h-[80vh] overflow-y-auto">
+                  <div className="divide-y divide-border max-h-[80vh] overflow-y-auto">
                     <button
                       onClick={() => setFiltroGrupo(null)}
                       className={`flex w-full items-center justify-between px-4 py-2.5 text-left transition ${
                         !filtroGrupo
-                          ? 'bg-blue-50 text-blue-700 font-medium'
-                          : 'text-slate-600 hover:bg-slate-50'
+                          ? 'bg-primary/10 text-primary font-medium'
+                          : 'text-muted-foreground hover:bg-secondary'
                       }`}
                     >
                       <span className="text-xs leading-snug">Todos</span>
-                      <span className="ml-2 shrink-0 rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-500">
+                      <span className="ml-2 shrink-0 rounded-full bg-secondary px-1.5 py-0.5 text-[10px] text-muted-foreground">
                         {results.length.toLocaleString('pt-BR')}
                       </span>
                     </button>
@@ -529,12 +529,12 @@ export function Home() {
                           onClick={() => setFiltroGrupo(isActive ? null : g)}
                           className={`flex w-full items-center justify-between px-4 py-2.5 text-left transition ${
                             isActive
-                              ? `${estilo?.bg ?? 'bg-blue-50'} ${estilo?.text ?? 'text-blue-700'} font-medium`
-                              : 'text-slate-600 hover:bg-slate-50'
+                              ? `${estilo?.bg ?? 'bg-primary/10'} ${estilo?.text ?? 'text-primary'} font-medium`
+                              : 'text-muted-foreground hover:bg-secondary'
                           }`}
                         >
                           <span className="text-xs leading-snug">{estilo?.no ?? g}</span>
-                          <span className="ml-2 shrink-0 rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-500">
+                          <span className="ml-2 shrink-0 rounded-full bg-secondary px-1.5 py-0.5 text-[10px] text-muted-foreground">
                             {count.toLocaleString('pt-BR')}
                           </span>
                         </button>
@@ -576,7 +576,7 @@ export function Home() {
                       className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition ${
                         showFilters || filtrosAtivos > 0
                           ? 'border-blue-300 bg-blue-50 text-blue-700'
-                          : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
+                          : 'border-border bg-card text-muted-foreground hover:border-border/80'
                       }`}
                     >
                       <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -597,7 +597,7 @@ export function Home() {
                     className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition ${
                       compareMode
                         ? 'border-blue-300 bg-blue-50 text-blue-700'
-                        : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
+                        : 'border-border bg-card text-muted-foreground hover:border-border/80'
                     }`}
                   >
                     <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -606,13 +606,13 @@ export function Home() {
                     Comparar
                   </button>
 
-                  <div className="flex rounded-lg border border-slate-200 bg-white p-0.5 shadow-sm">
+                  <div className="flex rounded-lg border border-border bg-card p-0.5 shadow-sm">
                     {VIEW_MODES.map((m) => (
                       <button
                         key={m}
                         onClick={() => setView(m)}
                         className={`rounded-md px-3 py-1.5 text-xs font-medium capitalize transition ${
-                          view === m ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                          view === m ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
                         }`}
                       >
                         {m}
@@ -624,10 +624,10 @@ export function Home() {
 
               {/* Filter panel */}
               {showFilters && (
-                <div className="mb-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm space-y-5">
+                <div className="mb-4 rounded-xl border border-border bg-card p-5 shadow-sm space-y-5">
                   {financiamentosPresentes.length > 1 && (
                     <div>
-                      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Financiamento</p>
+                      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Financiamento</p>
                       <div className="flex flex-wrap gap-2">
                         {financiamentosPresentes.map(({ tp, no }) => {
                           const active = filtroFinanciamento === tp
@@ -638,7 +638,7 @@ export function Home() {
                               className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
                                 active
                                   ? 'border-transparent bg-slate-700 text-white'
-                                  : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
+                                  : 'border-border bg-card text-muted-foreground hover:border-border/80'
                               }`}
                             >
                               {no || tp}
@@ -650,27 +650,27 @@ export function Home() {
                   )}
 
                   <div>
-                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Valor total SUS</p>
+                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Valor total SUS</p>
                     <div className="flex items-center gap-3">
                       <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">R$</span>
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">R$</span>
                         <input
                           type="number" min="0" value={valorMin}
                           onChange={e => setValorMin(e.target.value)}
                           placeholder="Mínimo"
-                          className="w-36 rounded-lg border border-slate-200 pl-8 pr-3 py-2 text-sm
-                                     focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400/20"
+                          className="w-36 rounded-lg border border-border bg-background text-foreground pl-8 pr-3 py-2 text-sm
+                                     focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                         />
                       </div>
-                      <span className="text-slate-400 text-sm">—</span>
+                      <span className="text-muted-foreground text-sm">—</span>
                       <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">R$</span>
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">R$</span>
                         <input
                           type="number" min="0" value={valorMax}
                           onChange={e => setValorMax(e.target.value)}
                           placeholder="Máximo"
-                          className="w-36 rounded-lg border border-slate-200 pl-8 pr-3 py-2 text-sm
-                                     focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400/20"
+                          className="w-36 rounded-lg border border-border bg-background text-foreground pl-8 pr-3 py-2 text-sm
+                                     focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                         />
                       </div>
                     </div>
@@ -724,8 +724,8 @@ export function Home() {
                 <div className="mt-6 text-center">
                   <button
                     onClick={() => setVisibleCount(c => c + PAGE_SIZE)}
-                    className="rounded-lg border border-slate-200 bg-white px-6 py-2.5 text-sm font-medium
-                               text-slate-600 shadow-sm transition hover:border-slate-300 hover:text-slate-800"
+                    className="rounded-lg border border-border bg-card px-6 py-2.5 text-sm font-medium
+                               text-muted-foreground shadow-sm transition hover:text-foreground"
                   >
                     Carregar mais ({sortedResults.length - visibleCount} restantes)
                   </button>
@@ -843,13 +843,13 @@ export function Home() {
                           key={g.co_grupo}
                           onClick={() => handleGroupClick(g)}
                           className="group flex items-center gap-3 overflow-hidden rounded-xl
-                                     bg-white p-4 shadow-[0_2px_8px_rgba(15,23,42,0.06),0_1px_2px_rgba(15,23,42,0.04)] text-left transition
+                                     bg-card border border-border p-4 shadow-[0_2px_8px_rgba(15,23,42,0.06),0_1px_2px_rgba(15,23,42,0.04)] text-left transition
                                      hover:shadow-[0_6px_20px_rgba(15,23,42,0.10),0_2px_6px_rgba(15,23,42,0.06)] hover:-translate-y-0.5 active:translate-y-0"
                         >
                           <span className={`shrink-0 flex h-8 w-8 items-center justify-center rounded-lg text-sm font-bold ${estilo.bg} ${estilo.text}`}>
                             {g.co_grupo}
                           </span>
-                          <p className="text-sm font-semibold leading-snug text-slate-800 group-hover:text-slate-900">
+                          <p className="text-sm font-semibold leading-snug text-foreground">
                             {g.no_grupo}
                           </p>
                         </button>
@@ -857,7 +857,7 @@ export function Home() {
                     })}
                   </div>
                 ) : (
-                  <div className="overflow-hidden rounded-xl bg-white shadow-[0_2px_8px_rgba(15,23,42,0.06),0_1px_2px_rgba(15,23,42,0.04)]">
+                  <div className="overflow-hidden rounded-xl bg-card border border-border shadow-[0_2px_8px_rgba(15,23,42,0.06),0_1px_2px_rgba(15,23,42,0.04)]">
                     {gruposVisiveis.map((g) => {
                       const estilo = GRUPO_MAP[g.co_grupo]
                       if (!estilo) return null
@@ -868,7 +868,7 @@ export function Home() {
                           onClick={() => handleGroupClick(g)}
                           className={cn(
                             "relative flex w-full items-center gap-2.5 overflow-hidden border-b border-slate-50 px-3 py-2.5 text-left transition last:border-0",
-                            isActive ? cn(estilo.bg, estilo.text, "font-medium") : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"
+                            isActive ? cn(estilo.bg, estilo.text, "font-medium") : "text-slate-500 hover:bg-secondary hover:text-foreground"
                           )}
                         >
                           <div className={cn("absolute left-0 top-0 h-full w-[3px]", isActive ? estilo.dot : "bg-slate-100")} />
@@ -894,8 +894,8 @@ export function Home() {
                     selectedSubgroup ? 'md:w-64' : 'md:w-72'
                   }`}
                 >
-                  <div className="overflow-hidden rounded-xl bg-white shadow-[0_2px_8px_rgba(15,23,42,0.06),0_1px_2px_rgba(15,23,42,0.04)]">
-                    <div className="flex items-center gap-2 border-b border-slate-100 px-4 py-3">
+                  <div className="overflow-hidden rounded-xl bg-card border border-border shadow-[0_2px_8px_rgba(15,23,42,0.06),0_1px_2px_rgba(15,23,42,0.04)]">
+                    <div className="flex items-center gap-2 border-b border-border px-4 py-3">
                       <div className={cn("h-2.5 w-2.5 shrink-0 rounded-sm", selectedEstilo?.dot)} />
                       <span className="text-xs font-semibold text-slate-700">{selectedGroup.no_grupo}</span>
                     </div>
@@ -905,7 +905,7 @@ export function Home() {
                         <Spinner />
                       </div>
                     ) : (
-                      <div className="divide-y divide-slate-50">
+                      <div className="divide-y divide-border">
                         {subgroups.map((s) => {
                           const isActive = s.co_subgrupo === selectedSubgroup?.co_subgrupo
                           return (
@@ -916,7 +916,7 @@ export function Home() {
                                 "relative flex w-full items-center justify-between gap-3 overflow-hidden px-4 py-3 text-left transition",
                                 isActive
                                   ? cn(selectedEstilo?.bg ?? "bg-blue-50", selectedEstilo?.text ?? "text-blue-700", "font-medium")
-                                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-800"
+                                  : "text-slate-600 hover:bg-secondary hover:text-foreground"
                               )}
                             >
                               <div className={cn("absolute left-0 top-0 h-full w-[3px]", isActive ? selectedEstilo?.dot : "bg-transparent")} />
@@ -935,7 +935,7 @@ export function Home() {
                       </div>
                     )}
 
-                    <div className="border-t border-slate-100 px-4 py-2.5">
+                    <div className="border-t border-border px-4 py-2.5">
                       <Link
                         to={`/grupo/${selectedGroup.co_grupo}`}
                         className="text-xs font-medium text-blue-600 hover:underline"
@@ -953,8 +953,8 @@ export function Home() {
                   key={selectedSubgroup.co_subgrupo}
                   className="w-full md:flex-1 animate-slide-right"
                 >
-                  <div className="overflow-hidden rounded-xl bg-white shadow-[0_2px_8px_rgba(15,23,42,0.06),0_1px_2px_rgba(15,23,42,0.04)]">
-                    <div className="flex items-center gap-2 border-b border-slate-100 px-4 py-3">
+                  <div className="overflow-hidden rounded-xl bg-card border border-border shadow-[0_2px_8px_rgba(15,23,42,0.06),0_1px_2px_rgba(15,23,42,0.04)]">
+                    <div className="flex items-center gap-2 border-b border-border px-4 py-3">
                       <div className={cn("h-2.5 w-2.5 shrink-0 rounded-sm", selectedEstilo?.dot)} />
                       <p className="text-xs font-semibold leading-snug text-slate-700">{selectedSubgroup.no_subgrupo}</p>
                     </div>
@@ -977,7 +977,7 @@ export function Home() {
                             <button
                               key={p.co_procedimento}
                               onClick={() => setSheetProc(p)}
-                              className="group relative flex w-full items-center gap-3 overflow-hidden px-4 py-3 text-left transition hover:bg-slate-50"
+                              className="group relative flex w-full items-center gap-3 overflow-hidden px-4 py-3 text-left transition hover:bg-secondary"
                             >
                               <div className={cn("absolute left-0 top-0 h-full w-[3px]", selectedEstilo?.dot ?? "bg-slate-200")} />
                               <div className="min-w-0 flex-1 pl-1">
@@ -999,7 +999,7 @@ export function Home() {
                     )}
 
                     {subgroupProcs.length >= 50 && (
-                      <div className="border-t border-slate-100 px-4 py-2.5">
+                      <div className="border-t border-border px-4 py-2.5">
                         <Link
                           to={`/grupo/${selectedGroup.co_grupo}`}
                           className="text-xs font-medium text-blue-600 hover:underline"
@@ -1070,8 +1070,8 @@ export function Home() {
       {/* Barra flutuante de comparação */}
       {compareMode && compareSelection.length > 0 && (
         <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2">
-          <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-5 py-3 shadow-xl">
-            <span className="text-sm text-slate-600">
+          <div className="flex items-center gap-3 rounded-2xl border border-border bg-card px-5 py-3 shadow-xl">
+            <span className="text-sm text-muted-foreground">
               {compareSelection.length}/3 selecionado{compareSelection.length > 1 ? 's' : ''}
             </span>
             <button
@@ -1085,7 +1085,7 @@ export function Home() {
             <button
               onClick={() => setCompareSelection([])}
               className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-600
-                         transition hover:bg-slate-50"
+                         transition hover:bg-secondary"
             >
               Limpar
             </button>

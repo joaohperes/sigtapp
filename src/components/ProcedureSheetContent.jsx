@@ -90,11 +90,11 @@ export function ProcedureSheetContent({ procedure }) {
           )}
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1">
-              <p className="font-mono text-xs text-slate-400">{formatCodigo(co_procedimento)}</p>
+              <p className="font-mono text-xs text-muted-foreground">{formatCodigo(co_procedimento)}</p>
               <button
                 type="button"
                 onClick={() => { navigator.clipboard.writeText(co_procedimento); toast.success('Código copiado!', { duration: 1500 }) }}
-                className="rounded p-0.5 text-slate-300 transition hover:bg-slate-100 hover:text-slate-500"
+                className="rounded p-0.5 text-muted-foreground/50 transition hover:bg-secondary hover:text-muted-foreground"
                 title="Copiar código"
               >
                 <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -103,7 +103,7 @@ export function ProcedureSheetContent({ procedure }) {
                 </svg>
               </button>
             </div>
-            <SheetTitle className="mt-1 text-left text-base font-semibold leading-snug text-slate-800">
+            <SheetTitle className="mt-1 text-left text-base font-semibold leading-snug text-foreground">
               {no_procedimento}
             </SheetTitle>
             {no_financiamento && (
@@ -114,7 +114,7 @@ export function ProcedureSheetContent({ procedure }) {
           </div>
           <button
             onClick={() => toggleFavorito(procedure)}
-            className="shrink-0 rounded-lg p-1.5 transition hover:bg-slate-100"
+            className="shrink-0 rounded-lg p-1.5 transition hover:bg-secondary"
             title={fav ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
           >
             <StarIcon filled={fav} />
@@ -159,7 +159,7 @@ export function ProcedureSheetContent({ procedure }) {
 
       {(descLoading || descricao) && (
         <div>
-          <p className="mb-2 text-xs font-medium text-slate-400">Descrição</p>
+          <p className="mb-2 text-xs font-medium text-muted-foreground">Descrição</p>
           {descLoading ? (
             <div className="space-y-2">
               <Skeleton className="h-3.5 w-full" />
@@ -167,7 +167,7 @@ export function ProcedureSheetContent({ procedure }) {
               <Skeleton className="h-3.5 w-4/6" />
             </div>
           ) : (
-            <p className="text-sm leading-relaxed text-slate-600">{toSentenceCase(descricao)}</p>
+            <p className="text-sm leading-relaxed text-foreground/80">{toSentenceCase(descricao)}</p>
           )}
         </div>
       )}
@@ -180,8 +180,8 @@ export function ProcedureSheetContent({ procedure }) {
         <CompatSection compatibilidades={compatibilidades} />
       )}
 
-      <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
-        <p className="mb-3 text-xs font-medium text-slate-400">Valores SUS</p>
+      <div className="rounded-xl border border-border bg-secondary/50 p-4">
+        <p className="mb-3 text-xs font-medium text-muted-foreground">Valores SUS</p>
         <div className="space-y-2">
           {[
             { label: 'Ambulatorial (SA)', value: vl_sa },
@@ -189,24 +189,24 @@ export function ProcedureSheetContent({ procedure }) {
             { label: 'Profissional (SP)', value: vl_sp },
           ].map(({ label, value }) => (
             <div key={label} className="flex items-center justify-between">
-              <span className="text-sm text-slate-500">{label}</span>
-              <span className="tabular-nums text-sm text-slate-700">{formatBRL(value)}</span>
+              <span className="text-sm text-muted-foreground">{label}</span>
+              <span className="tabular-nums text-sm text-foreground">{formatBRL(value)}</span>
             </div>
           ))}
-          <div className="flex items-center justify-between border-t border-slate-200 pt-2 mt-2">
-            <span className="text-sm font-semibold text-slate-700">Total</span>
-            <span className="tabular-nums text-base font-bold text-emerald-600">{formatBRL(total)}</span>
+          <div className="flex items-center justify-between border-t border-border pt-2 mt-2">
+            <span className="text-sm font-semibold text-foreground">Total</span>
+            <span className="tabular-nums text-base font-bold text-emerald-500">{formatBRL(total)}</span>
           </div>
         </div>
         {diasPerman > 0 && diasPerman < 9999 && (
-          <div className="mt-3 border-t border-slate-200 pt-3">
+          <div className="mt-3 border-t border-border pt-3">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-slate-500">Permanência mínima (AIH)</span>
-              <span className="tabular-nums text-sm font-semibold text-blue-700">
+              <span className="text-sm text-muted-foreground">Permanência mínima (AIH)</span>
+              <span className="tabular-nums text-sm font-semibold text-primary">
                 {diasPerman} {diasPerman === 1 ? 'dia' : 'dias'}
               </span>
             </div>
-            <p className="mt-0.5 text-right text-xs text-slate-400">
+            <p className="mt-0.5 text-right text-xs text-muted-foreground">
               Pagamento a partir de {diasPerman + 1} dias
             </p>
           </div>
@@ -215,8 +215,8 @@ export function ProcedureSheetContent({ procedure }) {
 
       <Link
         to={`/procedimento/${co_procedimento}`}
-        className="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5
-                   text-sm font-medium text-white transition hover:bg-blue-700"
+        className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5
+                   text-sm font-medium text-primary-foreground transition hover:opacity-90"
       >
         Ver página completa
         <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

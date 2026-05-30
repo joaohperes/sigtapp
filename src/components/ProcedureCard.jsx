@@ -89,9 +89,9 @@ export function ProcedureCard({ procedure, onSelect, compareMode, compareSelecte
 
   const inner = (
     <Card className={cn(
-      'overflow-hidden border-slate-100 bg-white transition-all duration-200',
+      'overflow-hidden border-border bg-card transition-all duration-200',
       'group-hover:shadow-[0_4px_20px_rgba(15,23,42,0.1),0_1px_4px_rgba(15,23,42,0.06)] group-hover:-translate-y-0.5',
-      compareSelected && 'ring-2 ring-blue-500 ring-offset-1',
+      compareSelected && 'ring-2 ring-primary ring-offset-1',
     )}>
       <div className="flex min-h-[88px]">
         {/* Barra lateral colorida */}
@@ -113,12 +113,12 @@ export function ProcedureCard({ procedure, onSelect, compareMode, compareSelecte
           {/* Conteúdo principal */}
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1 mb-1">
-              <p className="font-mono text-[11px] font-medium tracking-wider text-slate-400">
+              <p className="font-mono text-[11px] font-medium tracking-wider text-muted-foreground">
                 {formatCodigo(co_procedimento)}
               </p>
               <CopyButton value={co_procedimento} />
             </div>
-            <p title={no_procedimento} className="text-sm font-semibold leading-snug text-slate-800 line-clamp-2">
+            <p title={no_procedimento} className="text-sm font-semibold leading-snug text-foreground line-clamp-2">
               {no_procedimento}
             </p>
             {no_financiamento && (
@@ -134,7 +134,7 @@ export function ProcedureCard({ procedure, onSelect, compareMode, compareSelecte
               <button
                 onClick={(e) => { e.stopPropagation(); e.preventDefault(); toggleFavorito(procedure) }}
                 className={cn(
-                  'rounded p-1 transition hover:bg-slate-100',
+                  'rounded p-1 transition hover:bg-secondary',
                   !fav && 'opacity-0 group-hover:opacity-100'
                 )}
                 title={fav ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
@@ -144,8 +144,8 @@ export function ProcedureCard({ procedure, onSelect, compareMode, compareSelecte
             )}
             <PriceTooltip total={total} vl_sa={vl_sa} vl_sh={vl_sh} vl_sp={vl_sp} qt_dias_perman={qt_dias_perman}>
               <div className="cursor-default text-right">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Total SUS</p>
-                <p className="text-base font-bold tabular-nums text-emerald-600">{formatBRL(total)}</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Total SUS</p>
+                <p className="text-base font-bold tabular-nums text-emerald-500">{formatBRL(total)}</p>
               </div>
             </PriceTooltip>
           </div>
