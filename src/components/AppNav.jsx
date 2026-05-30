@@ -78,6 +78,7 @@ export function AppNav() {
             dark={dark}
             badge={favoritos.length > 0 ? favoritos.length : null}
           />
+          <NavLink to="/cid" label="CID-10" active={location.pathname === '/cid'} modoUE={modoUE} dark={dark} />
           <NavLink to="/hro" label="PS HRO" active={location.pathname === '/hro'} modoUE={modoUE} dark={dark} badge="HRO" />
         </div>
 

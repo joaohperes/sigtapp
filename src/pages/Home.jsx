@@ -21,6 +21,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
 import { HelpSheet, HelpButton } from '../components/HelpSheet'
+import { ContextoClinico } from '../components/ContextoClinico'
 
 const VIEW_MODES = ['cards', 'tabela']
 const SORT_OPTIONS = [
@@ -458,18 +459,23 @@ export function Home() {
                     </div>
                   ))
                 : (showAllCids ? cidResults : cidResults.slice(0, CID_PREVIEW)).map((cid) => (
-                    <div key={cid.co_cid} className="flex items-center gap-3 px-4 py-2.5 hover:bg-secondary transition">
-                      <span className="w-12 shrink-0 font-mono text-sm font-bold text-primary">
-                        {cid.co_cid.trim()}
-                      </span>
-                      <span className="flex-1 text-sm text-foreground leading-snug">{cid.no_cid?.trim()}</span>
-                      <button
-                        onClick={() => handleCidSelect(cid.co_cid.trim())}
-                        className="shrink-0 rounded-md border border-primary/30 bg-primary/10 px-2.5 py-1
-                                   text-xs font-medium text-primary hover:bg-primary/20 transition"
-                      >
-                        Procedimentos →
-                      </button>
+                    <div key={cid.co_cid} className="px-4 py-2.5">
+                      <div className="flex items-center gap-3">
+                        <span className="w-12 shrink-0 font-mono text-sm font-bold text-primary">
+                          {cid.co_cid.trim()}
+                        </span>
+                        <span className="flex-1 text-sm text-foreground leading-snug">{cid.no_cid?.trim()}</span>
+                        <div className="shrink-0 flex items-center gap-2">
+                          <ContextoClinico cid={cid} />
+                          <button
+                            onClick={() => handleCidSelect(cid.co_cid.trim())}
+                            className="rounded-md border border-primary/30 bg-primary/10 px-2.5 py-1
+                                       text-xs font-medium text-primary hover:bg-primary/20 transition whitespace-nowrap"
+                          >
+                            Procedimentos →
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   ))
               }
