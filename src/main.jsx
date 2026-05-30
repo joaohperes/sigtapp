@@ -1,4 +1,12 @@
 import { StrictMode } from 'react'
+
+// Desregistra todos os service workers antigos para forçar atualização
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then(regs => {
+    regs.forEach(r => r.unregister())
+  })
+}
+
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
