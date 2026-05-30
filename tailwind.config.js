@@ -6,10 +6,19 @@ export default {
   	extend: {
   		fontFamily: {
   			sans: [
-  				'Inter',
+  				'IBM Plex Sans',
   				'system-ui',
   				'sans-serif'
-  			]
+  			],
+  			mono: [
+  				'IBM Plex Mono',
+  				'ui-monospace',
+  				'monospace'
+  			],
+  			display: [
+  				'Bebas Neue',
+  				'sans-serif'
+  			],
   		},
   		borderRadius: {
   			lg: 'var(--radius)',

@@ -4,48 +4,62 @@
 
 @layer base {
   :root {
-    --background: 220 22% 94%;
+    /* Light theme — neutro/profissional */
+    --background: 220 20% 97%;
     --foreground: 222 25% 10%;
     --card: 0 0% 100%;
     --card-foreground: 222 25% 10%;
     --popover: 0 0% 100%;
     --popover-foreground: 222 25% 10%;
-    --primary: 221 83% 53%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 220 20% 95%;
+    --primary: 199 89% 58%;        /* #38bdf8 — mesmo accent do hemo-choque */
+    --primary-foreground: 222 47% 11%;
+    --secondary: 220 18% 93%;
     --secondary-foreground: 222 20% 30%;
-    --muted: 220 20% 95%;
-    --muted-foreground: 220 10% 50%;
-    --accent: 220 20% 94%;
+    --muted: 220 18% 93%;
+    --muted-foreground: 220 10% 48%;
+    --accent: 220 18% 91%;
     --accent-foreground: 222 25% 15%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
-    --border: 220 15% 90%;
-    --input: 220 15% 90%;
-    --ring: 221 83% 53%;
+    --border: 220 14% 88%;
+    --input: 220 14% 88%;
+    --ring: 199 89% 58%;
     --radius: 0.625rem;
+
+    /* Brand colors usadas diretamente como CSS vars */
+    --clr-accent: #38bdf8;
+    --clr-green: #34d399;
+    --clr-amber: #fbbf24;
+    --clr-red: #f87171;
+    --clr-coral: #fb923c;
+    --clr-purple: #a78bfa;
+    --clr-teal: #2dd4bf;
+    --clr-muted: #64748b;
   }
 
   .dark {
-    --background: 222 30% 8%;
-    --foreground: 210 20% 96%;
-    --card: 222 28% 11%;
-    --card-foreground: 210 20% 96%;
-    --popover: 222 28% 11%;
-    --popover-foreground: 210 20% 96%;
-    --primary: 217 91% 60%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 222 25% 16%;
-    --secondary-foreground: 210 20% 80%;
-    --muted: 222 25% 16%;
-    --muted-foreground: 215 15% 55%;
-    --accent: 222 25% 18%;
-    --accent-foreground: 210 20% 96%;
-    --destructive: 0 62% 40%;
+    /* Dark theme — paleta hemo-choque */
+    --background: 222 47% 8%;      /* #0a0e1a */
+    --foreground: 213 27% 92%;     /* #e8edf5 */
+    --card: 222 35% 12%;           /* #111827 */
+    --card-foreground: 213 27% 92%;
+    --popover: 222 35% 12%;
+    --popover-foreground: 213 27% 92%;
+    --primary: 199 89% 58%;        /* #38bdf8 */
+    --primary-foreground: 222 47% 11%;
+    --secondary: 222 28% 17%;      /* #1a2236 */
+    --secondary-foreground: 213 20% 80%;
+    --muted: 222 28% 17%;
+    --muted-foreground: 213 14% 55%; /* #8896a8 */
+    --accent: 222 28% 19%;
+    --accent-foreground: 213 27% 92%;
+    --destructive: 0 62% 57%;
     --destructive-foreground: 0 0% 98%;
-    --border: 222 20% 18%;
-    --input: 222 20% 18%;
-    --ring: 217 91% 60%;
+    --border: 213 20% 14%;         /* rgba(255,255,255,0.08) approx */
+    --input: 213 20% 14%;
+    --ring: 199 89% 58%;
+
+    --clr-muted: #8896a8;
   }
 
   * {
@@ -60,9 +74,15 @@
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
     @apply antialiased;
-    font-feature-settings: "cv01", "cv02", "kern" 1, "liga" 1;
+    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+    font-feature-settings: "kern" 1, "liga" 1;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* IBM Plex Mono como mono padrão */
+  code, kbd, samp, pre, .font-mono {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
   }
 }
 
