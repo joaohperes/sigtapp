@@ -390,8 +390,11 @@ export function expandirSinonimos(query) {
   const substituicoes = []
 
   for (const [coloquial, formal] of SINONIMOS) {
-    if (expanded.includes(coloquial) && coloquial !== formal) {
-      expanded = expanded.replace(coloquial, formal)
+    if (coloquial === formal) continue
+    // Exige word boundary: não substitui "itu" dentro de "mellitus"
+    const regex = new RegExp(`(?<![a-záéíóúãõâêôàüç])${coloquial.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?![a-záéíóúãõâêôàüç])`, 'i')
+    if (regex.test(expanded)) {
+      expanded = expanded.replace(regex, formal)
       substituicoes.push({ de: coloquial, para: formal })
     }
   }
