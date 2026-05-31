@@ -77,6 +77,10 @@ export function ContextoClinico({ cid, autoOpen = false }) {
   const [erroReg, setErroReg] = useState(null)
   const buscandoRegRef = useRef(false)
 
+  // Correlatos state
+  const [correlatos, setCorrelatos] = useState(null)
+  const buscandoCorRef = useRef(false)
+
   useEffect(() => {
     if (autoOpen) {
       setAberto(true)
@@ -117,7 +121,6 @@ export function ContextoClinico({ cid, autoOpen = false }) {
     setLoadingReg(true)
     setErroReg(null)
     try {
-      // Usa os primeiros 3 chars do CID para pegar o grupo (ex: I63 de I639)
       const cidBase = key.slice(0, 3)
       const { data, error } = await supabase.rpc('procedimentos_por_cid_regulacao', { p_co_cid: cidBase })
       if (error) throw new Error(error.message)
@@ -128,6 +131,32 @@ export function ContextoClinico({ cid, autoOpen = false }) {
     } finally {
       setLoadingReg(false)
       buscandoRegRef.current = false
+    }
+    // Busca correlatos em paralelo
+    buscarCorrelatos()
+  }
+
+  async function buscarCorrelatos() {
+    const key = cid.co_cid?.trim()
+    if (cacheReg.has(`cor:${key}`)) { setCorrelatos(cacheReg.get(`cor:${key}`)); return }
+    if (buscandoCorRef.current) return
+    buscandoCorRef.current = true
+    try {
+      const { data, error } = await supabase.rpc('cids_correlatos_regulacao', { p_co_cid: key })
+      if (error) throw new Error(error.message)
+      // Agrupa por CID correlato
+      const grupos = {}
+      for (const row of (data || [])) {
+        if (!grupos[row.co_cid]) grupos[row.co_cid] = { co_cid: row.co_cid, no_cid: row.no_cid, procs: [] }
+        grupos[row.co_cid].procs.push(row)
+      }
+      const resultado = Object.values(grupos)
+      cacheReg.set(`cor:${key}`, resultado)
+      setCorrelatos(resultado)
+    } catch {
+      setCorrelatos([])
+    } finally {
+      buscandoCorRef.current = false
     }
   }
 
@@ -231,6 +260,31 @@ export function ContextoClinico({ cid, autoOpen = false }) {
                   <p className="text-[10px] text-muted-foreground/60 pt-1">
                     Dados da tabela SIGTAP · clique para ver detalhes do procedimento
                   </p>
+                </div>
+              )}
+
+              {/* CIDs correlatos com procedimentos adicionais */}
+              {correlatos && correlatos.length > 0 && (
+                <div className={cn('mt-4 pt-4 border-t space-y-3', dark ? 'border-[rgba(255,255,255,0.06)]' : 'border-border')}>
+                  <div className="flex items-center gap-2">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-amber-500">
+                      CIDs correlatos com procedimentos adicionais
+                    </p>
+                    <span className="text-[10px] text-muted-foreground">— use como alternativa na regulação</span>
+                  </div>
+                  {correlatos.map(grupo => (
+                    <div key={grupo.co_cid} className={cn('rounded-lg border p-3', dark ? 'border-[rgba(255,255,255,0.07)] bg-[#0a0e1a]' : 'border-border bg-secondary/30')}>
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className={cn('font-mono text-xs font-bold', dark ? 'text-amber-400' : 'text-amber-600')}>{grupo.co_cid}</span>
+                        <span className="text-xs text-muted-foreground leading-snug">{grupo.no_cid}</span>
+                      </div>
+                      <div className="space-y-1.5">
+                        {grupo.procs.map(p => (
+                          <ProcReg key={p.co_procedimento} p={p} dark={dark} />
+                        ))}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
