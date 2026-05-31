@@ -225,13 +225,24 @@ export function ContextoClinico({ cid, autoOpen = false }) {
     if (buscandoCorRef.current) return
     buscandoCorRef.current = true
     try {
-      const res = await fetch('/api/cid-correlatos', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ co_cid: key }),
-      })
-      const data = await res.json()
-      const resultado = data.procs || []
+      const { data, error } = await supabase.rpc('cids_correlatos_clinicos', { p_co_cid: key })
+      if (error) throw new Error(error.message)
+      // Deduplica por procedimento
+      const seen = new Map()
+      for (const row of (data || [])) {
+        if (seen.has(row.co_procedimento)) continue
+        seen.set(row.co_procedimento, {
+          co_procedimento: row.co_procedimento,
+          no_procedimento: row.no_procedimento,
+          grupo: '03',
+          vl_sh: parseFloat(row.vl_sh) || 0,
+          vl_sa: parseFloat(row.vl_sa) || 0,
+          vl_sp: parseFloat(row.vl_sp) || 0,
+          co_cid_ref: row.co_cid_correlato,
+          no_cid_ref: row.no_cid_correlato,
+        })
+      }
+      const resultado = Array.from(seen.values())
       cacheCor.set(key, resultado)
       setCorrelatos(resultado)
     } catch {
