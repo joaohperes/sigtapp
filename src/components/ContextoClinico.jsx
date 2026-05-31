@@ -356,7 +356,34 @@ export function ContextoClinico({ cid, autoOpen = false }) {
                 </div>
               )}
 
-              {correlatos && correlatos.length > 0 && (
+              {/* Dica especial para Sepse */}
+              {correlatos !== null && /^A41/i.test(cid.co_cid?.trim()) && (
+                <div className={cn('mt-4 pt-4 border-t', dark ? 'border-[rgba(255,255,255,0.06)]' : 'border-border')}>
+                  <div className={cn('rounded-lg p-3', dark ? 'bg-amber-500/10 border border-amber-500/20' : 'bg-amber-50 border border-amber-200')}>
+                    <p className="text-[10px] font-semibold text-amber-500 uppercase tracking-wider mb-1">
+                      Dica para regulação de Sepse
+                    </p>
+                    <p className="text-[10px] text-muted-foreground leading-relaxed">
+                      Para sepse, considere usar o <strong className="text-foreground">CID do foco infeccioso</strong> com seu código de tratamento específico:
+                    </p>
+                    <div className="mt-1.5 space-y-0.5">
+                      {[
+                        { cid: 'J189', label: 'Foco pulmonar → Tratamento de pneumonias' },
+                        { cid: 'N390', label: 'Foco urinário → Tratamento de doenças renais' },
+                        { cid: 'K659', label: 'Foco abdominal → Tratamento de doenças do peritônio' },
+                        { cid: 'L089', label: 'Foco cutâneo → Tratamento de infecções de pele' },
+                      ].map(item => (
+                        <p key={item.cid} className="text-[10px] text-muted-foreground">
+                          <span className={cn('font-mono font-semibold', dark ? 'text-[#38bdf8]' : 'text-primary')}>{item.cid}</span>
+                          {' · '}{item.label}
+                        </p>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {correlatos && correlatos.length > 0 && !/^A41/i.test(cid.co_cid?.trim()) && (
                 <div className={cn('mt-4 pt-4 border-t space-y-2', dark ? 'border-[rgba(255,255,255,0.06)]' : 'border-border')}>
                   <div className="mb-3">
                     <p className="text-[10px] font-semibold uppercase tracking-wider text-amber-500 mb-0.5">
