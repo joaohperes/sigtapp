@@ -228,10 +228,10 @@ export function ContextoClinico({ cid, autoOpen = false }) {
       const res = await fetch('/api/cid-correlatos', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ co_cid: key, no_cid: cid.no_cid?.trim() }),
+        body: JSON.stringify({ co_cid: key }),
       })
       const data = await res.json()
-      const resultado = data.grupos || []
+      const resultado = data.procs || []
       cacheCor.set(key, resultado)
       setCorrelatos(resultado)
     } catch {
@@ -341,25 +341,32 @@ export function ContextoClinico({ cid, autoOpen = false }) {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
                   </svg>
-                  <span className="text-[10px] text-muted-foreground">Buscando CIDs correlatos para regulação...</span>
+                  <span className="text-[10px] text-muted-foreground">Buscando códigos alternativos para regulação...</span>
                 </div>
               )}
 
               {correlatos && correlatos.length > 0 && (
-                <div className={cn('mt-4 pt-4 border-t space-y-3', dark ? 'border-[rgba(255,255,255,0.06)]' : 'border-border')}>
-                  <div>
+                <div className={cn('mt-4 pt-4 border-t space-y-2', dark ? 'border-[rgba(255,255,255,0.06)]' : 'border-border')}>
+                  <div className="mb-3">
                     <p className="text-[10px] font-semibold uppercase tracking-wider text-amber-500 mb-0.5">
-                      CIDs correlatos — procedimentos alternativos para regulação
+                      Códigos clínicos alternativos — mesmo sistema orgânico
                     </p>
                     <p className="text-[10px] text-muted-foreground">
-                      Quando o código do CID principal já está em uso, estes CIDs clinicamente relacionados têm procedimentos diferentes disponíveis
+                      Procedimentos clínicos do mesmo sistema disponíveis no SIGTAP — use quando o código principal já está em uso
                     </p>
                   </div>
-                  {correlatos.map(grupo => (
-                    <GrupoCorrelato key={grupo.co_cid} grupo={grupo} dark={dark} />
+                  {correlatos.map(p => (
+                    <div key={p.co_procedimento}>
+                      <ProcReg p={p} dark={dark} />
+                      {p.co_cid_ref && (
+                        <p className="mt-0.5 ml-1 text-[10px] text-muted-foreground/60">
+                          via CID <span className="font-mono">{p.co_cid_ref}</span> · {p.no_cid_ref}
+                        </p>
+                      )}
+                    </div>
                   ))}
-                  <p className="text-[10px] text-muted-foreground/60">
-                    Sugestões por IA + dados reais do SIGTAP · confirme compatibilidade com a regulação local
+                  <p className="text-[10px] text-muted-foreground/60 pt-1">
+                    Dados do SIGTAP · confirme compatibilidade com a regulação local
                   </p>
                 </div>
               )}
