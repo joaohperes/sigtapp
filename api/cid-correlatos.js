@@ -25,32 +25,31 @@ export default async function handler(req, res) {
   const client = new Groq({ apiKey })
 
   // Passo 1: Groq sugere CIDs correlatos clinicamente relevantes
-  const prompt = `Você é um médico especialista em regulação hospitalar no SUS brasileiro.
+  const prompt = `Você é um médico com experiência em regulação hospitalar no SUS brasileiro.
 
-Para o CID-10 "${key}" — "${no_cid}", liste os CIDs correlatos que um médico regulador usaria como DIAGNÓSTICO ALTERNATIVO para a mesma condição clínica quando precisa de um código de procedimento diferente para uma AIH de transferência/regulação.
+Para o CID-10 "${key}" — "${no_cid}", liste CIDs que um médico regulador usaria como DIAGNÓSTICO ALTERNATIVO para o mesmo paciente quando precisa de um código de procedimento diferente para uma AIH de transferência.
 
-Contexto: Na regulação do SUS, às vezes o código de procedimento do CID principal já está em uso, e o médico precisa de um CID clinicamente relacionado que tenha um CÓDIGO DE PROCEDIMENTO CLÍNICO (grupo 03) diferente disponível na tabela SIGTAP.
+CONTEXTO: O paciente tem "${no_cid}". O código de procedimento do CID principal já está em uso. O médico precisa de um CID que:
+1. Seja clinicamente justificável para o mesmo paciente (etiologia, complicação ou condição associada)
+2. Provavelmente tenha um PROCEDIMENTO CLÍNICO (grupo 03) diferente na tabela SIGTAP
 
 Retorne APENAS JSON válido:
 {
   "correlatos": [
     {
-      "co_cid": "código CID sem ponto (ex: K250)",
-      "justificativa": "por que este CID é clinicamente correlato ao ${key}"
+      "co_cid": "código CID sem ponto, exatamente 4 chars (ex: K250)",
+      "justificativa": "uma frase direta explicando a relação clínica com ${no_cid}"
     }
   ]
 }
 
-Regras:
-- Liste 3 a 6 CIDs que sejam etiologias, manifestações ou condições associadas ao ${key}
-- Foque em CIDs que provavelmente têm PROCEDIMENTOS CLÍNICOS (03) na tabela SIGTAP
-- Sejam clinicamente defensáveis: um médico poderia justificar a escolha
-- CIDs do mesmo capítulo ou capítulos adjacentes
-- Para hematêmese (K920): inclua úlcera gástrica (K25x), úlcera duodenal (K26x), varizes esofágicas (I850)
-- Para sepse (A419): inclua foco infeccioso específico (pneumonia J18, ITU N39, etc.)
-- Para DPOC (J44x): inclua asma (J45), insuficiência respiratória (J96)
-- Use formato 4 chars sem ponto (ex: K250, I850, J189)
-- Use acentuação correta em português`
+REGRAS OBRIGATÓRIAS:
+- Liste exatamente 3 a 5 CIDs
+- Apenas CIDs diretamente relacionados à MESMA condição clínica (mesma topografia ou etiologia)
+- NUNCA sugira CIDs de sistemas completamente diferentes (ex: K920/hematêmese → não sugerir K91x/pós-cirúrgico)
+- Prefira CIDs específicos de etiologia (ex: para K920 → K250 úlcera gástrica, I850 varizes, não K91x)
+- Use sempre formato 4 chars sem ponto: K250, I850, J189, A419
+- Justificativa em uma frase objetiva em português com acentuação correta`
 
   let cidsSugeridos = []
   try {
@@ -85,8 +84,12 @@ Regras:
     // Filtra só procedimentos que o CID original não tem
     const { data: procsOriginal } = await supabase.rpc('procedimentos_por_cid_regulacao', { p_co_cid: key })
     const codsOriginais = new Set((procsOriginal || []).map(p => p.co_procedimento))
-    const novos = procs.filter(p => !codsOriginais.has(p.co_procedimento))
-    // Garante que vl_sh/vl_sa/vl_sp existem (ProcReg usa parseFloat deles)
+    const novos = procs.filter(p => {
+      if (codsOriginais.has(p.co_procedimento)) return false
+      // Remove procedimentos com valor zero (dados inválidos no SIGTAP)
+      const total = (parseFloat(p.vl_sh) || 0) + (parseFloat(p.vl_sa) || 0) + (parseFloat(p.vl_sp) || 0)
+      return total > 0
+    })
     novos.forEach(p => {
       p.vl_sh = p.vl_sh ?? 0
       p.vl_sa = p.vl_sa ?? 0
