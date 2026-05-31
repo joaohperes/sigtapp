@@ -45,10 +45,13 @@ Retorne APENAS JSON válido:
 
 REGRAS OBRIGATÓRIAS:
 - Liste exatamente 3 a 5 CIDs
-- Apenas CIDs diretamente relacionados à MESMA condição clínica (mesma topografia ou etiologia)
-- NUNCA sugira CIDs de sistemas completamente diferentes (ex: K920/hematêmese → não sugerir K91x/pós-cirúrgico)
-- Prefira CIDs específicos de etiologia (ex: para K920 → K250 úlcera gástrica, I850 varizes, não K91x)
-- Use sempre formato 4 chars sem ponto: K250, I850, J189, A419
+- Inclua DOIS TIPOS de correlatos:
+  1. CIDs de etiologia/complicação direta (ex: para K920 → K250 úlcera gástrica, I850 varizes)
+  2. CIDs "guarda-chuva" do mesmo sistema orgânico que têm códigos clínicos genéricos de tratamento
+     (ex: para K359 apendicite → K929 "doença do aparelho digestivo NE", K578 "doença diverticular")
+     Esses CIDs genéricos são úteis porque costumam ter códigos como "Tratamento de outras doenças do aparelho digestivo"
+- NUNCA sugira CIDs de sistemas completamente diferentes
+- Use sempre formato 4 chars sem ponto: K250, I850, J189, K929
 - Justificativa em uma frase objetiva em português com acentuação correta`
 
   let cidsSugeridos = []
