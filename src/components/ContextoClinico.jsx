@@ -121,8 +121,7 @@ export function ContextoClinico({ cid, autoOpen = false }) {
     setLoadingReg(true)
     setErroReg(null)
     try {
-      const cidBase = key.slice(0, 3)
-      const { data, error } = await supabase.rpc('procedimentos_por_cid_regulacao', { p_co_cid: cidBase })
+      const { data, error } = await supabase.rpc('procedimentos_por_cid_regulacao', { p_co_cid: key })
       if (error) throw new Error(error.message)
       cacheReg.set(key, data || [])
       setProcsReg(data || [])
