@@ -60,6 +60,107 @@ function ProcReg({ p, dark }) {
   )
 }
 
+function ProcRegList({ procs, dark }) {
+  const [cirurgicosAbertos, setCirurgicosAbertos] = useState(false)
+  const clinicos = procs.filter(p => p.grupo === '03')
+  const cirurgicos = procs.filter(p => p.grupo === '04')
+
+  return (
+    <div className="space-y-2">
+      {clinicos.length > 0 && (
+        <div className="space-y-1.5">
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-[#38bdf8] mb-1">
+            Clínicos — use para regulação
+          </p>
+          {clinicos.map(p => <ProcReg key={p.co_procedimento} p={p} dark={dark} />)}
+        </div>
+      )}
+
+      {cirurgicos.length > 0 && (
+        <div className={clinicos.length > 0 ? 'pt-2 border-t border-border/50' : ''}>
+          <button
+            onClick={() => setCirurgicosAbertos(v => !v)}
+            className="flex items-center gap-1.5 text-[10px] font-medium text-muted-foreground hover:text-foreground transition"
+          >
+            <svg className={cn('h-3 w-3 transition-transform', cirurgicosAbertos ? 'rotate-90' : '')} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+            {cirurgicosAbertos ? 'Ocultar' : 'Ver'} procedimentos cirúrgicos ({cirurgicos.length})
+          </button>
+          {cirurgicosAbertos && (
+            <div className="mt-1.5 space-y-1.5">
+              {cirurgicos.map(p => <ProcReg key={p.co_procedimento} p={p} dark={dark} />)}
+            </div>
+          )}
+        </div>
+      )}
+
+      <p className="text-[10px] text-muted-foreground/60 pt-1">
+        Dados da tabela SIGTAP · clique para ver detalhes do procedimento
+      </p>
+    </div>
+  )
+}
+
+function GrupoCorrelato({ grupo, dark }) {
+  const [cirurgicosAbertos, setCirurgicosAbertos] = useState(false)
+  const clinicos = grupo.procs.filter(p => p.grupo === '03')
+  const cirurgicos = grupo.procs.filter(p => p.grupo === '04')
+
+  return (
+    <div className={cn('rounded-lg border p-3', dark ? 'border-[rgba(255,255,255,0.07)] bg-[#0a0e1a]' : 'border-border bg-secondary/30')}>
+      {/* Cabeçalho do CID correlato */}
+      <div className="mb-2.5">
+        <div className="flex items-center gap-2">
+          <span className={cn('font-mono text-xs font-bold shrink-0', dark ? 'text-amber-400' : 'text-amber-600')}>{grupo.co_cid}</span>
+          <span className="text-xs font-medium text-foreground leading-snug">{grupo.no_cid}</span>
+        </div>
+        {grupo.justificativa && (
+          <p className="mt-0.5 text-[10px] text-muted-foreground italic">{grupo.justificativa}</p>
+        )}
+      </div>
+
+      {/* Procedimentos clínicos — visíveis por padrão */}
+      {clinicos.length > 0 && (
+        <div className="space-y-1.5">
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-[#38bdf8] mb-1">
+            Clínicos — use para regulação
+          </p>
+          {clinicos.map(p => <ProcReg key={p.co_procedimento} p={p} dark={dark} />)}
+        </div>
+      )}
+
+      {/* Procedimentos cirúrgicos — colapsados */}
+      {cirurgicos.length > 0 && (
+        <div className={clinicos.length > 0 ? 'mt-2.5 pt-2.5 border-t border-border/50' : ''}>
+          <button
+            onClick={() => setCirurgicosAbertos(v => !v)}
+            className="flex items-center gap-1.5 text-[10px] font-medium text-muted-foreground hover:text-foreground transition"
+          >
+            <svg
+              className={cn('h-3 w-3 transition-transform', cirurgicosAbertos ? 'rotate-90' : '')}
+              fill="none" stroke="currentColor" viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+            {cirurgicosAbertos ? 'Ocultar' : 'Ver'} procedimentos cirúrgicos ({cirurgicos.length})
+          </button>
+          {cirurgicosAbertos && (
+            <div className="mt-1.5 space-y-1.5">
+              {cirurgicos.map(p => <ProcReg key={p.co_procedimento} p={p} dark={dark} />)}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Sem procedimentos clínicos e cirúrgicos todos colapsados */}
+      {clinicos.length === 0 && cirurgicos.length > 0 && !cirurgicosAbertos && (
+        <p className="text-[10px] text-muted-foreground/60">Apenas procedimentos cirúrgicos disponíveis</p>
+      )}
+    </div>
+  )
+}
+
 export function ContextoClinico({ cid, autoOpen = false }) {
   const { dark } = useTheme()
   const navigate = useNavigate()
@@ -248,17 +349,7 @@ export function ContextoClinico({ cid, autoOpen = false }) {
                 <p className="text-xs text-muted-foreground">Nenhum procedimento grupo 03/04 vinculado a este CID na tabela SIGTAP.</p>
               )}
               {procsReg && procsReg.length > 0 && (
-                <div className="space-y-2">
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-3">
-                    Procedimentos grupo 03/04 vinculados a este CID na tabela SIGTAP
-                  </p>
-                  {procsReg.map(p => (
-                    <ProcReg key={p.co_procedimento} p={p} dark={dark} />
-                  ))}
-                  <p className="text-[10px] text-muted-foreground/60 pt-1">
-                    Dados da tabela SIGTAP · clique para ver detalhes do procedimento
-                  </p>
-                </div>
+                <ProcRegList procs={procsReg} dark={dark} />
               )}
 
               {/* CIDs correlatos com procedimentos adicionais */}
@@ -283,22 +374,7 @@ export function ContextoClinico({ cid, autoOpen = false }) {
                     </p>
                   </div>
                   {correlatos.map(grupo => (
-                    <div key={grupo.co_cid} className={cn('rounded-lg border p-3', dark ? 'border-[rgba(255,255,255,0.07)] bg-[#0a0e1a]' : 'border-border bg-secondary/30')}>
-                      <div className="mb-2">
-                        <div className="flex items-center gap-2">
-                          <span className={cn('font-mono text-xs font-bold shrink-0', dark ? 'text-amber-400' : 'text-amber-600')}>{grupo.co_cid}</span>
-                          <span className="text-xs font-medium text-foreground leading-snug">{grupo.no_cid}</span>
-                        </div>
-                        {grupo.justificativa && (
-                          <p className="mt-0.5 text-[10px] text-muted-foreground italic">{grupo.justificativa}</p>
-                        )}
-                      </div>
-                      <div className="space-y-1.5">
-                        {grupo.procs.map(p => (
-                          <ProcReg key={p.co_procedimento} p={p} dark={dark} />
-                        ))}
-                      </div>
-                    </div>
+                    <GrupoCorrelato key={grupo.co_cid} grupo={grupo} dark={dark} />
                   ))}
                   <p className="text-[10px] text-muted-foreground/60">
                     Sugestões por IA + dados reais do SIGTAP · confirme compatibilidade com a regulação local
