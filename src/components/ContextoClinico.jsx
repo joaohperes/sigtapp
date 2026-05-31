@@ -60,41 +60,65 @@ function ProcReg({ p, dark }) {
   )
 }
 
-function ProcRegList({ procs, dark }) {
+// Renderiza lista de procedimentos com clínicos em destaque e cirúrgicos colapsáveis
+// somente se há clínicos. Se só há cirúrgicos, exibe todos diretamente.
+function ProcList({ procs, dark, labelClinicos = 'Clínicos — use para regulação' }) {
   const [cirurgicosAbertos, setCirurgicosAbertos] = useState(false)
   const clinicos = procs.filter(p => p.grupo === '03')
   const cirurgicos = procs.filter(p => p.grupo === '04')
+  const soCirurgicos = clinicos.length === 0 && cirurgicos.length > 0
 
   return (
-    <div className="space-y-2">
-      {clinicos.length > 0 && (
-        <div className="space-y-1.5">
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-[#38bdf8] mb-1">
-            Clínicos — use para regulação
+    <div className="space-y-1.5">
+      {/* Só cirúrgicos — mostra todos diretamente com aviso */}
+      {soCirurgicos && (
+        <>
+          <p className="text-[10px] text-muted-foreground mb-1">
+            Nenhum código clínico disponível — apenas procedimentos cirúrgicos:
           </p>
-          {clinicos.map(p => <ProcReg key={p.co_procedimento} p={p} dark={dark} />)}
-        </div>
+          {cirurgicos.map(p => <ProcReg key={p.co_procedimento} p={p} dark={dark} />)}
+        </>
       )}
 
-      {cirurgicos.length > 0 && (
-        <div className={clinicos.length > 0 ? 'pt-2 border-t border-border/50' : ''}>
-          <button
-            onClick={() => setCirurgicosAbertos(v => !v)}
-            className="flex items-center gap-1.5 text-[10px] font-medium text-muted-foreground hover:text-foreground transition"
-          >
-            <svg className={cn('h-3 w-3 transition-transform', cirurgicosAbertos ? 'rotate-90' : '')} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-            {cirurgicosAbertos ? 'Ocultar' : 'Ver'} procedimentos cirúrgicos ({cirurgicos.length})
-          </button>
-          {cirurgicosAbertos && (
-            <div className="mt-1.5 space-y-1.5">
-              {cirurgicos.map(p => <ProcReg key={p.co_procedimento} p={p} dark={dark} />)}
+      {/* Tem clínicos — destaca e colapsa cirúrgicos */}
+      {!soCirurgicos && (
+        <>
+          {clinicos.length > 0 && (
+            <div className="space-y-1.5">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-[#38bdf8] mb-1">
+                {labelClinicos}
+              </p>
+              {clinicos.map(p => <ProcReg key={p.co_procedimento} p={p} dark={dark} />)}
             </div>
           )}
-        </div>
+          {cirurgicos.length > 0 && (
+            <div className={clinicos.length > 0 ? 'pt-2 border-t border-border/40' : ''}>
+              <button
+                onClick={() => setCirurgicosAbertos(v => !v)}
+                className="flex items-center gap-1.5 text-[10px] font-medium text-muted-foreground hover:text-foreground transition"
+              >
+                <svg className={cn('h-3 w-3 transition-transform', cirurgicosAbertos ? 'rotate-90' : '')} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+                {cirurgicosAbertos ? 'Ocultar' : 'Ver'} procedimentos cirúrgicos ({cirurgicos.length})
+              </button>
+              {cirurgicosAbertos && (
+                <div className="mt-1.5 space-y-1.5">
+                  {cirurgicos.map(p => <ProcReg key={p.co_procedimento} p={p} dark={dark} />)}
+                </div>
+              )}
+            </div>
+          )}
+        </>
       )}
+    </div>
+  )
+}
 
+function ProcRegList({ procs, dark }) {
+  return (
+    <div className="space-y-2">
+      <ProcList procs={procs} dark={dark} />
       <p className="text-[10px] text-muted-foreground/60 pt-1">
         Dados da tabela SIGTAP · clique para ver detalhes do procedimento
       </p>
@@ -103,13 +127,8 @@ function ProcRegList({ procs, dark }) {
 }
 
 function GrupoCorrelato({ grupo, dark }) {
-  const [cirurgicosAbertos, setCirurgicosAbertos] = useState(false)
-  const clinicos = grupo.procs.filter(p => p.grupo === '03')
-  const cirurgicos = grupo.procs.filter(p => p.grupo === '04')
-
   return (
     <div className={cn('rounded-lg border p-3', dark ? 'border-[rgba(255,255,255,0.07)] bg-[#0a0e1a]' : 'border-border bg-secondary/30')}>
-      {/* Cabeçalho do CID correlato */}
       <div className="mb-2.5">
         <div className="flex items-center gap-2">
           <span className={cn('font-mono text-xs font-bold shrink-0', dark ? 'text-amber-400' : 'text-amber-600')}>{grupo.co_cid}</span>
@@ -119,44 +138,7 @@ function GrupoCorrelato({ grupo, dark }) {
           <p className="mt-0.5 text-[10px] text-muted-foreground italic">{grupo.justificativa}</p>
         )}
       </div>
-
-      {/* Procedimentos clínicos — visíveis por padrão */}
-      {clinicos.length > 0 && (
-        <div className="space-y-1.5">
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-[#38bdf8] mb-1">
-            Clínicos — use para regulação
-          </p>
-          {clinicos.map(p => <ProcReg key={p.co_procedimento} p={p} dark={dark} />)}
-        </div>
-      )}
-
-      {/* Procedimentos cirúrgicos — colapsados */}
-      {cirurgicos.length > 0 && (
-        <div className={clinicos.length > 0 ? 'mt-2.5 pt-2.5 border-t border-border/50' : ''}>
-          <button
-            onClick={() => setCirurgicosAbertos(v => !v)}
-            className="flex items-center gap-1.5 text-[10px] font-medium text-muted-foreground hover:text-foreground transition"
-          >
-            <svg
-              className={cn('h-3 w-3 transition-transform', cirurgicosAbertos ? 'rotate-90' : '')}
-              fill="none" stroke="currentColor" viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-            {cirurgicosAbertos ? 'Ocultar' : 'Ver'} procedimentos cirúrgicos ({cirurgicos.length})
-          </button>
-          {cirurgicosAbertos && (
-            <div className="mt-1.5 space-y-1.5">
-              {cirurgicos.map(p => <ProcReg key={p.co_procedimento} p={p} dark={dark} />)}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Sem procedimentos clínicos e cirúrgicos todos colapsados */}
-      {clinicos.length === 0 && cirurgicos.length > 0 && !cirurgicosAbertos && (
-        <p className="text-[10px] text-muted-foreground/60">Apenas procedimentos cirúrgicos disponíveis</p>
-      )}
+      <ProcList procs={grupo.procs} dark={dark} labelClinicos="Clínico alternativo para regulação" />
     </div>
   )
 }
