@@ -46,11 +46,14 @@ Retorne APENAS JSON válido:
 REGRAS OBRIGATÓRIAS:
 - Liste exatamente 3 a 5 CIDs
 - Inclua DOIS TIPOS de correlatos:
-  1. CIDs de etiologia/complicação direta (ex: para K920 → K250 úlcera gástrica, I850 varizes)
+  1. CIDs de etiologia/complicação direta clinicamente defensável
+     (ex: para K920 → K250 úlcera gástrica, I850 varizes esofágicas)
   2. CIDs "guarda-chuva" do mesmo sistema orgânico que têm códigos clínicos genéricos de tratamento
-     (ex: para K359 apendicite → K929 "doença do aparelho digestivo NE", K578 "doença diverticular")
-     Esses CIDs genéricos são úteis porque costumam ter códigos como "Tratamento de outras doenças do aparelho digestivo"
-- NUNCA sugira CIDs de sistemas completamente diferentes
+     (ex: para K359 apendicite → K929 "doença do aparelho digestivo NE")
+     Esses são úteis porque têm códigos como "Tratamento de outras doenças do aparelho digestivo"
+- NUNCA sugira CIDs de outros sistemas orgânicos como correlato
+  (ex: para K359 apendicite → NUNCA sugerir K850 pancreatite, K70 hepatopatia)
+- NUNCA invente relações clínicas falsas — seja conservador e honesto na justificativa
 - Use sempre formato 4 chars sem ponto: K250, I850, J189, K929
 - Justificativa em uma frase objetiva em português com acentuação correta`
 
