@@ -86,6 +86,12 @@ Regras:
     const { data: procsOriginal } = await supabase.rpc('procedimentos_por_cid_regulacao', { p_co_cid: key })
     const codsOriginais = new Set((procsOriginal || []).map(p => p.co_procedimento))
     const novos = procs.filter(p => !codsOriginais.has(p.co_procedimento))
+    // Garante que vl_sh/vl_sa/vl_sp existem (ProcReg usa parseFloat deles)
+    novos.forEach(p => {
+      p.vl_sh = p.vl_sh ?? 0
+      p.vl_sa = p.vl_sa ?? 0
+      p.vl_sp = p.vl_sp ?? 0
+    })
     if (novos.length === 0) return
 
     // Busca nome do CID

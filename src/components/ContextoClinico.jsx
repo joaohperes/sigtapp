@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils'
 
 const cacheIA = new Map()
 const cacheReg = new Map()
+const cacheCor = new Map()
 
 function PillIA({ p, dark, onClick }) {
   return (
@@ -137,7 +138,7 @@ export function ContextoClinico({ cid, autoOpen = false }) {
 
   async function buscarCorrelatos() {
     const key = cid.co_cid?.trim()
-    if (cacheReg.has(`cor:${key}`)) { setCorrelatos(cacheReg.get(`cor:${key}`)); return }
+    if (cacheCor.has(key)) { setCorrelatos(cacheCor.get(key)); return }
     if (buscandoCorRef.current) return
     buscandoCorRef.current = true
     try {
@@ -148,7 +149,7 @@ export function ContextoClinico({ cid, autoOpen = false }) {
       })
       const data = await res.json()
       const resultado = data.grupos || []
-      cacheReg.set(`cor:${key}`, resultado)
+      cacheCor.set(key, resultado)
       setCorrelatos(resultado)
     } catch {
       setCorrelatos([])
