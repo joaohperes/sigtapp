@@ -141,15 +141,13 @@ export function ContextoClinico({ cid, autoOpen = false }) {
     if (buscandoCorRef.current) return
     buscandoCorRef.current = true
     try {
-      const { data, error } = await supabase.rpc('cids_correlatos_regulacao', { p_co_cid: key })
-      if (error) throw new Error(error.message)
-      // Agrupa por CID correlato
-      const grupos = {}
-      for (const row of (data || [])) {
-        if (!grupos[row.co_cid]) grupos[row.co_cid] = { co_cid: row.co_cid, no_cid: row.no_cid, procs: [] }
-        grupos[row.co_cid].procs.push(row)
-      }
-      const resultado = Object.values(grupos)
+      const res = await fetch('/api/cid-correlatos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ co_cid: key, no_cid: cid.no_cid?.trim() }),
+      })
+      const data = await res.json()
+      const resultado = data.grupos || []
       cacheReg.set(`cor:${key}`, resultado)
       setCorrelatos(resultado)
     } catch {
@@ -263,19 +261,36 @@ export function ContextoClinico({ cid, autoOpen = false }) {
               )}
 
               {/* CIDs correlatos com procedimentos adicionais */}
+              {correlatos === null && !loadingReg && (
+                <div className="flex items-center gap-2 mt-4 pt-3 border-t border-border">
+                  <svg className="h-3.5 w-3.5 animate-spin text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                  </svg>
+                  <span className="text-[10px] text-muted-foreground">Buscando CIDs correlatos para regulação...</span>
+                </div>
+              )}
+
               {correlatos && correlatos.length > 0 && (
                 <div className={cn('mt-4 pt-4 border-t space-y-3', dark ? 'border-[rgba(255,255,255,0.06)]' : 'border-border')}>
-                  <div className="flex items-center gap-2">
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-amber-500">
-                      CIDs correlatos com procedimentos adicionais
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-amber-500 mb-0.5">
+                      CIDs correlatos — procedimentos alternativos para regulação
                     </p>
-                    <span className="text-[10px] text-muted-foreground">— use como alternativa na regulação</span>
+                    <p className="text-[10px] text-muted-foreground">
+                      Quando o código do CID principal já está em uso, estes CIDs clinicamente relacionados têm procedimentos diferentes disponíveis
+                    </p>
                   </div>
                   {correlatos.map(grupo => (
                     <div key={grupo.co_cid} className={cn('rounded-lg border p-3', dark ? 'border-[rgba(255,255,255,0.07)] bg-[#0a0e1a]' : 'border-border bg-secondary/30')}>
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className={cn('font-mono text-xs font-bold', dark ? 'text-amber-400' : 'text-amber-600')}>{grupo.co_cid}</span>
-                        <span className="text-xs text-muted-foreground leading-snug">{grupo.no_cid}</span>
+                      <div className="mb-2">
+                        <div className="flex items-center gap-2">
+                          <span className={cn('font-mono text-xs font-bold shrink-0', dark ? 'text-amber-400' : 'text-amber-600')}>{grupo.co_cid}</span>
+                          <span className="text-xs font-medium text-foreground leading-snug">{grupo.no_cid}</span>
+                        </div>
+                        {grupo.justificativa && (
+                          <p className="mt-0.5 text-[10px] text-muted-foreground italic">{grupo.justificativa}</p>
+                        )}
                       </div>
                       <div className="space-y-1.5">
                         {grupo.procs.map(p => (
@@ -284,6 +299,9 @@ export function ContextoClinico({ cid, autoOpen = false }) {
                       </div>
                     </div>
                   ))}
+                  <p className="text-[10px] text-muted-foreground/60">
+                    Sugestões por IA + dados reais do SIGTAP · confirme compatibilidade com a regulação local
+                  </p>
                 </div>
               )}
             </div>
