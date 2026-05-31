@@ -11,6 +11,6 @@ export const CORINGAS_CID = [
   { co_cid: 'K920', no_cid: 'Hematêmese',                                         label: 'HDA'                },
   { co_cid: 'N179', no_cid: 'Insuficiência renal aguda não especificada',         label: 'IRA'                },
   { co_cid: 'K359', no_cid: 'Apendicite aguda não especificada',                  label: 'Apendicite'         },
-  { co_cid: 'S099', no_cid: 'Traumatismo cranioencefálico',                       label: 'TCE'                },
+  { co_cid: 'S062', no_cid: 'Traumatismo cerebral difuso',                         label: 'TCE'                },
   { co_cid: 'E149', no_cid: 'Diabetes mellitus não especificado — sem compl.',    label: 'DM descompensado'   },
 ]
