@@ -93,8 +93,10 @@ function Chip({ c, cor, dark }) {
 }
 
 function GrupoCard({ grupo, dark }) {
+  const [extraAberto, setExtraAberto] = useState(false)
   const corMap = dark ? COR_MAP : COR_MAP_LIGHT
   const cor = corMap[grupo.cor] || corMap.blue
+  const temExtra = grupo.extra?.length > 0
 
   return (
     <div className={cn(
@@ -108,10 +110,33 @@ function GrupoCard({ grupo, dark }) {
         <span className="text-[10px] text-muted-foreground/50 tabular-nums">{grupo.cids.length}</span>
       </div>
 
-      {/* Chips */}
-      <div className="px-2.5 py-2 flex flex-wrap gap-1.5">
+      {/* Chips principais */}
+      <div className="px-2.5 pt-2 pb-1.5 flex flex-wrap gap-1.5">
         {grupo.cids.map(c => <Chip key={c.co_cid} c={c} cor={cor} dark={dark} />)}
       </div>
+
+      {/* Extras colapsáveis */}
+      {temExtra && (
+        <div className={cn('border-t', dark ? 'border-[rgba(255,255,255,0.05)]' : 'border-border/40')}>
+          {extraAberto && (
+            <div className="px-2.5 pt-1.5 pb-1 flex flex-wrap gap-1.5">
+              {grupo.extra.map(c => <Chip key={c.co_cid} c={c} cor={cor} dark={dark} />)}
+            </div>
+          )}
+          <button
+            onClick={() => setExtraAberto(v => !v)}
+            className={cn(
+              'w-full px-3 py-1 text-[10px] font-medium transition flex items-center gap-1',
+              dark ? 'text-muted-foreground/50 hover:text-muted-foreground' : 'text-muted-foreground/60 hover:text-muted-foreground'
+            )}
+          >
+            <svg className={cn('h-3 w-3 transition-transform', extraAberto ? 'rotate-180' : '')} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+            {extraAberto ? 'ver menos' : `+${grupo.extra.length} diagnósticos`}
+          </button>
+        </div>
+      )}
     </div>
   )
 }
