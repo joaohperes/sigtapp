@@ -39,22 +39,27 @@ function CidRow({ cid, dark, autoCtx }) {
   const isCat = cid.co_cid.trim().length === 3
 
   return (
-    <div className="border-b border-border last:border-0 px-4 py-3">
-      <div className="flex items-center gap-3">
-        <div className="w-14 shrink-0">
-          <span className={cn('font-mono text-sm font-semibold', isCat ? 'text-primary' : 'text-foreground')}>
-            {cid.co_cid.trim()}
-          </span>
-        </div>
+    <div className="border-b border-border last:border-0 px-4 py-3.5">
+      <div className="flex items-start gap-3 mb-2">
         <div className="flex-1 min-w-0">
-          <p className="text-sm text-foreground leading-snug">{cid.no_cid?.trim()}</p>
+          <div className="flex items-baseline gap-2.5 flex-wrap">
+            <span className={cn(
+              'font-mono text-base font-bold shrink-0',
+              dark ? 'text-[#38bdf8]' : 'text-primary'
+            )}>
+              {cid.co_cid.trim()}
+            </span>
+            <span className="text-sm font-semibold text-foreground leading-snug">
+              {cid.no_cid?.trim()}
+            </span>
+          </div>
           {sexo && (
-            <span className="mt-0.5 inline-block rounded-full bg-secondary px-2 py-0.5 text-xs text-muted-foreground">
+            <span className="mt-1 inline-block rounded-full bg-secondary px-2 py-0.5 text-xs text-muted-foreground">
               {sexo}
             </span>
           )}
         </div>
-        <div className="shrink-0 flex items-center gap-2">
+        <div className="shrink-0">
           <Link
             to={`/procedimentos?q=${encodeURIComponent(cid.co_cid.trim())}&sc=1`}
             className={cn(
@@ -247,12 +252,6 @@ export function DiagnosticoPage() {
           <div className="mb-6">
             <p className="mb-3 text-sm text-muted-foreground">
               {results.length} código{results.length !== 1 ? 's' : ''} encontrado{results.length !== 1 ? 's' : ''}
-              <span className="ml-2 text-muted-foreground/60">· clique em</span>
-              <span className="ml-1 inline-flex items-center gap-0.5 rounded border border-border px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
-                <svg className="h-2.5 w-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-                Contexto
-              </span>
-              <span className="ml-1 text-muted-foreground/60">para procedimentos e regulação</span>
             </p>
             <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
               {results.map((cid, i) => (

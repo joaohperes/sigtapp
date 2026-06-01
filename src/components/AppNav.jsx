@@ -10,17 +10,17 @@ function NavLink({ to, label, active, modoUE, dark, badge }) {
     <Link
       to={to}
       className={cn(
-        'relative flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition',
+        'relative flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium transition',
         active
           ? modoUE
-            ? 'bg-red-800 text-white'
+            ? 'bg-red-700 text-white'
             : dark
-              ? 'bg-[rgba(56,189,248,0.12)] text-[#38bdf8] border border-[rgba(56,189,248,0.25)]'
-              : 'bg-primary/10 text-primary border border-primary/20'
+              ? 'bg-[#38bdf8] text-[#0a1628]'
+              : 'bg-primary text-primary-foreground'
           : modoUE
             ? 'text-red-200 hover:bg-red-800 hover:text-white'
             : dark
-              ? 'text-[#8896a8] hover:bg-[rgba(255,255,255,0.05)] hover:text-[#e8edf5]'
+              ? 'text-[#8896a8] hover:bg-[rgba(255,255,255,0.06)] hover:text-[#e8edf5]'
               : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
       )}
     >
