@@ -19,6 +19,9 @@ export function ProcedureDetail() {
   const [compatibilidades, setCompatibilidades] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const { dark } = useTheme()
+  const { modoUE } = useModoUE()
+  const { isFavorito, toggleFavorito } = useFavoritos()
 
   useEffect(() => {
     if (data) {
@@ -95,9 +98,6 @@ export function ProcedureDetail() {
 
   const total = (data.vl_sa || 0) + (data.vl_sh || 0) + (data.vl_sp || 0)
   const estilo = GRUPO_MAP[data.co_grupo]
-  const { isFavorito, toggleFavorito } = useFavoritos()
-  const { modoUE } = useModoUE()
-  const { dark } = useTheme()
   const fav = isFavorito(data.co_procedimento)
   const cidsPrincipais = cids.filter((c) => c.st_principal === 'S')
   const cidsSecundarios = cids.filter((c) => c.st_principal !== 'S')
