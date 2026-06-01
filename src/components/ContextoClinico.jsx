@@ -29,9 +29,10 @@ function PillIA({ p, dark, onClick }) {
   )
 }
 
-function ProcReg({ p, via }) {
+function ProcReg({ p, dark }) {
   const total = (parseFloat(p.vl_sh) || 0) + (parseFloat(p.vl_sa) || 0) + (parseFloat(p.vl_sp) || 0)
-  const isCirurgico = p.grupo === '04'
+  const grupo = p.grupo === '03' ? 'Clínico' : 'Cirúrgico'
+  const corGrupo = p.grupo === '03' ? 'text-foreground/60' : 'text-orange-400'
 
   function copiar(e) {
     e.preventDefault()
@@ -43,27 +44,34 @@ function ProcReg({ p, via }) {
   return (
     <Link
       to={`/procedimento/${p.co_procedimento}`}
-      className="group flex items-baseline gap-2 py-1.5 px-1 rounded hover:bg-secondary transition-colors"
+      className={cn(
+        'flex items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition',
+        dark
+          ? 'border-border bg-secondary hover:border-border/80'
+          : 'border-border bg-secondary/50 hover:border-foreground/20'
+      )}
     >
-      <span className="font-mono text-[10px] text-muted-foreground shrink-0 tabular-nums w-[72px]">
-        {formatCodigo(p.co_procedimento)}
-      </span>
-      <span className="flex-1 min-w-0 text-xs text-foreground leading-snug">
-        {isCirurgico && <span className="mr-1 text-[9px] font-semibold text-orange-400 uppercase">Cir</span>}
-        {p.no_procedimento}
-        {via && <span className="ml-1.5 font-mono text-[9px] text-muted-foreground/50">{via}</span>}
-      </span>
-      <button
-        onClick={copiar}
-        title="Copiar código"
-        className="opacity-0 group-hover:opacity-100 shrink-0 rounded p-0.5 text-muted-foreground/50 hover:text-muted-foreground transition"
-      >
-        <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-            d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-        </svg>
-      </button>
-      <span className="shrink-0 text-xs font-semibold text-emerald-500 tabular-nums">{formatBRL(total)}</span>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2 mb-0.5">
+          <span className="font-mono text-[10px] text-muted-foreground">{formatCodigo(p.co_procedimento)}</span>
+          <span className={cn('text-[10px] font-semibold', corGrupo)}>{grupo}</span>
+          <button
+            onClick={copiar}
+            title="Copiar código"
+            className="rounded p-0.5 text-muted-foreground/40 hover:text-muted-foreground transition"
+          >
+            <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+          </button>
+        </div>
+        <p className="text-xs font-medium text-foreground leading-snug">{p.no_procedimento}</p>
+      </div>
+      <div className="shrink-0 text-right">
+        <p className="text-[10px] text-muted-foreground">Total SUS</p>
+        <p className="text-xs font-bold text-emerald-500 tabular-nums">{formatBRL(total)}</p>
+      </div>
     </Link>
   )
 }
@@ -72,13 +80,15 @@ const CLINICOS_PREVIEW = 5
 
 // Renderiza lista de procedimentos com clínicos em destaque e cirúrgicos colapsáveis
 // somente se há clínicos. Se só há cirúrgicos, exibe todos diretamente.
-function ProcList({ procs, labelClinicos = 'Clínicos — use para regulação' }) {
+function ProcList({ procs, dark, labelClinicos = 'Clínicos — use para regulação' }) {
   const [cirurgicosAbertos, setCirurgicosAbertos] = useState(false)
   const [clinicosExpandidos, setClinicosExpandidos] = useState(false)
 
+  // Prioriza procedimentos com valor > 0, depois os demais
   const clinicosRaw = procs.filter(p => p.grupo === '03')
   const clinicosComValor = clinicosRaw.filter(p => (parseFloat(p.vl_sh) || 0) + (parseFloat(p.vl_sa) || 0) + (parseFloat(p.vl_sp) || 0) > 0)
   const clinicosSemValor = clinicosRaw.filter(p => (parseFloat(p.vl_sh) || 0) + (parseFloat(p.vl_sa) || 0) + (parseFloat(p.vl_sp) || 0) === 0)
+  // Mostra primeiro os com valor, depois sem valor — limita preview ao total
   const clinicos = [...clinicosComValor, ...clinicosSemValor]
   const clinicosVisiveis = clinicosExpandidos ? clinicos : clinicos.slice(0, CLINICOS_PREVIEW)
   const temMaisClinicos = clinicos.length > CLINICOS_PREVIEW
@@ -87,48 +97,52 @@ function ProcList({ procs, labelClinicos = 'Clínicos — use para regulação' 
   const soCirurgicos = clinicos.length === 0 && cirurgicos.length > 0
 
   return (
-    <div>
+    <div className="space-y-1.5">
+      {/* Só cirúrgicos — mostra todos diretamente com aviso */}
       {soCirurgicos && (
         <>
-          <p className="text-[10px] text-muted-foreground mb-1">Apenas procedimentos cirúrgicos:</p>
-          {cirurgicos.map(p => <ProcReg key={p.co_procedimento} p={p} />)}
+          <p className="text-[10px] text-muted-foreground mb-1">
+            Nenhum código clínico disponível — apenas procedimentos cirúrgicos:
+          </p>
+          {cirurgicos.map(p => <ProcReg key={p.co_procedimento} p={p} dark={dark} />)}
         </>
       )}
 
+      {/* Tem clínicos — destaca e colapsa cirúrgicos */}
       {!soCirurgicos && (
         <>
           {clinicos.length > 0 && (
-            <div>
-              <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground/60 mb-1 px-1">
+            <div className="space-y-1.5">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
                 {labelClinicos}
               </p>
-              <div className="divide-y divide-border/50">
-                {clinicosVisiveis.map(p => <ProcReg key={p.co_procedimento} p={p} />)}
-              </div>
+              {clinicosVisiveis.map(p => <ProcReg key={p.co_procedimento} p={p} dark={dark} />)}
               {temMaisClinicos && (
                 <button
                   onClick={() => setClinicosExpandidos(v => !v)}
-                  className="mt-1 px-1 text-[10px] text-muted-foreground/60 hover:text-muted-foreground transition"
+                  className="text-[10px] font-medium text-muted-foreground hover:text-foreground transition"
                 >
-                  {clinicosExpandidos ? 'Ver menos' : `+ ${clinicos.length - CLINICOS_PREVIEW} procedimentos`}
+                  {clinicosExpandidos
+                    ? 'Ver menos'
+                    : `Ver mais ${clinicos.length - CLINICOS_PREVIEW} procedimentos`}
                 </button>
               )}
             </div>
           )}
           {cirurgicos.length > 0 && (
-            <div className={clinicos.length > 0 ? 'mt-2 pt-2 border-t border-border/40' : ''}>
+            <div className={clinicos.length > 0 ? 'pt-2 border-t border-border/40' : ''}>
               <button
                 onClick={() => setCirurgicosAbertos(v => !v)}
-                className="flex items-center gap-1 px-1 text-[10px] text-muted-foreground/60 hover:text-muted-foreground transition"
+                className="flex items-center gap-1.5 text-[10px] font-medium text-muted-foreground hover:text-foreground transition"
               >
                 <svg className={cn('h-3 w-3 transition-transform', cirurgicosAbertos ? 'rotate-90' : '')} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
-                {cirurgicosAbertos ? 'Ocultar' : 'Ver'} cirúrgicos ({cirurgicos.length})
+                {cirurgicosAbertos ? 'Ocultar' : 'Ver'} procedimentos cirúrgicos ({cirurgicos.length})
               </button>
               {cirurgicosAbertos && (
-                <div className="mt-1 divide-y divide-border/50">
-                  {cirurgicos.map(p => <ProcReg key={p.co_procedimento} p={p} />)}
+                <div className="mt-1.5 space-y-1.5">
+                  {cirurgicos.map(p => <ProcReg key={p.co_procedimento} p={p} dark={dark} />)}
                 </div>
               )}
             </div>
@@ -139,10 +153,10 @@ function ProcList({ procs, labelClinicos = 'Clínicos — use para regulação' 
   )
 }
 
-function ProcRegList({ procs }) {
+function ProcRegList({ procs, dark }) {
   return (
     <div className="space-y-2">
-      <ProcList procs={procs} />
+      <ProcList procs={procs} dark={dark} />
       <p className="text-[10px] text-muted-foreground/60 pt-1">
         Dados da tabela SIGTAP · clique para ver detalhes do procedimento
       </p>
@@ -162,7 +176,7 @@ function GrupoCorrelato({ grupo, dark }) {
           <p className="mt-0.5 text-[10px] text-muted-foreground italic">{grupo.justificativa}</p>
         )}
       </div>
-      <ProcList procs={grupo.procs} labelClinicos="Clínico alternativo para regulação" />
+      <ProcList procs={grupo.procs} dark={dark} labelClinicos="Clínico alternativo para regulação" />
     </div>
   )
 }
@@ -365,7 +379,7 @@ export function ContextoClinico({ cid, autoOpen = false }) {
                 <p className="text-xs text-muted-foreground">Nenhum procedimento grupo 03/04 vinculado a este CID na tabela SIGTAP.</p>
               )}
               {procsReg && procsReg.length > 0 && (
-                <ProcRegList procs={procsReg} />
+                <ProcRegList procs={procsReg} dark={dark} />
               )}
 
               {/* CIDs correlatos com procedimentos adicionais */}
@@ -407,15 +421,28 @@ export function ContextoClinico({ cid, autoOpen = false }) {
               )}
 
               {correlatos && correlatos.length > 0 && !/^A41/i.test(cid.co_cid?.trim()) && (
-                <div className="mt-3 pt-3 border-t border-border/50">
-                  <p className="text-[10px] font-medium uppercase tracking-wider text-amber-500/80 mb-1 px-1">
-                    Alternativos — mesmo sistema
-                  </p>
-                  <div className="divide-y divide-border/50">
-                    {correlatos.map(p => (
-                      <ProcReg key={p.co_procedimento} p={p} via={p.co_cid_ref} />
-                    ))}
+                <div className={cn('mt-4 pt-4 border-t space-y-2', dark ? 'border-[rgba(255,255,255,0.06)]' : 'border-border')}>
+                  <div className="mb-3">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-amber-500 mb-0.5">
+                      Códigos clínicos alternativos — mesmo sistema orgânico
+                    </p>
+                    <p className="text-[10px] text-muted-foreground">
+                      Procedimentos clínicos do mesmo sistema disponíveis no SIGTAP — use quando o código principal já está em uso
+                    </p>
                   </div>
+                  {correlatos.map(p => (
+                    <div key={p.co_procedimento}>
+                      <ProcReg p={p} dark={dark} />
+                      {p.co_cid_ref && (
+                        <p className="mt-0.5 ml-1 text-[10px] text-muted-foreground/60">
+                          via CID <span className="font-mono">{p.co_cid_ref}</span> · {p.no_cid_ref}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                  <p className="text-[10px] text-muted-foreground/60 pt-1">
+                    Dados do SIGTAP · confirme compatibilidade com a regulação local
+                  </p>
                 </div>
               )}
             </div>
