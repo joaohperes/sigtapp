@@ -208,12 +208,12 @@ export function DiagnosticoPage() {
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-10"
           style={{ background: 'linear-gradient(to bottom, transparent, rgba(0,0,0,0.18))' }} />
 
-        <div className="relative mx-auto max-w-3xl px-4 pb-10 pt-10 text-center">
+        <div className="relative mx-auto max-w-3xl px-4 pb-6 pt-6 text-center">
           <Link to="/" className="block hover:opacity-80 transition-opacity">
-            <h1 className="text-6xl text-white"
+            <h1 className="text-4xl text-white"
                 style={{ fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '0.08em' }}>SIGTAPP</h1>
           </Link>
-          <p className={cn('mt-2 text-sm font-medium tracking-wide', modoUE ? 'text-red-300/70' : 'text-blue-300/60')}>
+          <p className={cn('mt-1 text-sm font-medium tracking-wide', modoUE ? 'text-red-300/70' : 'text-blue-300/60')}>
             Busque pelo diagnóstico — CID-10, procedimentos e regulação SUS
           </p>
 

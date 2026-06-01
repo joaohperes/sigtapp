@@ -6,7 +6,7 @@ const Command = React.forwardRef(({ className, ...props }, ref) => (
   <CommandPrimitive
     ref={ref}
     className={cn(
-      "flex h-full w-full flex-col overflow-hidden rounded-xl bg-white text-slate-900",
+      "flex h-full w-full flex-col overflow-hidden rounded-xl bg-background text-foreground",
       className
     )}
     {...props}
@@ -15,7 +15,7 @@ const Command = React.forwardRef(({ className, ...props }, ref) => (
 Command.displayName = CommandPrimitive.displayName
 
 const CommandInput = React.forwardRef(({ className, ...props }, ref) => (
-  <div className="flex items-center border-b border-slate-100 px-4" cmdk-input-wrapper="">
+  <div className="flex items-center border-b border-border px-4" cmdk-input-wrapper="">
     <svg className="mr-3 h-4 w-4 shrink-0 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
         d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
