@@ -103,7 +103,7 @@ function GrupoCard({ grupo, dark }) {
   return (
     <div className={cn(
       'rounded-xl border overflow-hidden',
-      dark ? 'border-[rgba(255,255,255,0.07)] bg-[#0d1424]' : 'border-border bg-card'
+      'border-border bg-card'
     )}>
       {/* Header */}
       <div className={cn('flex items-center gap-2 px-3 py-2', cor.header)}>

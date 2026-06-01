@@ -77,7 +77,7 @@ function ProcSearchInput({ onAdd, existingCodes }) {
       <div className="relative">
         <div className="pointer-events-none absolute inset-y-0 left-3.5 flex items-center">
           {loading ? (
-            <svg className="h-4 w-4 animate-spin text-blue-500" fill="none" viewBox="0 0 24 24">
+            <svg className="h-4 w-4 animate-spin text-muted-foreground" fill="none" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
             </svg>
@@ -127,7 +127,7 @@ function ProcSearchInput({ onAdd, existingCodes }) {
                   {formatBRL(totalOf(proc))}
                 </span>
                 {alreadyAdded && (
-                  <span className="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] text-muted-foreground">
+                  <span className="shrink-0 rounded-full bg-secondary px-2 py-0.5 text-[10px] text-muted-foreground">
                     já adicionado
                   </span>
                 )}
@@ -331,9 +331,9 @@ export function CalculadoraPage() {
     <TooltipProvider>
       <div className="min-h-screen bg-background">
         {/* Header */}
-        <div className={dark ? "bg-gradient-to-br from-[#0A1628] via-[#0D2347] to-[#0F3460]" : "border-b border-border bg-card"}>
+        <div className="border-b border-border bg-card">
           <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
-            <Link to="/" className={cn("inline-flex items-center gap-1.5 text-xs transition", dark ? "text-blue-300/70 hover:text-blue-200" : "text-muted-foreground hover:text-foreground")}>
+            <Link to="/" className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition">
               <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
@@ -341,8 +341,8 @@ export function CalculadoraPage() {
             </Link>
             <div className="flex items-end justify-between gap-4">
               <div>
-                <h1 className={cn("mt-2 text-2xl font-bold", dark ? "text-white" : "text-foreground")}>Calculadora de AIH</h1>
-                <p className={cn("mt-1 text-sm", dark ? "text-blue-300/70" : "text-muted-foreground")}>
+                <h1 className="mt-2 text-2xl font-bold text-foreground">Calculadora de AIH</h1>
+                <p className="mt-1 text-sm text-muted-foreground">
                   Monte um conjunto de procedimentos e calcule o valor total faturável pelo SUS.
                 </p>
               </div>
@@ -394,7 +394,7 @@ export function CalculadoraPage() {
                     <div key={proc.co_procedimento}>
                       {/* Linha indicadora de drop */}
                       {isDragTarget && dragIndexRef.current > index && (
-                        <div className="mx-2 h-0.5 rounded-full bg-blue-400 mb-1" />
+                        <div className="mx-2 h-0.5 rounded-full bg-foreground/30 mb-1" />
                       )}
 
                       <div
@@ -408,9 +408,9 @@ export function CalculadoraPage() {
                           isPrincipal
                             ? 'border-border bg-card'
                             : warning
-                              ? 'border-amber-200 bg-white'
+                              ? 'border-amber-500/30 bg-amber-500/5'
                               : 'border-border bg-card',
-                          isDragTarget && 'ring-2 ring-blue-300 ring-offset-1',
+                          isDragTarget && 'ring-2 ring-foreground/20 ring-offset-1',
                         )}
                       >
                         {estilo && <div className={`h-1 w-full rounded-t-xl ${estilo.dot}`} />}
@@ -434,7 +434,7 @@ export function CalculadoraPage() {
                                 <button
                                   type="button"
                                   onClick={() => { navigator.clipboard.writeText(proc.co_procedimento) }}
-                                  className="rounded p-0.5 text-muted-foreground/50 transition hover:bg-slate-100 hover:text-muted-foreground"
+                                  className="rounded p-0.5 text-muted-foreground/50 transition hover:bg-secondary hover:text-muted-foreground"
                                   title="Copiar código"
                                 >
                                   <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -443,7 +443,7 @@ export function CalculadoraPage() {
                                   </svg>
                                 </button>
                                 {isPrincipal && (
-                                  <Badge className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-semibold text-blue-700 hover:bg-blue-100">
+                                  <Badge className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-semibold text-muted-foreground hover:bg-secondary">
                                     Principal
                                   </Badge>
                                 )}
@@ -455,7 +455,7 @@ export function CalculadoraPage() {
                               </div>
                               <Link
                                 to={`/procedimento/${proc.co_procedimento}`}
-                                className="mt-1 block text-sm font-semibold text-foreground hover:text-blue-600 transition"
+                                className="mt-1 block text-sm font-semibold text-foreground hover:text-muted-foreground transition"
                               >
                                 {proc.no_procedimento}
                               </Link>
@@ -467,7 +467,7 @@ export function CalculadoraPage() {
                               </div>
 
                               {warning && (
-                                <div className="mt-2 flex items-start gap-1.5 rounded-lg bg-amber-50 px-2.5 py-1.5">
+                                <div className="mt-2 flex items-start gap-1.5 rounded-lg bg-amber-500/10 px-2.5 py-1.5">
                                   <WarningIcon />
                                   <p className="text-xs text-amber-700">{warning}</p>
                                 </div>
@@ -494,7 +494,7 @@ export function CalculadoraPage() {
                                   <button
                                     onClick={() => setQty(proc.co_procedimento, qty - 1)}
                                     disabled={qty <= 1}
-                                    className="flex h-6 w-6 items-center justify-center rounded-md border border-slate-200
+                                    className="flex h-6 w-6 items-center justify-center rounded-md border border-border
                                                text-muted-foreground transition hover:bg-secondary disabled:opacity-40"
                                   >
                                     <svg className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
@@ -505,7 +505,7 @@ export function CalculadoraPage() {
                                   <button
                                     onClick={() => setQty(proc.co_procedimento, qty + 1)}
                                     disabled={qty >= 99}
-                                    className="flex h-6 w-6 items-center justify-center rounded-md border border-slate-200
+                                    className="flex h-6 w-6 items-center justify-center rounded-md border border-border
                                                text-muted-foreground transition hover:bg-secondary disabled:opacity-40"
                                   >
                                     <svg className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
@@ -530,7 +530,7 @@ export function CalculadoraPage() {
                                     <button
                                       onClick={() => setDias(proc.co_procedimento, dias - 1)}
                                       disabled={dias <= 1}
-                                      className="flex h-6 w-6 items-center justify-center rounded-md border border-slate-200
+                                      className="flex h-6 w-6 items-center justify-center rounded-md border border-border
                                                  text-muted-foreground transition hover:bg-secondary disabled:opacity-40"
                                     >
                                       <svg className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
@@ -544,7 +544,7 @@ export function CalculadoraPage() {
                                     <button
                                       onClick={() => setDias(proc.co_procedimento, dias + 1)}
                                       disabled={dias >= 999}
-                                      className="flex h-6 w-6 items-center justify-center rounded-md border border-slate-200
+                                      className="flex h-6 w-6 items-center justify-center rounded-md border border-border
                                                  text-muted-foreground transition hover:bg-secondary disabled:opacity-40"
                                     >
                                       <svg className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
@@ -568,7 +568,7 @@ export function CalculadoraPage() {
                       </div>
 
                       {isDragTarget && dragIndexRef.current < index && (
-                        <div className="mx-2 h-0.5 rounded-full bg-blue-400 mt-1" />
+                        <div className="mx-2 h-0.5 rounded-full bg-foreground/30 mt-1" />
                       )}
                     </div>
                   )
@@ -590,7 +590,7 @@ export function CalculadoraPage() {
 
               {/* Resumo financeiro */}
               <div className="rounded-xl border border-border bg-card shadow-sm">
-                <div className="border-b border-slate-100 px-5 py-4">
+                <div className="border-b border-border px-5 py-4">
                   <h2 className="text-sm font-bold text-foreground">Resumo do faturamento</h2>
                 </div>
                 <div className="p-5 space-y-3">
@@ -608,7 +608,7 @@ export function CalculadoraPage() {
                       <span className="font-semibold tabular-nums text-foreground">{formatBRL(totalSP)}</span>
                     </div>
                   </div>
-                  <div className="border-t border-slate-200 pt-3">
+                  <div className="border-t border-border pt-3">
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-bold text-foreground/90">Total SUS</span>
                       <span className="text-xl font-bold tabular-nums text-emerald-600">{formatBRL(totalGeral)}</span>
@@ -622,7 +622,7 @@ export function CalculadoraPage() {
                     <p className="text-xs text-muted-foreground/70">Verificando compatibilidades…</p>
                   )}
                   {!compatLoading && compatEmpty && items.length > 1 && (
-                    <div className="rounded-lg bg-slate-50 p-3 text-xs text-muted-foreground">
+                    <div className="rounded-lg bg-secondary p-3 text-xs text-muted-foreground">
                       O procedimento principal não possui compatibilidades cadastradas no SIGTAP.
                     </div>
                   )}
@@ -637,7 +637,7 @@ export function CalculadoraPage() {
               {/* Sugestões de compatíveis */}
               {!compatLoading && compatSuggestions.length > 0 && (
                 <div className="rounded-xl border border-border bg-card shadow-sm">
-                  <div className="border-b border-slate-100 px-5 py-3">
+                  <div className="border-b border-border px-5 py-3">
                     <div className="flex items-center justify-between gap-2">
                       <div>
                         <h2 className="text-sm font-bold text-foreground">Compatíveis com o principal</h2>
@@ -647,14 +647,14 @@ export function CalculadoraPage() {
                       </div>
                       <button
                         onClick={addAllCompatible}
-                        className="shrink-0 rounded-lg border border-slate-200 px-2.5 py-1 text-[11px] font-medium
-                                   text-muted-foreground transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700"
+                        className="shrink-0 rounded-lg border border-border px-2.5 py-1 text-[11px] font-medium
+                                   text-muted-foreground transition hover:border-foreground/20 hover:bg-secondary hover:text-foreground"
                       >
                         Adicionar todos
                       </button>
                     </div>
                   </div>
-                  <div className="divide-y divide-slate-50">
+                  <div className="divide-y divide-border">
                     {visibleSuggestions.map((c) => {
                       const estilo = GRUPO_MAP[c.co_procedimento_compativel?.slice(0, 2)]
                       return (
@@ -669,8 +669,8 @@ export function CalculadoraPage() {
                           </div>
                           <button
                             onClick={() => addByCode(c.co_procedimento_compativel)}
-                            className="shrink-0 rounded-lg border border-slate-200 p-1 text-muted-foreground/70
-                                       transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600"
+                            className="shrink-0 rounded-lg border border-border p-1 text-muted-foreground/70
+                                       transition hover:border-foreground/20 hover:bg-secondary hover:text-foreground"
                             title="Adicionar"
                           >
                             <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
@@ -682,10 +682,10 @@ export function CalculadoraPage() {
                     })}
                   </div>
                   {compatSuggestions.length > 5 && (
-                    <div className="border-t border-slate-50 px-4 py-2.5">
+                    <div className="border-t border-border px-4 py-2.5">
                       <button
                         onClick={() => setShowAllCompat(v => !v)}
-                        className="text-xs text-blue-600 hover:text-blue-700 transition"
+                        className="text-xs text-muted-foreground hover:text-foreground transition"
                       >
                         {showAllCompat ? 'Ver menos' : `Ver mais ${compatSuggestions.length - 5} procedimentos`}
                       </button>

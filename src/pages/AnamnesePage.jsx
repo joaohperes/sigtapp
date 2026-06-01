@@ -489,7 +489,7 @@ export function AnamnesePage() {
       <Skeleton className="mb-3 h-5 w-52" />
       <div className="grid gap-2 grid-cols-1 sm:grid-cols-2 xl:grid-cols-1">
         {[0, 1].map(i => (
-          <div key={i} className="rounded-xl bg-white p-3 shadow-[0_4px_16px_rgba(15,23,42,0.08),0_1px_4px_rgba(15,23,42,0.05)] border-l-2 border-indigo-200 space-y-2">
+          <div key={i} className="rounded-xl bg-card p-3 border border-border border-l-2 border-l-foreground/20 space-y-2">
             <Skeleton className="h-4 w-14" />
             <Skeleton className="h-3 w-full" />
             <Skeleton className="h-3 w-4/6" />
@@ -505,7 +505,7 @@ export function AnamnesePage() {
       <Skeleton className="mb-3 h-5 w-60" />
       <div className="space-y-2">
         {[0, 1, 2, 3].map(i => (
-          <div key={i} className="rounded-xl bg-white p-3 shadow-[0_4px_16px_rgba(15,23,42,0.08),0_1px_4px_rgba(15,23,42,0.05)] border-l-2 border-emerald-200 space-y-2">
+          <div key={i} className="rounded-xl bg-card p-3 border border-border border-l-2 border-l-emerald-500/40 space-y-2">
             <Skeleton className="h-3 w-24" />
             <Skeleton className="h-4 w-3/4" />
           </div>
@@ -530,7 +530,7 @@ export function AnamnesePage() {
         /* 2-col em sm/lg; 1-col em xl (coluna dedicada) */
         <div className="grid gap-2 grid-cols-1 sm:grid-cols-2 xl:grid-cols-1">
           {cids.map((c, i) => (
-            <div key={c.co_cid} className="rounded-xl bg-white p-3 shadow-[0_4px_16px_rgba(15,23,42,0.08),0_1px_4px_rgba(15,23,42,0.05)] border-l-2 border-indigo-400">
+            <div key={c.co_cid} className="rounded-xl bg-card p-3 border border-border border-l-2 border-l-foreground/30">
               {/* Header: código pai + badge */}
               <div className="flex items-center gap-2">
                 <span className="font-mono text-sm font-bold text-indigo-600">
@@ -564,8 +564,8 @@ export function AnamnesePage() {
               <div className="mt-2 grid grid-cols-2 gap-1.5">
                 <button
                   onClick={() => toggleCidSiblings(c.co_cid_pai || c.co_cid.slice(0, 3))}
-                  className="rounded-lg border border-slate-200 bg-slate-50 py-1 px-2
-                             text-xs font-medium text-muted-foreground transition hover:bg-slate-100 flex items-center justify-center gap-1"
+                  className="rounded-lg border border-border bg-secondary py-1 px-2
+                             text-xs font-medium text-muted-foreground transition hover:bg-accent flex items-center justify-center gap-1"
                 >
                   Subcódigos
                   <svg
@@ -593,7 +593,7 @@ export function AnamnesePage() {
                 <div className="mt-2 space-y-1">
                   {cidSiblings[c.co_cid_pai || c.co_cid.slice(0, 3)].loading ? (
                     [0, 1, 2].map(k => (
-                      <div key={k} className="rounded-lg border border-slate-100 bg-slate-50 px-3 py-1.5">
+                      <div key={k} className="rounded-lg border border-border bg-secondary px-3 py-1.5">
                         <Skeleton className="h-3 w-full" />
                       </div>
                     ))
@@ -605,7 +605,7 @@ export function AnamnesePage() {
                           'rounded-lg border px-3 py-1.5 text-[11px] leading-snug',
                           s.co_cid === c.co_cid
                             ? 'border-indigo-200 bg-indigo-50'
-                            : 'border-slate-100 bg-slate-50'
+                            : 'border-border bg-secondary'
                         )}
                       >
                         <span className="font-mono text-indigo-500 mr-1.5">{formatCidCode(s.co_cid)}</span>
@@ -622,7 +622,7 @@ export function AnamnesePage() {
                 <div className="mt-2 space-y-1">
                   {cidProcs[c.co_cid].loading ? (
                     [0, 1, 2].map(k => (
-                      <div key={k} className="rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 space-y-1">
+                      <div key={k} className="rounded-lg border border-border bg-secondary px-3 py-2 space-y-1">
                         <Skeleton className="h-2.5 w-16" />
                         <Skeleton className="h-3 w-full" />
                       </div>
@@ -637,7 +637,7 @@ export function AnamnesePage() {
                           <button
                             key={p.co_procedimento}
                             onClick={() => setSheetProc(p)}
-                            className="w-full rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-left transition hover:border-indigo-200 hover:bg-indigo-50"
+                            className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-left transition hover:border-foreground/20 hover:bg-accent"
                           >
                             <p className="font-mono text-[10px] text-muted-foreground/70">{formatCodigo(p.co_procedimento)}</p>
                             <p className="mt-0.5 text-xs font-medium leading-snug text-foreground/90 line-clamp-2">{p.no_procedimento}</p>
@@ -694,10 +694,10 @@ export function AnamnesePage() {
           {cidProcsSecundarios.map(({ cid, data }, i) => {
             const isOpen = openProcCids[cid.co_cid] ?? (i === 0)
             return (
-              <div key={cid.co_cid} className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+              <div key={cid.co_cid} className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
                 <button
                   onClick={() => setOpenProcCids(s => ({ ...s, [cid.co_cid]: !isOpen }))}
-                  className="flex w-full items-center justify-between gap-2 px-4 py-3 text-left transition hover:bg-slate-50"
+                  className="flex w-full items-center justify-between gap-2 px-4 py-3 text-left transition hover:bg-secondary"
                 >
                   <span className="flex items-center gap-2">
                     <span className="font-mono text-sm font-bold text-indigo-500">{cid.co_cid_pai || cid.co_cid}</span>
@@ -712,7 +712,7 @@ export function AnamnesePage() {
                   </svg>
                 </button>
                 {isOpen && (
-                  <div className="border-t border-slate-100 p-3 space-y-2">
+                  <div className="border-t border-border p-3 space-y-2">
                     {data.map((p) => (
                       <ProcedureRow key={p.co_procedimento} procedure={p} onSelect={setSheetProc} />
                     ))}
@@ -733,16 +733,11 @@ export function AnamnesePage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className={modoUE
-        ? "bg-gradient-to-br from-red-950 via-red-900 to-red-800"
-        : dark
-          ? "bg-[#111827] border-b border-[rgba(255,255,255,0.06)]"
-          : "bg-white border-b border-slate-200"
-      }>
+      <div className={modoUE ? "bg-gradient-to-br from-red-950 via-red-900 to-red-800" : "border-b border-border bg-card"}>
         <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 flex items-center justify-between gap-4">
           <div>
-            <h1 className={cn("text-lg font-bold sm:text-xl", modoUE || dark ? "text-white" : "text-foreground")}>Análise de Anamnese</h1>
-            <p className={cn("mt-0.5 text-sm", modoUE ? "text-red-200" : dark ? "text-[#8896a8]" : "text-muted-foreground")}>
+            <h1 className={cn("text-lg font-bold sm:text-xl", modoUE ? "text-white" : "text-foreground")}>Análise de Anamnese</h1>
+            <p className={cn("mt-0.5 text-sm", modoUE ? "text-red-200" : "text-muted-foreground")}>
               Cole o texto clínico e a IA identificará CIDs, procedimentos SIGTAP e gerará o texto para AIH
             </p>
           </div>
@@ -756,8 +751,8 @@ export function AnamnesePage() {
                 modoUE
                   ? "border-red-300/50 bg-red-900/30 text-red-100 hover:bg-red-900/50"
                   : dark
-                    ? "border-[rgba(255,255,255,0.15)] bg-[rgba(255,255,255,0.07)] text-[#e8edf5] hover:bg-[rgba(255,255,255,0.12)]"
-                    : "border-slate-200 bg-slate-50 text-foreground/90 hover:bg-slate-100"
+                    ? "border-border bg-secondary text-foreground hover:bg-accent"
+                    : "border-border bg-secondary text-foreground/90 hover:bg-accent"
               )}
             >
               <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -785,16 +780,16 @@ export function AnamnesePage() {
             <div className={!showResults ? 'mx-auto max-w-2xl' : ''}>
               <div className={cn(
                 "rounded-xl border p-6 shadow-sm",
-                dark ? "border-[rgba(255,255,255,0.08)] bg-[#111827]" : "border-slate-200 bg-white"
+                "border-border bg-card"
               )}>
                 <div className="mb-3 flex items-center justify-between">
-                  <label className={cn("text-sm font-semibold", dark ? "text-[#e8edf5]" : "text-foreground/90")}>
+                  <label className={cn("text-sm font-semibold", "text-foreground")}>
                     Texto clínico / Anamnese
                   </label>
                   {!anamnese && (
                     <button
                       onClick={() => setAnamnese(EXEMPLO)}
-                      className={cn("text-xs hover:underline", modoUE ? "text-red-500" : "text-[#38bdf8]")}
+                      className={cn("text-xs hover:underline", modoUE ? "text-red-500" : "text-muted-foreground")}
                     >
                       Usar exemplo
                     </button>
@@ -809,8 +804,7 @@ export function AnamnesePage() {
                   className={cn(
                     "w-full resize-y rounded-lg border p-3 text-sm leading-relaxed focus:outline-none focus:ring-2",
                     dark
-                      ? "border-[rgba(255,255,255,0.1)] bg-[#1a2236] text-[#e8edf5] placeholder:text-[#8896a8] focus:border-[#38bdf8] focus:ring-[#38bdf8]/20"
-                      : "border-slate-200 bg-white text-foreground/90 placeholder:text-muted-foreground/70 focus:border-blue-400 focus:ring-blue-400/20",
+                      "border-border bg-background text-foreground placeholder:text-muted-foreground/50 focus:border-foreground/30 focus:ring-foreground/10",
                     modoUE && "focus:border-red-400 focus:ring-red-400/20"
                   )}
                 />
@@ -824,7 +818,7 @@ export function AnamnesePage() {
                     disabled={loading || anamnese.trim().length < 20}
                     className={cn(
                       "flex w-full items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:justify-start",
-                      modoUE ? "bg-red-700 hover:bg-red-800" : "bg-blue-600 hover:bg-blue-700"
+                      modoUE ? "bg-red-700 hover:bg-red-800" : "bg-foreground text-background hover:bg-foreground/90"
                     )}
                   >
                     {loading ? (
@@ -861,7 +855,7 @@ export function AnamnesePage() {
                 </p>
                 <div className="space-y-2">
                   {savedAnalyses.map(entry => (
-                    <div key={entry.id} className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+                    <div key={entry.id} className="flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-3 shadow-sm">
                       <button
                         onClick={() => handleLoadSaved(entry)}
                         className="min-w-0 flex-1 text-left"
@@ -890,7 +884,7 @@ export function AnamnesePage() {
             {/* Cards de exemplo — visíveis apenas antes da análise */}
             {!showResults && (
               <div className="mt-4">
-                <p className={cn("mb-2 text-[11px] font-semibold uppercase tracking-wide", dark ? "text-[#8896a8]" : "text-muted-foreground/70")}>
+                <p className={cn("mb-2 text-[11px] font-semibold uppercase tracking-wide", "text-muted-foreground/70")}>
                   Exemplos clínicos
                 </p>
                 <div className="grid grid-cols-2 gap-2">
@@ -900,15 +894,13 @@ export function AnamnesePage() {
                       onClick={() => setAnamnese(ex.texto)}
                       className={cn(
                         'rounded-xl border p-3 text-left transition',
-                        dark
-                          ? 'border-[rgba(255,255,255,0.08)] bg-[#1a2236] hover:border-[rgba(56,189,248,0.3)]'
-                          : modoUE
-                            ? 'border-slate-200 bg-white hover:border-red-300 shadow-sm'
-                            : 'border-slate-200 bg-white hover:border-blue-300 shadow-sm'
+                        modoUE
+                            ? 'border-border bg-card hover:border-red-500/40'
+                            : 'border-border bg-card hover:border-foreground/20'
                       )}
                     >
-                      <p className={cn("text-xs font-semibold", dark ? "text-[#e8edf5]" : "text-foreground/90")}>{ex.titulo}</p>
-                      <p className={cn("mt-0.5 text-[11px] leading-snug", dark ? "text-[#8896a8]" : "text-muted-foreground/70")}>{ex.subtitulo}</p>
+                      <p className={cn("text-xs font-semibold", "text-foreground")}>{ex.titulo}</p>
+                      <p className={cn("mt-0.5 text-[11px] leading-snug", "text-muted-foreground/70")}>{ex.subtitulo}</p>
                     </button>
                   ))}
                 </div>
@@ -918,7 +910,7 @@ export function AnamnesePage() {
 
             {/* AIH — só aparece após análise */}
             {analyzed && aih && (
-              <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+              <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
                 <div className="mb-3 flex items-center justify-between">
                   <div>
                     <h2 className="text-sm font-semibold text-foreground/90">Texto para AIH</h2>
@@ -927,7 +919,7 @@ export function AnamnesePage() {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={handleSalvar}
-                      className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-slate-50"
+                      className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-secondary"
                     >
                       <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -939,7 +931,7 @@ export function AnamnesePage() {
                       onClick={handleCopyAih}
                       className={cn(
                         "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-white transition",
-                        modoUE ? "bg-red-600 hover:bg-red-700" : "bg-blue-600 hover:bg-blue-700"
+                        modoUE ? "bg-red-700 hover:bg-red-800" : "bg-foreground text-background hover:bg-foreground/90"
                       )}
                     >
                       <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -955,8 +947,8 @@ export function AnamnesePage() {
                   onChange={e => setAih(e.target.value)}
                   rows={10}
                   className={cn(
-                    "w-full resize-y rounded-lg border border-slate-200 p-3 text-sm leading-relaxed text-foreground/90 placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2",
-                    modoUE ? "focus:border-red-400 focus:ring-red-400/20" : "focus:border-blue-400 focus:ring-blue-400/20"
+                    "w-full resize-y rounded-lg border border-border bg-background p-3 text-sm leading-relaxed text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2",
+                    modoUE ? "focus:border-red-400 focus:ring-red-400/20" : "focus:border-foreground/30 focus:ring-foreground/10"
                   )}
                 />
               </div>
