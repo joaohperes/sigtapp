@@ -783,6 +783,22 @@ export function Home() {
         {/* ── Estado inicial — grupos com drill-down ── */}
         {!searched && (
           <div>
+            {/* Header da página */}
+            <div className="mb-6 flex items-end justify-between">
+              <div>
+                <h1 className="text-lg font-bold text-foreground">Procedimentos SIGTAP</h1>
+                <p className="mt-0.5 text-sm text-muted-foreground">
+                  Tabela de procedimentos, medicamentos e OPM do SUS
+                  {totalProcedimentos > 0 && (
+                    <span className="ml-2 font-mono text-xs text-primary">
+                      {totalProcedimentos.toLocaleString('pt-BR')} procedimentos
+                    </span>
+                  )}
+                </p>
+              </div>
+              <HelpButton onClick={() => setHelpOpen(true)} />
+            </div>
+
             {/* Favoritos */}
             {favoritos.length > 0 && (
               <div className="mb-8">
@@ -859,7 +875,7 @@ export function Home() {
             )}
 
             {/* Painéis */}
-            <div className="flex flex-col md:flex-row items-start gap-3">
+            <div className="flex flex-col md:flex-row items-start gap-3 min-h-[480px]">
 
               {/* Painel 1 — Groups (sempre coluna única) */}
               <div className="w-52 shrink-0">
@@ -892,6 +908,27 @@ export function Home() {
                   })}
                 </div>
               </div>
+
+              {/* Placeholder — nenhum grupo selecionado */}
+              {!selectedGroup && (
+                <div className="flex-1 flex items-center justify-center rounded-xl border border-dashed border-border">
+                  <div className="text-center px-8 py-12">
+                    <svg className="mx-auto h-10 w-10 text-muted-foreground/30 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                        d="M4 6h16M4 10h16M4 14h8m-8 4h4" />
+                    </svg>
+                    <p className="text-sm font-medium text-muted-foreground">Selecione um grupo</p>
+                    <p className="mt-1 text-xs text-muted-foreground/60">
+                      Escolha uma categoria à esquerda para explorar os procedimentos
+                    </p>
+                    <p className="mt-4 text-xs text-muted-foreground/40">
+                      ou use{' '}
+                      <kbd className="rounded bg-secondary px-1.5 py-0.5 font-mono text-[10px]">⌘K</kbd>
+                      {' '}para busca rápida
+                    </p>
+                  </div>
+                </div>
+              )}
 
               {/* Painel 2 — Subgrupos */}
               {selectedGroup && (
