@@ -73,43 +73,66 @@ function CidRow({ cid, dark, autoCtx }) {
   )
 }
 
+const CHIPS_PREVIEW = 4
+
+function Chip({ c, cor, dark }) {
+  return (
+    <Link
+      key={c.co_cid}
+      to={`/?q=${encodeURIComponent(c.co_cid)}&ctx=1`}
+      title={c.co_cid}
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-all',
+        cor.chip
+      )}
+    >
+      <span className="font-mono text-[9px] opacity-60 shrink-0 tabular-nums">{c.co_cid}</span>
+      <span className={cn('h-2.5 w-px shrink-0 opacity-30', dark ? 'bg-white' : 'bg-current')} />
+      {c.label}
+    </Link>
+  )
+}
+
 function GrupoCard({ grupo, dark }) {
+  const [expandido, setExpandido] = useState(false)
   const corMap = dark ? COR_MAP : COR_MAP_LIGHT
   const cor = corMap[grupo.cor] || corMap.blue
+  const temMais = grupo.cids.length > CHIPS_PREVIEW
+  const visiveis = expandido ? grupo.cids : grupo.cids.slice(0, CHIPS_PREVIEW)
 
   return (
     <div className={cn(
-      'rounded-2xl border overflow-hidden',
+      'rounded-2xl border overflow-hidden flex flex-col',
       dark ? 'border-[rgba(255,255,255,0.07)] bg-[#0d1424]' : 'border-border bg-card'
     )}>
       {/* Header */}
-      <div className={cn('flex items-center gap-2 px-4 py-3', cor.header)}>
+      <div className={cn('flex items-center gap-2 px-4 py-2.5', cor.header)}>
         <span className={cn('h-2 w-2 rounded-full shrink-0', cor.dot)} />
-        <span className={cn('text-xs font-bold tracking-wide', cor.label)}>{grupo.label}</span>
+        <span className={cn('text-xs font-bold tracking-wide flex-1', cor.label)}>{grupo.label}</span>
+        <span className="text-[10px] text-muted-foreground/60 tabular-nums">{grupo.cids.length}</span>
       </div>
 
       {/* Chips */}
-      <div className="px-3 py-3 flex flex-wrap gap-1.5">
-        {grupo.cids.map(c => (
-          <Link
-            key={c.co_cid}
-            to={`/?q=${encodeURIComponent(c.co_cid)}&ctx=1`}
-            title={c.co_cid}
-            className={cn(
-              'inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-all',
-              cor.chip
-            )}
-          >
-            <span className={cn(
-              'font-mono text-[9px] opacity-60 shrink-0 tabular-nums',
-            )}>
-              {c.co_cid}
-            </span>
-            <span className={cn('h-2.5 w-px shrink-0 opacity-30', dark ? 'bg-white' : 'bg-current')} />
-            {c.label}
-          </Link>
-        ))}
+      <div className="px-3 pt-2.5 pb-2 flex flex-wrap gap-1.5 flex-1">
+        {visiveis.map(c => <Chip key={c.co_cid} c={c} cor={cor} dark={dark} />)}
       </div>
+
+      {/* Ver mais / menos */}
+      {temMais && (
+        <button
+          onClick={() => setExpandido(v => !v)}
+          className={cn(
+            'w-full px-3 py-1.5 text-[10px] font-medium text-left transition border-t',
+            dark
+              ? 'border-[rgba(255,255,255,0.05)] text-muted-foreground hover:text-foreground'
+              : 'border-border/50 text-muted-foreground hover:text-foreground'
+          )}
+        >
+          {expandido
+            ? '↑ ver menos'
+            : `+ ${grupo.cids.length - CHIPS_PREVIEW} diagnósticos`}
+        </button>
+      )}
     </div>
   )
 }
@@ -285,7 +308,7 @@ export function DiagnosticoPage() {
               </div>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-3 grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
               {CORINGAS_GRUPOS.map(grupo => (
                 <GrupoCard key={grupo.id} grupo={grupo} dark={dark} />
               ))}
