@@ -29,6 +29,8 @@ export const CORINGAS_GRUPOS = [
       { co_cid: 'J810', label: 'EAP'                    },
       { co_cid: 'J939', label: 'Pneumotórax'            },
       { co_cid: 'J859', label: 'Abscesso pulmonar'      },
+      { co_cid: 'R042', label: 'Hemoptise'              },
+      { co_cid: 'I270', label: 'Hipertensão pulmonar'   },
     ],
   },
   {
@@ -61,6 +63,8 @@ export const CORINGAS_GRUPOS = [
       { co_cid: 'G450', label: 'AIT'                    },
       { co_cid: 'G350', label: 'Mielite transversa'     },
       { co_cid: 'R55',  label: 'Síncope'                },
+      { co_cid: 'G910', label: 'Hidrocefalia'           },
+      { co_cid: 'G061', label: 'Abscesso raquidiano'    },
     ],
   },
   {
@@ -76,6 +80,8 @@ export const CORINGAS_GRUPOS = [
       { co_cid: 'S329', label: 'Fratura de pelve'       },
       { co_cid: 'T314', label: 'Queimadura grave'       },
       { co_cid: 'T209', label: 'Queimadura facial'      },
+      { co_cid: 'S360', label: 'Trauma abdominal'       },
+      { co_cid: 'S150', label: 'Trauma vascular cervical'},
     ],
   },
   {

@@ -287,7 +287,7 @@ export function DiagnosticoPage() {
               </div>
             </div>
 
-            <div className="grid gap-3 grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 items-start">
+            <div className="grid gap-3 grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
               {CORINGAS_GRUPOS.map(grupo => (
                 <GrupoCard key={grupo.id} grupo={grupo} dark={dark} />
               ))}
