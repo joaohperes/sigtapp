@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { cn } from '@/lib/utils'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import * as VisuallyHidden from '@radix-ui/react-visually-hidden'
 import {
@@ -92,9 +93,16 @@ async function searchCids(q) {
   return (data || []).slice(0, 5)
 }
 
+const FILTROS = [
+  { key: 'tudo',        label: 'Tudo'        },
+  { key: 'procedimento', label: 'Procedimento' },
+  { key: 'cid',         label: 'CID-10'      },
+]
+
 export function CommandMenu() {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
+  const [filtro, setFiltro] = useState('tudo')
   const [procs, setProcs] = useState([])
   const [cids, setCids] = useState([])
   const [loading, setLoading] = useState(false)
@@ -126,8 +134,8 @@ export function CommandMenu() {
     debounceRef.current = setTimeout(async () => {
       try {
         const [{ data: procData }, cidData] = await Promise.all([
-          supabase.rpc('buscar_procedimentos', { query: query.trim(), limite: 6 }),
-          searchCids(query),
+          filtro !== 'cid'         ? supabase.rpc('buscar_procedimentos', { query: query.trim(), limite: 6 }) : Promise.resolve({ data: [] }),
+          filtro !== 'procedimento' ? searchCids(query) : Promise.resolve([]),
         ])
         setProcs(procData || [])
         setCids(cidData)
@@ -150,6 +158,7 @@ export function CommandMenu() {
     setOpen(v)
     if (!v) {
       setQuery('')
+      setFiltro('tudo')
       setProcs([])
       setCids([])
     }
@@ -183,6 +192,23 @@ export function CommandMenu() {
               value={query}
               onValueChange={setQuery}
             />
+            {/* Filtros */}
+            <div className="flex gap-1 border-b border-border px-3 py-2">
+              {FILTROS.map(f => (
+                <button
+                  key={f.key}
+                  onClick={() => setFiltro(f.key)}
+                  className={cn(
+                    'rounded-full px-3 py-1 text-xs font-medium transition',
+                    filtro === f.key
+                      ? 'bg-primary text-primary-foreground'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
+                  )}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
             <CommandList>
               {!isSearching ? (
                 <CommandGroup heading="Navegação rápida">

@@ -444,84 +444,7 @@ export function Home() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero */}
-      <div className={cn(
-        "relative overflow-hidden",
-        modoUE
-          ? "bg-gradient-to-br from-red-950 via-red-900 to-red-800"
-          : "bg-[#080F1E]"
-      )}>
-        {/* Dot grid */}
-        {!modoUE && (
-          <div className="pointer-events-none absolute inset-0" style={{
-            backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.055) 1px, transparent 1px)',
-            backgroundSize: '28px 28px',
-          }} />
-        )}
-        {/* Glow */}
-        {!modoUE && (
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-72" style={{
-            background: 'radial-gradient(ellipse 80% 100% at 50% -5%, rgba(56,120,255,0.18) 0%, transparent 70%)',
-          }} />
-        )}
-        {/* Bottom fade */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-10"
-          style={{ background: 'linear-gradient(to bottom, transparent, rgba(0,0,0,0.18))' }} />
-
-        <div className="relative mx-auto max-w-3xl px-4 pb-12 pt-10 text-center">
-          <Link to="/" className="block hover:opacity-80 transition-opacity">
-            <h1 className="text-6xl text-white"
-                style={{ fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '0.08em' }}>SIGTAPP</h1>
-          </Link>
-          <p className={cn("mt-2 text-sm font-medium tracking-wide", modoUE ? "text-red-300/70" : "text-blue-300/60")}>
-            Procedimentos, Medicamentos e OPM do SUS · CID-10
-          </p>
-          <div className="mt-3 flex justify-center">
-            <HelpButton onClick={() => setHelpOpen(true)} dark />
-          </div>
-          <div className="mt-6">
-            <SearchBar
-              key={location.state?.reset ?? 'initial'}
-              onSearch={handleSearch}
-              loading={loading}
-              initialValue={initialQuery}
-              recentSearches={recentSearches}
-              onSelectRecent={saveRecentSearch}
-              suggestions={[]}
-            />
-          </div>
-
-          {/* Segmented control */}
-          <div className="mt-4 flex justify-center">
-            <div className="relative grid grid-cols-3 rounded-full bg-white/20">
-              {/* Sliding indicator */}
-              <div
-                aria-hidden
-                className="absolute inset-y-0 rounded-full bg-white shadow-sm transition-transform duration-200 ease-in-out"
-                style={{
-                  width: 'calc(100% / 3)',
-                  transform: `translateX(calc(${activeModeIndex} * 100%))`,
-                }}
-              />
-              {SEARCH_MODES.map(({ mode, label }) => (
-                <button
-                  key={mode ?? 'tudo'}
-                  onClick={() => handleModeChange(mode)}
-                  className={`relative z-10 rounded-full px-6 py-1.5 text-center text-xs font-semibold transition-colors duration-150 ${
-                    searchMode === mode
-                      ? modoUE ? 'text-red-700' : 'text-blue-700'
-                      : 'text-white/70 hover:text-white'
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <main className="mx-auto max-w-7xl px-6 py-8">
+      <main className="mx-auto max-w-7xl px-6 py-6">
         {/* Error */}
         {error && (
           <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -938,63 +861,36 @@ export function Home() {
             {/* Painéis */}
             <div className="flex flex-col md:flex-row items-start gap-3">
 
-              {/* Painel 1 — Groups */}
-              <div className={`w-full transition-all duration-300 ease-in-out ${
-                selectedGroup ? 'md:w-52 md:shrink-0' : ''
-              }`}>
-                {!selectedGroup ? (
-                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                    {gruposVisiveis.map((g) => {
-                      const estilo = GRUPO_MAP[g.co_grupo]
-                      if (!estilo) return null
-                      return (
-                        <button
-                          key={g.co_grupo}
-                          onClick={() => handleGroupClick(g)}
-                          className="group flex items-center gap-3 overflow-hidden rounded-xl
-                                     bg-card border border-border p-4 shadow-[0_2px_8px_rgba(15,23,42,0.06),0_1px_2px_rgba(15,23,42,0.04)] text-left transition
-                                     hover:shadow-[0_6px_20px_rgba(15,23,42,0.10),0_2px_6px_rgba(15,23,42,0.06)] hover:-translate-y-0.5 active:translate-y-0"
-                        >
-                          <span className={`shrink-0 flex h-8 w-8 items-center justify-center rounded-lg text-sm font-bold ${estilo.bg} ${estilo.text}`}>
-                            {g.co_grupo}
-                          </span>
-                          <p className="text-sm font-semibold leading-snug text-foreground">
-                            {g.no_grupo}
-                          </p>
-                        </button>
-                      )
-                    })}
-                  </div>
-                ) : (
-                  <div className="overflow-hidden rounded-xl bg-card border border-border shadow-[0_2px_8px_rgba(15,23,42,0.06),0_1px_2px_rgba(15,23,42,0.04)]">
-                    {gruposVisiveis.map((g) => {
-                      const estilo = GRUPO_MAP[g.co_grupo]
-                      if (!estilo) return null
-                      const isActive = g.co_grupo === selectedGroup.co_grupo
-                      return (
-                        <button
-                          key={g.co_grupo}
-                          onClick={() => handleGroupClick(g)}
-                          className={cn(
-                            "relative flex w-full items-center gap-2.5 overflow-hidden border-b border-border px-3 py-2.5 text-left transition last:border-0",
-                            isActive
-                              ? dark ? cn("bg-[rgba(56,189,248,0.08)]", estilo.text, "font-medium") : cn(estilo.bg, estilo.text, "font-medium")
-                              : "text-muted-foreground hover:bg-secondary hover:text-foreground"
-                          )}
-                        >
-                          <div className={cn("absolute left-0 top-0 h-full w-[3px]", isActive ? estilo.dot : "bg-slate-100")} />
-                          <span className={cn(
-                            "ml-1 flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded text-[10px] font-bold",
-                            isActive ? cn(estilo.dot, "text-white") : "bg-slate-100 text-slate-400"
-                          )}>
-                            {g.co_grupo}
-                          </span>
-                          <span className="text-xs leading-snug">{estilo.no}</span>
-                        </button>
-                      )
-                    })}
-                  </div>
-                )}
+              {/* Painel 1 — Groups (sempre coluna única) */}
+              <div className="w-52 shrink-0">
+                <div className="overflow-hidden rounded-xl bg-card border border-border shadow-sm">
+                  {gruposVisiveis.map((g) => {
+                    const estilo = GRUPO_MAP[g.co_grupo]
+                    if (!estilo) return null
+                    const isActive = selectedGroup?.co_grupo === g.co_grupo
+                    return (
+                      <button
+                        key={g.co_grupo}
+                        onClick={() => handleGroupClick(g)}
+                        className={cn(
+                          "relative flex w-full items-center gap-2.5 overflow-hidden border-b border-border px-3 py-2.5 text-left transition last:border-0",
+                          isActive
+                            ? dark ? cn("bg-[rgba(56,189,248,0.08)]", estilo.text, "font-medium") : cn(estilo.bg, estilo.text, "font-medium")
+                            : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                        )}
+                      >
+                        <div className={cn("absolute left-0 top-0 h-full w-[3px]", isActive ? estilo.dot : "opacity-0")} />
+                        <span className={cn(
+                          "ml-1 flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded text-[10px] font-bold",
+                          isActive ? cn(estilo.dot, "text-white") : cn(estilo.bg, estilo.text)
+                        )}>
+                          {g.co_grupo}
+                        </span>
+                        <span className="text-xs leading-snug">{estilo.no}</span>
+                      </button>
+                    )
+                  })}
+                </div>
               </div>
 
               {/* Painel 2 — Subgrupos */}
