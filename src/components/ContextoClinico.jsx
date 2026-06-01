@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import { toast } from 'sonner'
 import { useTheme } from '../contexts/ThemeContext'
 import { supabase } from '../lib/supabase'
 import { formatBRL, formatCodigo } from '../utils/formatters'
@@ -35,6 +36,13 @@ function ProcReg({ p, dark }) {
   const grupo = p.grupo === '03' ? 'Clínico' : 'Cirúrgico'
   const corGrupo = p.grupo === '03' ? 'text-[#38bdf8]' : 'text-[#fb923c]'
 
+  function copiar(e) {
+    e.preventDefault()
+    e.stopPropagation()
+    navigator.clipboard.writeText(p.co_procedimento)
+    toast.success('Código copiado!', { duration: 1500 })
+  }
+
   return (
     <Link
       to={`/procedimento/${p.co_procedimento}`}
@@ -49,6 +57,16 @@ function ProcReg({ p, dark }) {
         <div className="flex items-center gap-2 mb-0.5">
           <span className="font-mono text-[10px] text-muted-foreground">{formatCodigo(p.co_procedimento)}</span>
           <span className={cn('text-[10px] font-semibold', corGrupo)}>{grupo}</span>
+          <button
+            onClick={copiar}
+            title="Copiar código"
+            className="rounded p-0.5 text-muted-foreground/40 hover:text-muted-foreground transition"
+          >
+            <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+          </button>
         </div>
         <p className="text-xs font-medium text-foreground leading-snug">{p.no_procedimento}</p>
       </div>
