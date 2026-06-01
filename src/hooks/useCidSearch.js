@@ -35,8 +35,21 @@ export function useCidSearch() {
 
     if (isCidCode) {
       setMeta({ original: q, expanded: q, substituicoes: [] })
-      // Normaliza removendo ponto (I50.0 → I500) e busca por prefixo
       const code = q.replace('.', '').toUpperCase()
+
+      // Código de categoria (3 chars, ex: X70, I61): busca exata primeiro
+      // Evita expandir para dezenas de subcódigos desnecessários
+      if (code.length === 3) {
+        const { data, error: err } = await supabase
+          .from('cid')
+          .select('co_cid, no_cid, tp_sexo')
+          .eq('co_cid', code)
+          .limit(1)
+        if (err) { setError(err.message); setResults([]) }
+        else if (data && data.length > 0) { setResults(data); setLoading(false); return }
+        // Se não encontrou exato, cai no prefixo abaixo
+      }
+
       const { data, error: err } = await supabase
         .from('cid')
         .select('co_cid, no_cid, tp_sexo')
