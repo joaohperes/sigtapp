@@ -174,25 +174,25 @@ export function ProcedureDetail() {
 
           {/* Coluna esquerda — Valores */}
           <div className="space-y-3">
-            <div className="rounded-xl bg-slate-900 p-5 shadow-lg">
+            <div className="rounded-xl bg-card border border-border p-5 shadow-lg">
               <p className="mb-4 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Composição do valor</p>
               <div className="space-y-3">
                 <ValueRow label="Ambulatorial (SA)" value={data.vl_sa} />
                 <ValueRow label="Hospitalar (SH)" value={data.vl_sh} />
                 <ValueRow label="Profissional (SP)" value={data.vl_sp} />
               </div>
-              <div className="mt-4 flex items-center justify-between border-t border-white/10 pt-4">
+              <div className="mt-4 flex items-center justify-between border-t border-border pt-4">
                 <p className="text-sm font-semibold text-muted-foreground/50">Total SUS</p>
                 <p className="text-xl font-bold tabular-nums text-emerald-400">{formatBRL(total)}</p>
               </div>
             </div>
             {data.qt_dias_perman > 0 && data.qt_dias_perman < 9999 && (
-              <div className="rounded-xl border border-blue-800/40 bg-blue-950 p-4 shadow-sm">
+              <div className="rounded-xl border border-blue-500/30 bg-blue-500/10 p-4 shadow-sm">
                 <p className="text-xs text-blue-400">Permanência mínima (AIH)</p>
-                <p className="mt-1 text-lg font-bold tabular-nums text-blue-200">
+                <p className="mt-1 text-lg font-bold tabular-nums text-blue-300">
                   {data.qt_dias_perman} {data.qt_dias_perman === 1 ? 'dia' : 'dias'}
                 </p>
-                <p className="mt-1 text-xs text-blue-500">
+                <p className="mt-1 text-xs text-blue-400/70">
                   Pagamento a partir de {data.qt_dias_perman + 1} dias
                 </p>
               </div>
@@ -202,7 +202,7 @@ export function ProcedureDetail() {
           {/* Coluna central — Classificação + Descrição */}
           <div className="space-y-4">
             {(data.no_grupo || data.no_subgrupo || data.no_forma_org) && (
-              <div className="rounded-xl bg-white p-5 shadow-[0_2px_8px_rgba(15,23,42,0.06),0_1px_2px_rgba(15,23,42,0.04)]">
+              <div className="rounded-xl bg-card border border-border p-5 shadow-sm">
                 <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                   Classificação
                 </h2>
@@ -227,7 +227,7 @@ export function ProcedureDetail() {
                           <TooltipProvider>
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <span className="cursor-default rounded-full bg-violet-100 px-2 py-0.5 text-xs font-medium text-violet-700">SIA</span>
+                                <span className="cursor-default rounded-full bg-violet-500/15 px-2 py-0.5 text-xs font-medium text-violet-400">SIA</span>
                               </TooltipTrigger>
                               <TooltipContent className="max-w-[200px] text-xs">
                                 Sistema de Informações Ambulatoriais — procedimento cobrado via BPA (ambulatório)
@@ -239,7 +239,7 @@ export function ProcedureDetail() {
                           <TooltipProvider>
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <span className="cursor-default rounded-full bg-orange-100 px-2 py-0.5 text-xs font-medium text-orange-700">SIH</span>
+                                <span className="cursor-default rounded-full bg-orange-500/15 px-2 py-0.5 text-xs font-medium text-orange-400">SIH</span>
                               </TooltipTrigger>
                               <TooltipContent className="max-w-[200px] text-xs">
                                 Sistema de Informações Hospitalares — procedimento cobrado via AIH (internação)
@@ -255,7 +255,7 @@ export function ProcedureDetail() {
             )}
 
             {data.ds_procedimento && (
-              <div className="rounded-xl bg-white p-5 shadow-[0_2px_8px_rgba(15,23,42,0.06),0_1px_2px_rgba(15,23,42,0.04)]">
+              <div className="rounded-xl bg-card border border-border p-5 shadow-sm">
                 <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                   Descrição
                 </h2>
@@ -269,7 +269,7 @@ export function ProcedureDetail() {
             <div className="space-y-4">
 
           {cids.length > 0 && (
-            <div className="rounded-xl bg-white p-5 shadow-[0_2px_8px_rgba(15,23,42,0.06),0_1px_2px_rgba(15,23,42,0.04)]">
+            <div className="rounded-xl bg-card border border-border p-5 shadow-sm">
               <div className="mb-3 flex items-center justify-between">
                 <h2 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                   CIDs relacionados
@@ -281,7 +281,7 @@ export function ProcedureDetail() {
                 {cidsPrincipais.length > 0 && (
                   <div>
                     <p className="mb-2 text-xs font-medium text-muted-foreground/70">Principais</p>
-                    <div className="divide-y divide-slate-100 rounded-lg border border-slate-100">
+                    <div className="divide-y divide-border rounded-lg border border-border">
                       {cidsPrincipais.map((c) => (
                         <CidRow key={c.co_cid} cid={c} principal />
                       ))}
@@ -294,7 +294,7 @@ export function ProcedureDetail() {
                     {cidsPrincipais.length > 0 && (
                       <p className="mb-2 text-xs font-medium text-muted-foreground/70">Secundários</p>
                     )}
-                    <div className="divide-y divide-slate-100 rounded-lg border border-slate-100">
+                    <div className="divide-y divide-border rounded-lg border border-border">
                       {cidsSecundarios.map((c) => (
                         <CidRow key={c.co_cid} cid={c} />
                       ))}
@@ -326,7 +326,7 @@ function ValueRow({ label, value }) {
   return (
     <div className="flex items-center justify-between">
       <p className="text-xs text-muted-foreground/70">{label}</p>
-      <p className="tabular-nums text-sm font-medium text-slate-200">{formatBRL(value)}</p>
+      <p className="tabular-nums text-sm font-medium text-foreground">{formatBRL(value)}</p>
     </div>
   )
 }
@@ -371,7 +371,7 @@ function isProgramaSUS(nome) {
 function HabRow({ h }) {
   return (
     <div className="flex items-center gap-3 px-3 py-2">
-      <span className="shrink-0 font-mono text-xs font-semibold text-teal-600">{h.co_habilitacao}</span>
+      <span className="shrink-0 font-mono text-xs font-semibold text-teal-400">{h.co_habilitacao}</span>
       <span className="text-sm text-foreground/90">{toSentenceCase(h.no_habilitacao)}</span>
     </div>
   )
@@ -384,28 +384,28 @@ function HabilitacoesCard({ habilitacoes }) {
   return (
     <div className="space-y-3">
       {reais.length > 0 && (
-        <div className="rounded-xl bg-white p-5 shadow-[0_2px_8px_rgba(15,23,42,0.06),0_1px_2px_rgba(15,23,42,0.04)]">
+        <div className="rounded-xl bg-card border border-border p-5 shadow-sm">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Habilitações necessárias</h2>
             <span className="text-xs text-muted-foreground/70">{reais.length}</span>
           </div>
-          <div className="divide-y divide-slate-100 rounded-lg border border-slate-100">
+          <div className="divide-y divide-border rounded-lg border border-border">
             {reais.map(h => <HabRow key={h.co_habilitacao} h={h} />)}
           </div>
         </div>
       )}
       {programas.length > 0 && (
-        <div className="rounded-xl border border-violet-200 bg-violet-50 shadow-sm overflow-hidden">
+        <div className="rounded-xl border border-violet-500/30 bg-violet-500/10 shadow-sm overflow-hidden">
           <button
             onClick={() => setOpen(o => !o)}
             className="flex w-full items-center justify-between px-5 py-4 text-left"
           >
             <div className="flex items-center gap-2">
-              <svg className="h-4 w-4 text-violet-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="h-4 w-4 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
               </svg>
-              <h2 className="text-sm font-semibold text-violet-800">Credenciamentos em programas</h2>
-              <span className="rounded-full bg-violet-200 px-2 py-0.5 text-xs font-medium text-violet-700">{programas.length}</span>
+              <h2 className="text-sm font-semibold text-violet-300">Credenciamentos em programas</h2>
+              <span className="rounded-full bg-violet-500/20 px-2 py-0.5 text-xs font-medium text-violet-300">{programas.length}</span>
             </div>
             <svg
               className={`h-4 w-4 text-violet-400 transition-transform ${open ? 'rotate-180' : ''}`}
@@ -415,7 +415,7 @@ function HabilitacoesCard({ habilitacoes }) {
             </svg>
           </button>
           {open && (
-            <div className="border-t border-violet-200 bg-white divide-y divide-slate-100">
+            <div className="border-t border-violet-500/20 bg-card divide-y divide-border">
               {programas.map(h => <HabRow key={h.co_habilitacao} h={h} />)}
             </div>
           )}
@@ -428,19 +428,19 @@ function HabilitacoesCard({ habilitacoes }) {
 function CompatCard({ compatibilidades }) {
   const [open, setOpen] = useState(false)
   return (
-    <div className="rounded-xl border border-blue-200 bg-blue-50 shadow-sm overflow-hidden">
+    <div className="rounded-xl border border-blue-500/30 bg-blue-500/10 shadow-sm overflow-hidden">
       <button
         onClick={() => setOpen(o => !o)}
         className="flex w-full items-center justify-between px-5 py-4 text-left"
       >
         <div className="flex items-center gap-2">
-          <svg className="h-4 w-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="h-4 w-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
           </svg>
-          <h2 className="text-sm font-semibold text-blue-800">
+          <h2 className="text-sm font-semibold text-blue-300">
             Pode cobrar junto com
           </h2>
-          <span className="rounded-full bg-blue-200 px-2 py-0.5 text-xs font-medium text-blue-700">{compatibilidades.length}</span>
+          <span className="rounded-full bg-blue-500/20 px-2 py-0.5 text-xs font-medium text-blue-300">{compatibilidades.length}</span>
         </div>
         <svg
           className={`h-4 w-4 text-blue-400 transition-transform ${open ? 'rotate-180' : ''}`}
@@ -450,18 +450,18 @@ function CompatCard({ compatibilidades }) {
         </svg>
       </button>
       {open && (
-        <div className="border-t border-blue-200 bg-white">
-          <div className="divide-y divide-slate-100 max-h-[60vh] overflow-y-auto">
+        <div className="border-t border-blue-500/20 bg-card">
+          <div className="divide-y divide-border max-h-[60vh] overflow-y-auto">
             {compatibilidades.map((c) => (
               <Link
                 key={c.co_procedimento_compativel}
                 to={`/procedimento/${c.co_procedimento_compativel}`}
-                className="flex items-baseline gap-3 px-5 py-2.5 hover:bg-blue-50 transition"
+                className="flex items-baseline gap-3 px-5 py-2.5 hover:bg-secondary transition"
               >
-                <span className="shrink-0 font-mono text-xs font-semibold text-blue-600">{formatCodigo(c.co_procedimento_compativel)}</span>
+                <span className="shrink-0 font-mono text-xs font-semibold text-blue-400">{formatCodigo(c.co_procedimento_compativel)}</span>
                 <span className="flex-1 text-sm text-foreground/90">{toSentenceCase(c.no_procedimento_compativel)}</span>
                 {c.qt_permitida > 0 && (
-                  <span className="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-xs text-muted-foreground">máx {c.qt_permitida}x</span>
+                  <span className="shrink-0 rounded-full bg-secondary px-2 py-0.5 text-xs text-muted-foreground">máx {c.qt_permitida}x</span>
                 )}
               </Link>
             ))}
