@@ -81,25 +81,24 @@ function Chip({ c, cor, dark }) {
       to={`/?q=${encodeURIComponent(c.co_cid)}&ctx=1`}
       title={c.co_cid}
       className={cn(
-        'inline-flex items-center rounded-md border px-2 py-0.5 text-[11px] font-medium transition-all whitespace-nowrap',
+        'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition-all',
         cor.chip
       )}
     >
+      <span className="font-mono text-[9px] opacity-50 shrink-0 tabular-nums">{c.co_cid}</span>
+      <span className={cn('h-2.5 w-px shrink-0 opacity-25', dark ? 'bg-white' : 'bg-current')} />
       {c.label}
     </Link>
   )
 }
 
 function GrupoCard({ grupo, dark }) {
-  const [expandido, setExpandido] = useState(false)
   const corMap = dark ? COR_MAP : COR_MAP_LIGHT
   const cor = corMap[grupo.cor] || corMap.blue
-  const temMais = grupo.cids.length > CHIPS_PREVIEW
-  const visiveis = expandido ? grupo.cids : grupo.cids.slice(0, CHIPS_PREVIEW)
 
   return (
     <div className={cn(
-      'rounded-xl border overflow-hidden flex flex-col',
+      'rounded-xl border overflow-hidden',
       dark ? 'border-[rgba(255,255,255,0.07)] bg-[#0d1424]' : 'border-border bg-card'
     )}>
       {/* Header */}
@@ -110,32 +109,9 @@ function GrupoCard({ grupo, dark }) {
       </div>
 
       {/* Chips */}
-      <div className="px-2.5 pt-2 pb-2 flex flex-wrap gap-1 flex-1">
-        {visiveis.map(c => <Chip key={c.co_cid} c={c} cor={cor} dark={dark} />)}
-        {temMais && !expandido && (
-          <button
-            onClick={() => setExpandido(true)}
-            className="inline-flex items-center rounded-md border border-dashed px-2 py-0.5 text-[11px] font-medium text-muted-foreground hover:text-foreground transition-all border-muted-foreground/30 hover:border-muted-foreground/60"
-          >
-            +{grupo.cids.length - CHIPS_PREVIEW}
-          </button>
-        )}
+      <div className="px-2.5 py-2 flex flex-wrap gap-1.5">
+        {grupo.cids.map(c => <Chip key={c.co_cid} c={c} cor={cor} dark={dark} />)}
       </div>
-
-      {/* Ver menos */}
-      {expandido && (
-        <button
-          onClick={() => setExpandido(false)}
-          className={cn(
-            'w-full px-3 py-1 text-[10px] font-medium text-center transition border-t',
-            dark
-              ? 'border-[rgba(255,255,255,0.05)] text-muted-foreground/50 hover:text-muted-foreground'
-              : 'border-border/40 text-muted-foreground/50 hover:text-muted-foreground'
-          )}
-        >
-          ver menos
-        </button>
-      )}
     </div>
   )
 }
