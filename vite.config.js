@@ -31,11 +31,7 @@ export default defineConfig({
         runtimeCaching: [
           {
             urlPattern: ({ url }) => url.hostname.includes('supabase.co'),
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'supabase-cache',
-              expiration: { maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 },
-            },
+            handler: 'NetworkOnly',
           },
         ],
       },
