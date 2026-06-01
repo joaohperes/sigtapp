@@ -187,34 +187,14 @@ export function DiagnosticoPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero */}
-      <div className={cn(
-        'relative overflow-hidden',
-        modoUE
-          ? 'bg-gradient-to-br from-red-950 via-red-900 to-red-800'
-          : 'bg-[#080F1E]'
-      )}>
-        {!modoUE && (
-          <div className="pointer-events-none absolute inset-0" style={{
-            backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.055) 1px, transparent 1px)',
-            backgroundSize: '28px 28px',
-          }} />
-        )}
-        {!modoUE && (
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-72" style={{
-            background: 'radial-gradient(ellipse 80% 100% at 50% -5%, rgba(99,102,241,0.18) 0%, transparent 70%)',
-          }} />
-        )}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-10"
-          style={{ background: 'linear-gradient(to bottom, transparent, rgba(0,0,0,0.18))' }} />
-
-        <div className="relative mx-auto max-w-3xl px-4 py-4">
-          {/* Campo de busca */}
-          <div className="relative">
-            <div className="pointer-events-none absolute inset-y-0 left-4 flex items-center">
+      {/* Busca inline — discreta, sem hero */}
+      <div className="border-b border-border bg-background">
+        <div className="mx-auto max-w-3xl px-4 py-3">
+          <div className="relative flex items-center gap-3">
+            <div className="pointer-events-none absolute inset-y-0 left-3 flex items-center">
               {loading
-                ? <svg className="h-5 w-5 animate-spin text-primary" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" /></svg>
-                : <svg className="h-5 w-5 text-white/40" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clipRule="evenodd" /></svg>
+                ? <svg className="h-4 w-4 animate-spin text-muted-foreground" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" /></svg>
+                : <svg className="h-4 w-4 text-muted-foreground/50" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clipRule="evenodd" /></svg>
               }
             </div>
             <input
@@ -223,27 +203,22 @@ export function DiagnosticoPage() {
               value={value}
               onChange={handleChange}
               autoFocus
-              placeholder="pneumonia, infarto, AVC, sepse, fratura..."
-              className="w-full rounded-xl border-0 bg-white/10 text-white py-4 pl-12 pr-12 text-base shadow-lg placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-white/30"
+              placeholder="Buscar diagnóstico — pneumonia, infarto, AVC, sepse..."
+              className={cn(
+                'w-full rounded-lg border bg-card py-2.5 pl-9 pr-8 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/30 transition',
+                dark ? 'border-border' : 'border-border'
+              )}
             />
             {value && (
               <button
                 onClick={() => { setValue(''); setSearchParams({}); search(''); inputRef.current?.focus() }}
-                className="absolute inset-y-0 right-4 flex items-center text-white/40 hover:text-white/80 transition"
+                className="absolute inset-y-0 right-2 flex items-center text-muted-foreground/50 hover:text-muted-foreground transition"
               >
-                <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" /></svg>
+                <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" /></svg>
               </button>
             )}
           </div>
 
-          <div className="mt-3 flex items-center justify-center gap-4 text-xs">
-            <button
-              onClick={() => navigate('/procedimentos')}
-              className="text-white/50 hover:text-white/80 transition underline-offset-2 hover:underline"
-            >
-              Buscar código de procedimento →
-            </button>
-          </div>
         </div>
       </div>
 
