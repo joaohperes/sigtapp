@@ -1,5 +1,6 @@
 import { Component } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { DiagnosticoPage } from './pages/DiagnosticoPage'
 import { Home } from './pages/Home'
 import { ProcedureDetail } from './pages/ProcedureDetail'
 import { GroupPage } from './pages/GroupPage'
@@ -43,7 +44,8 @@ function AppShell() {
       <AppNav />
       <ErrorBoundary>
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<DiagnosticoPage />} />
+          <Route path="/procedimentos" element={<Home />} />
           <Route path="/grupo/:co" element={<GroupPage />} />
           <Route path="/procedimento/:codigo" element={<ProcedureDetail />} />
           <Route path="/cid" element={<CidSearch />} />

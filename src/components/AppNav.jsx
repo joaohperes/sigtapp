@@ -67,8 +67,8 @@ export function AppNav() {
 
         {/* Nav links */}
         <div className="flex items-center gap-0.5">
-          <NavLink to="/" label="Busca" active={location.pathname === '/'} modoUE={modoUE} dark={dark} />
-          <NavLink to="/cid" label="CID-10" active={location.pathname === '/cid'} modoUE={modoUE} dark={dark} />
+          <NavLink to="/" label="Diagnóstico" active={location.pathname === '/'} modoUE={modoUE} dark={dark} />
+          <NavLink to="/procedimentos" label="Procedimentos" active={location.pathname === '/procedimentos'} modoUE={modoUE} dark={dark} />
           <NavLink to="/anamnese" label="Anamnese IA" active={location.pathname === '/anamnese'} modoUE={modoUE} dark={dark} />
           <NavLink to="/calculadora" label="Calculadora" active={location.pathname === '/calculadora'} modoUE={modoUE} dark={dark} />
           <NavLink
