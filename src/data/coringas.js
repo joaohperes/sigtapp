@@ -138,8 +138,9 @@ export const CORINGAS_GRUPOS = [
       { co_cid: 'F419', label: 'Transtorno de ansiedade'},
       { co_cid: 'F109', label: 'Sínd. abstinência álcool'},
       { co_cid: 'F119', label: 'Abstinência opioide'    },
-      { co_cid: 'T39',  label: 'Intoxicação por fármacos'},
-      { co_cid: 'X70',  label: 'Tentativa de suicídio'  },
+      { co_cid: 'T399', label: 'Intoxicação por fármacos'},
+      { co_cid: 'T650', label: 'Intoxicação por cianeto'},
+      { co_cid: 'F103', label: 'Sínd. abstinência álcool c/ convulsão'},
     ],
   },
   {
