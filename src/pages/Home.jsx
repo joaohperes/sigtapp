@@ -860,9 +860,6 @@ export function Home() {
         {/* ── Estado inicial — grupos com drill-down ── */}
         {!searched && (
           <div>
-            {/* Coringas — diagnósticos frequentes do PS organizados por categoria */}
-            <CoringasDoPS dark={dark} />
-
             {/* Favoritos */}
             {favoritos.length > 0 && (
               <div className="mb-8">

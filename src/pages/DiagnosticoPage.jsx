@@ -208,17 +208,9 @@ export function DiagnosticoPage() {
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-10"
           style={{ background: 'linear-gradient(to bottom, transparent, rgba(0,0,0,0.18))' }} />
 
-        <div className="relative mx-auto max-w-3xl px-4 pb-6 pt-6 text-center">
-          <Link to="/" className="block hover:opacity-80 transition-opacity">
-            <h1 className="text-4xl text-white"
-                style={{ fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '0.08em' }}>SIGTAPP</h1>
-          </Link>
-          <p className={cn('mt-1 text-sm font-medium tracking-wide', modoUE ? 'text-red-300/70' : 'text-blue-300/60')}>
-            Busque pelo diagnóstico — CID-10, procedimentos e regulação SUS
-          </p>
-
+        <div className="relative mx-auto max-w-3xl px-4 py-4">
           {/* Campo de busca */}
-          <div className="relative mt-6">
+          <div className="relative">
             <div className="pointer-events-none absolute inset-y-0 left-4 flex items-center">
               {loading
                 ? <svg className="h-5 w-5 animate-spin text-primary" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" /></svg>

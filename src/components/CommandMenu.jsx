@@ -272,9 +272,9 @@ export function CommandMenu() {
                 <div className="px-3 py-2">
                   <button
                     onClick={() => handleSelect(`/?q=${encodeURIComponent(query.trim())}`)}
-                    className="w-full rounded-lg px-3 py-2 text-left text-xs text-slate-500 transition hover:bg-slate-50"
+                    className="w-full rounded-lg px-3 py-2 text-left text-xs text-muted-foreground transition hover:bg-secondary"
                   >
-                    Ver todos os resultados para <span className="font-medium text-slate-700">"{query}"</span> →
+                    Ver todos os resultados para <span className="font-medium text-foreground">"{query}"</span> →
                   </button>
                 </div>
               </>
