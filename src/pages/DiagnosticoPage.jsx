@@ -202,7 +202,7 @@ export function DiagnosticoPage() {
         )}
         {!modoUE && (
           <div className="pointer-events-none absolute inset-x-0 top-0 h-72" style={{
-            background: 'radial-gradient(ellipse 80% 100% at 50% -5%, rgba(56,120,255,0.18) 0%, transparent 70%)',
+            background: 'radial-gradient(ellipse 80% 100% at 50% -5%, rgba(99,102,241,0.18) 0%, transparent 70%)',
           }} />
         )}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-10"

@@ -11,8 +11,8 @@
     --card-foreground: 222 25% 10%;
     --popover: 0 0% 100%;
     --popover-foreground: 222 25% 10%;
-    --primary: 199 89% 58%;        /* #38bdf8 — mesmo accent do hemo-choque */
-    --primary-foreground: 222 47% 11%;
+    --primary: 239 84% 67%;        /* #6366f1 — indigo */
+    --primary-foreground: 0 0% 100%;
     --secondary: 220 18% 93%;
     --secondary-foreground: 222 20% 30%;
     --muted: 220 18% 93%;
@@ -23,11 +23,11 @@
     --destructive-foreground: 0 0% 98%;
     --border: 220 14% 88%;
     --input: 220 14% 88%;
-    --ring: 199 89% 58%;
+    --ring: 239 84% 67%;
     --radius: 0.625rem;
 
     /* Brand colors usadas diretamente como CSS vars */
-    --clr-accent: #38bdf8;
+    --clr-accent: #6366f1;
     --clr-green: #34d399;
     --clr-amber: #fbbf24;
     --clr-red: #f87171;
@@ -45,7 +45,7 @@
     --card-foreground: 213 27% 92%;
     --popover: 222 35% 12%;
     --popover-foreground: 213 27% 92%;
-    --primary: 199 89% 58%;        /* #38bdf8 */
+    --primary: 239 84% 67%;        /* #6366f1 */
     --primary-foreground: 222 47% 11%;
     --secondary: 222 28% 17%;      /* #1a2236 */
     --secondary-foreground: 213 20% 80%;
@@ -57,7 +57,7 @@
     --destructive-foreground: 0 0% 98%;
     --border: 213 20% 14%;         /* rgba(255,255,255,0.08) approx */
     --input: 213 20% 14%;
-    --ring: 199 89% 58%;
+    --ring: 239 84% 67%;
 
     --clr-muted: #8896a8;
   }
