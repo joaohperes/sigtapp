@@ -60,11 +60,23 @@ function ProcReg({ p, dark }) {
   )
 }
 
+const CLINICOS_PREVIEW = 5
+
 // Renderiza lista de procedimentos com clínicos em destaque e cirúrgicos colapsáveis
 // somente se há clínicos. Se só há cirúrgicos, exibe todos diretamente.
 function ProcList({ procs, dark, labelClinicos = 'Clínicos — use para regulação' }) {
   const [cirurgicosAbertos, setCirurgicosAbertos] = useState(false)
-  const clinicos = procs.filter(p => p.grupo === '03')
+  const [clinicosExpandidos, setClinicosExpandidos] = useState(false)
+
+  // Prioriza procedimentos com valor > 0, depois os demais
+  const clinicosRaw = procs.filter(p => p.grupo === '03')
+  const clinicosComValor = clinicosRaw.filter(p => (parseFloat(p.vl_sh) || 0) + (parseFloat(p.vl_sa) || 0) + (parseFloat(p.vl_sp) || 0) > 0)
+  const clinicosSemValor = clinicosRaw.filter(p => (parseFloat(p.vl_sh) || 0) + (parseFloat(p.vl_sa) || 0) + (parseFloat(p.vl_sp) || 0) === 0)
+  // Mostra primeiro os com valor, depois sem valor — limita preview ao total
+  const clinicos = [...clinicosComValor, ...clinicosSemValor]
+  const clinicosVisiveis = clinicosExpandidos ? clinicos : clinicos.slice(0, CLINICOS_PREVIEW)
+  const temMaisClinicos = clinicos.length > CLINICOS_PREVIEW
+
   const cirurgicos = procs.filter(p => p.grupo === '04')
   const soCirurgicos = clinicos.length === 0 && cirurgicos.length > 0
 
@@ -88,7 +100,17 @@ function ProcList({ procs, dark, labelClinicos = 'Clínicos — use para regula�
               <p className="text-[10px] font-semibold uppercase tracking-wider text-[#38bdf8] mb-1">
                 {labelClinicos}
               </p>
-              {clinicos.map(p => <ProcReg key={p.co_procedimento} p={p} dark={dark} />)}
+              {clinicosVisiveis.map(p => <ProcReg key={p.co_procedimento} p={p} dark={dark} />)}
+              {temMaisClinicos && (
+                <button
+                  onClick={() => setClinicosExpandidos(v => !v)}
+                  className="text-[10px] font-medium text-muted-foreground hover:text-foreground transition"
+                >
+                  {clinicosExpandidos
+                    ? 'Ver menos'
+                    : `Ver mais ${clinicos.length - CLINICOS_PREVIEW} procedimentos`}
+                </button>
+              )}
             </div>
           )}
           {cirurgicos.length > 0 && (
@@ -231,13 +253,16 @@ export function ContextoClinico({ cid, autoOpen = false }) {
       const seen = new Map()
       for (const row of (data || [])) {
         if (seen.has(row.co_procedimento)) continue
+        const vl_sh = parseFloat(row.vl_sh) || 0
+        const vl_sa = parseFloat(row.vl_sa) || 0
+        const vl_sp = parseFloat(row.vl_sp) || 0
+        // Ignora procedimentos sem valor (CAPS, residência terapêutica, etc.)
+        if (vl_sh + vl_sa + vl_sp === 0) continue
         seen.set(row.co_procedimento, {
           co_procedimento: row.co_procedimento,
           no_procedimento: row.no_procedimento,
           grupo: '03',
-          vl_sh: parseFloat(row.vl_sh) || 0,
-          vl_sa: parseFloat(row.vl_sa) || 0,
-          vl_sp: parseFloat(row.vl_sp) || 0,
+          vl_sh, vl_sa, vl_sp,
           co_cid_ref: row.co_cid_correlato,
           no_cid_ref: row.no_cid_correlato,
         })
