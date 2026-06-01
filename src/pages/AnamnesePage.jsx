@@ -802,9 +802,7 @@ export function AnamnesePage() {
                   placeholder="Descreva o quadro clínico do paciente: queixas, história, exame físico, hipóteses diagnósticas..."
                   rows={8}
                   className={cn(
-                    "w-full resize-y rounded-lg border p-3 text-sm leading-relaxed focus:outline-none focus:ring-2",
-                    dark
-                      "border-border bg-background text-foreground placeholder:text-muted-foreground/50 focus:border-foreground/30 focus:ring-foreground/10",
+                    "w-full resize-y rounded-lg border border-border bg-background p-3 text-sm leading-relaxed text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:border-foreground/30 focus:ring-foreground/10",
                     modoUE && "focus:border-red-400 focus:ring-red-400/20"
                   )}
                 />
