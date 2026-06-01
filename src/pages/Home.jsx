@@ -857,7 +857,7 @@ export function Home() {
         {!searched && (
           <div>
             {/* Coringas — diagnósticos frequentes do PS organizados por categoria */}
-            <CorингасDoPS dark={dark} />
+            <CoringasDoPS dark={dark} />
 
             {/* Favoritos */}
             {favoritos.length > 0 && (
