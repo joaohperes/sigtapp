@@ -32,7 +32,7 @@ function PillIA({ p, dark, onClick }) {
 function ProcReg({ p, dark }) {
   const total = (parseFloat(p.vl_sh) || 0) + (parseFloat(p.vl_sa) || 0) + (parseFloat(p.vl_sp) || 0)
   const grupo = p.grupo === '03' ? 'Clínico' : 'Cirúrgico'
-  const corGrupo = p.grupo === '03' ? 'text-foreground/60' : 'text-orange-400'
+  const corGrupo = p.grupo === '03' ? 'text-emerald-500' : 'text-orange-400'
 
   function copiar(e) {
     e.preventDefault()
@@ -157,7 +157,7 @@ function ProcRegList({ procs, dark }) {
 }
 
 function CorrelatosColapsaveis({ correlatos, dark }) {
-  const [aberto, setAberto] = useState(false)
+  const [aberto, setAberto] = useState(true)
   return (
     <div className="mt-3 pt-3 border-t border-border/50">
       <button
