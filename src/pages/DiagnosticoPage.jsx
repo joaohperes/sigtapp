@@ -132,8 +132,14 @@ export function DiagnosticoPage() {
   }, [])
 
   useEffect(() => {
-    if (initialQuery.trim().length >= 2) search(initialQuery)
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+    if (initialQuery.trim().length >= 2) {
+      setValue(initialQuery)
+      search(initialQuery)
+    } else {
+      setValue('')
+      search('')
+    }
+  }, [initialQuery]) // eslint-disable-line react-hooks/exhaustive-deps
 
   function handleChange(e) {
     const v = e.target.value
