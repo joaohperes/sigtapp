@@ -85,6 +85,10 @@ const COR_MAP = {
   purple: { dot: 'bg-purple-400', label: 'text-purple-400', border: 'border-purple-400/30', activeBg: 'bg-purple-400/10' },
   yellow: { dot: 'bg-yellow-400', label: 'text-yellow-400', border: 'border-yellow-400/30', activeBg: 'bg-yellow-400/10' },
   teal:   { dot: 'bg-teal-400',   label: 'text-teal-400',   border: 'border-teal-400/30',   activeBg: 'bg-teal-400/10'   },
+  green:  { dot: 'bg-green-400',  label: 'text-green-400',  border: 'border-green-400/30',  activeBg: 'bg-green-400/10'  },
+  stone:  { dot: 'bg-stone-400',  label: 'text-stone-300',  border: 'border-stone-400/30',  activeBg: 'bg-stone-400/10'  },
+  indigo: { dot: 'bg-indigo-400', label: 'text-indigo-400', border: 'border-indigo-400/30', activeBg: 'bg-indigo-400/10' },
+  pink:   { dot: 'bg-pink-400',   label: 'text-pink-400',   border: 'border-pink-400/30',   activeBg: 'bg-pink-400/10'   },
 }
 
 function CoringasDoPS({ dark }) {

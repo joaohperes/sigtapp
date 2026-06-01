@@ -8,13 +8,30 @@ import { CORINGAS_GRUPOS } from '../data/coringas'
 import { cn } from '@/lib/utils'
 
 const COR_MAP = {
-  red:    { dot: 'bg-red-400',    label: 'text-red-400',    chip: 'hover:border-red-400/40 hover:text-red-400'     },
-  orange: { dot: 'bg-orange-400', label: 'text-orange-400', chip: 'hover:border-orange-400/40 hover:text-orange-400'},
-  blue:   { dot: 'bg-blue-400',   label: 'text-blue-400',   chip: 'hover:border-blue-400/40 hover:text-blue-400'   },
-  purple: { dot: 'bg-purple-400', label: 'text-purple-400', chip: 'hover:border-purple-400/40 hover:text-purple-400'},
-  yellow: { dot: 'bg-yellow-400', label: 'text-yellow-400', chip: 'hover:border-yellow-400/40 hover:text-yellow-400'},
-  green:  { dot: 'bg-green-400',  label: 'text-green-400',  chip: 'hover:border-green-400/40 hover:text-green-400' },
-  teal:   { dot: 'bg-teal-400',   label: 'text-teal-400',   chip: 'hover:border-teal-400/40 hover:text-teal-400'   },
+  red:    { dot: 'bg-red-400',    label: 'text-red-400',    chip: 'border-red-400/20 text-red-300 hover:border-red-400/60 hover:bg-red-400/10',    header: 'bg-red-400/10'    },
+  orange: { dot: 'bg-orange-400', label: 'text-orange-400', chip: 'border-orange-400/20 text-orange-300 hover:border-orange-400/60 hover:bg-orange-400/10', header: 'bg-orange-400/10' },
+  blue:   { dot: 'bg-blue-400',   label: 'text-blue-400',   chip: 'border-blue-400/20 text-blue-300 hover:border-blue-400/60 hover:bg-blue-400/10',   header: 'bg-blue-400/10'   },
+  purple: { dot: 'bg-purple-400', label: 'text-purple-400', chip: 'border-purple-400/20 text-purple-300 hover:border-purple-400/60 hover:bg-purple-400/10', header: 'bg-purple-400/10' },
+  yellow: { dot: 'bg-yellow-400', label: 'text-yellow-400', chip: 'border-yellow-400/20 text-yellow-300 hover:border-yellow-400/60 hover:bg-yellow-400/10', header: 'bg-yellow-400/10' },
+  green:  { dot: 'bg-green-400',  label: 'text-green-400',  chip: 'border-green-400/20 text-green-300 hover:border-green-400/60 hover:bg-green-400/10',  header: 'bg-green-400/10'  },
+  teal:   { dot: 'bg-teal-400',   label: 'text-teal-400',   chip: 'border-teal-400/20 text-teal-300 hover:border-teal-400/60 hover:bg-teal-400/10',   header: 'bg-teal-400/10'   },
+  stone:  { dot: 'bg-stone-400',  label: 'text-stone-300',  chip: 'border-stone-400/20 text-stone-300 hover:border-stone-400/60 hover:bg-stone-400/10',  header: 'bg-stone-400/10'  },
+  indigo: { dot: 'bg-indigo-400', label: 'text-indigo-400', chip: 'border-indigo-400/20 text-indigo-300 hover:border-indigo-400/60 hover:bg-indigo-400/10', header: 'bg-indigo-400/10' },
+  pink:   { dot: 'bg-pink-400',   label: 'text-pink-400',   chip: 'border-pink-400/20 text-pink-300 hover:border-pink-400/60 hover:bg-pink-400/10',   header: 'bg-pink-400/10'   },
+}
+
+// Light mode equivalents
+const COR_MAP_LIGHT = {
+  red:    { dot: 'bg-red-400',    label: 'text-red-600',    chip: 'border-red-200 text-red-700 hover:border-red-400 hover:bg-red-50',    header: 'bg-red-50'    },
+  orange: { dot: 'bg-orange-400', label: 'text-orange-600', chip: 'border-orange-200 text-orange-700 hover:border-orange-400 hover:bg-orange-50', header: 'bg-orange-50' },
+  blue:   { dot: 'bg-blue-400',   label: 'text-blue-600',   chip: 'border-blue-200 text-blue-700 hover:border-blue-400 hover:bg-blue-50',   header: 'bg-blue-50'   },
+  purple: { dot: 'bg-purple-400', label: 'text-purple-600', chip: 'border-purple-200 text-purple-700 hover:border-purple-400 hover:bg-purple-50', header: 'bg-purple-50' },
+  yellow: { dot: 'bg-yellow-400', label: 'text-yellow-700', chip: 'border-yellow-200 text-yellow-800 hover:border-yellow-400 hover:bg-yellow-50', header: 'bg-yellow-50' },
+  green:  { dot: 'bg-green-400',  label: 'text-green-600',  chip: 'border-green-200 text-green-700 hover:border-green-400 hover:bg-green-50',  header: 'bg-green-50'  },
+  teal:   { dot: 'bg-teal-400',   label: 'text-teal-600',   chip: 'border-teal-200 text-teal-700 hover:border-teal-400 hover:bg-teal-50',   header: 'bg-teal-50'   },
+  stone:  { dot: 'bg-stone-400',  label: 'text-stone-600',  chip: 'border-stone-200 text-stone-700 hover:border-stone-400 hover:bg-stone-50',  header: 'bg-stone-50'  },
+  indigo: { dot: 'bg-indigo-400', label: 'text-indigo-600', chip: 'border-indigo-200 text-indigo-700 hover:border-indigo-400 hover:bg-indigo-50', header: 'bg-indigo-50' },
+  pink:   { dot: 'bg-pink-400',   label: 'text-pink-600',   chip: 'border-pink-200 text-pink-700 hover:border-pink-400 hover:bg-pink-50',   header: 'bg-pink-50'   },
 }
 
 function CidRow({ cid, dark, autoCtx }) {
@@ -56,6 +73,47 @@ function CidRow({ cid, dark, autoCtx }) {
   )
 }
 
+function GrupoCard({ grupo, dark }) {
+  const corMap = dark ? COR_MAP : COR_MAP_LIGHT
+  const cor = corMap[grupo.cor] || corMap.blue
+
+  return (
+    <div className={cn(
+      'rounded-2xl border overflow-hidden',
+      dark ? 'border-[rgba(255,255,255,0.07)] bg-[#0d1424]' : 'border-border bg-card'
+    )}>
+      {/* Header */}
+      <div className={cn('flex items-center gap-2 px-4 py-3', cor.header)}>
+        <span className={cn('h-2 w-2 rounded-full shrink-0', cor.dot)} />
+        <span className={cn('text-xs font-bold tracking-wide', cor.label)}>{grupo.label}</span>
+      </div>
+
+      {/* Chips */}
+      <div className="px-3 py-3 flex flex-wrap gap-1.5">
+        {grupo.cids.map(c => (
+          <Link
+            key={c.co_cid}
+            to={`/?q=${encodeURIComponent(c.co_cid)}&ctx=1`}
+            title={c.co_cid}
+            className={cn(
+              'inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-all',
+              cor.chip
+            )}
+          >
+            <span className={cn(
+              'font-mono text-[9px] opacity-60 shrink-0 tabular-nums',
+            )}>
+              {c.co_cid}
+            </span>
+            <span className={cn('h-2.5 w-px shrink-0 opacity-30', dark ? 'bg-white' : 'bg-current')} />
+            {c.label}
+          </Link>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 export function DiagnosticoPage() {
   const { dark } = useTheme()
   const { modoUE } = useModoUE()
@@ -68,9 +126,6 @@ export function DiagnosticoPage() {
   const [value, setValue] = useState(initialQuery)
   const debounceRef = useRef(null)
   const inputRef = useRef(null)
-
-  // Grupos abertos por padrão: infeccioso e cardiovascular
-  const [abertos, setAbertos] = useState(() => new Set(['infeccioso', 'cardiovascular']))
 
   useEffect(() => {
     document.title = 'SIGTAPP — Diagnóstico e Regulação SUS'
@@ -95,32 +150,38 @@ export function DiagnosticoPage() {
     }, 400)
   }
 
-  function toggleGrupo(id) {
-    setAbertos(prev => {
-      const next = new Set(prev)
-      next.has(id) ? next.delete(id) : next.add(id)
-      return next
-    })
-  }
-
   const searched = value.trim().length >= 2
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero / Busca */}
-      <div className={
+      {/* Hero */}
+      <div className={cn(
+        'relative overflow-hidden',
         modoUE
           ? 'bg-gradient-to-br from-red-950 via-red-900 to-red-800'
-          : dark
-            ? 'bg-gradient-to-br from-[#0A1628] via-[#0D2347] to-[#0F3460]'
-            : 'bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800'
-      }>
-        <div className="mx-auto max-w-3xl px-4 pt-10 pb-10 text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-white font-display" style={{ letterSpacing: '0.08em' }}>
-            SIGTAPP
-          </h1>
-          <p className="mt-1.5 text-sm text-blue-200/80">
-            Busque pelo diagnóstico — encontre CID, procedimentos e códigos de regulação
+          : 'bg-[#080F1E]'
+      )}>
+        {!modoUE && (
+          <div className="pointer-events-none absolute inset-0" style={{
+            backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.055) 1px, transparent 1px)',
+            backgroundSize: '28px 28px',
+          }} />
+        )}
+        {!modoUE && (
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-72" style={{
+            background: 'radial-gradient(ellipse 80% 100% at 50% -5%, rgba(56,120,255,0.18) 0%, transparent 70%)',
+          }} />
+        )}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-10"
+          style={{ background: 'linear-gradient(to bottom, transparent, rgba(0,0,0,0.18))' }} />
+
+        <div className="relative mx-auto max-w-3xl px-4 pb-10 pt-10 text-center">
+          <Link to="/" className="block hover:opacity-80 transition-opacity">
+            <h1 className="text-6xl text-white"
+                style={{ fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '0.08em' }}>SIGTAPP</h1>
+          </Link>
+          <p className={cn('mt-2 text-sm font-medium tracking-wide', modoUE ? 'text-red-300/70' : 'text-blue-300/60')}>
+            Busque pelo diagnóstico — CID-10, procedimentos e regulação SUS
           </p>
 
           {/* Campo de busca */}
@@ -137,7 +198,7 @@ export function DiagnosticoPage() {
               value={value}
               onChange={handleChange}
               autoFocus
-              placeholder="pneumonia, infarto, AVC, sepse, apendicite..."
+              placeholder="pneumonia, infarto, AVC, sepse, fratura..."
               className="w-full rounded-xl border-0 bg-white/10 text-white py-4 pl-12 pr-12 text-base shadow-lg placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-white/30 backdrop-blur-sm"
             />
             {value && (
@@ -150,7 +211,6 @@ export function DiagnosticoPage() {
             )}
           </div>
 
-          {/* Link para busca de procedimentos */}
           <div className="mt-3 flex items-center justify-center gap-4 text-xs">
             <button
               onClick={() => navigate('/procedimentos')}
@@ -162,7 +222,7 @@ export function DiagnosticoPage() {
         </div>
       </div>
 
-      <main className="mx-auto max-w-3xl px-4 py-6">
+      <main className="mx-auto max-w-6xl px-4 py-8">
         {/* Banner sinônimo */}
         {meta?.substituicoes?.length > 0 && (
           <div className="mb-4 flex items-start gap-2.5 rounded-lg border border-amber-200/40 bg-amber-500/10 px-4 py-3 text-sm">
@@ -182,7 +242,7 @@ export function DiagnosticoPage() {
           </div>
         )}
 
-        {/* Resultados */}
+        {/* Resultados de busca */}
         {searched && results.length > 0 && (
           <div className="mb-6">
             <p className="mb-3 text-sm text-muted-foreground">
@@ -209,64 +269,20 @@ export function DiagnosticoPage() {
           </div>
         )}
 
-        {/* Coringas — estado inicial */}
+        {/* Mapa de diagnósticos — estado inicial */}
         {!searched && (
           <div>
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                <svg className="h-4 w-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-                Diagnósticos frequentes do PS
-              </h2>
-              <span className="text-xs text-muted-foreground">clique para ver CID + procedimentos + regulação</span>
+            <div className="mb-5 flex items-center justify-between">
+              <div>
+                <h2 className="text-sm font-semibold text-foreground">Diagnósticos frequentes</h2>
+                <p className="mt-0.5 text-xs text-muted-foreground">Clique em qualquer diagnóstico para ver CID, procedimentos e regulação</p>
+              </div>
             </div>
 
-            <div className="space-y-2">
-              {CORINGAS_GRUPOS.map(grupo => {
-                const cor = COR_MAP[grupo.cor] || COR_MAP.blue
-                const aberto = abertos.has(grupo.id)
-                return (
-                  <div key={grupo.id} className={cn(
-                    'rounded-xl border overflow-hidden',
-                    dark ? 'border-[rgba(255,255,255,0.07)] bg-[#111827]' : 'border-border bg-card'
-                  )}>
-                    <button
-                      onClick={() => toggleGrupo(grupo.id)}
-                      className="flex w-full items-center gap-2.5 px-4 py-3 text-left"
-                    >
-                      <span className={cn('h-2 w-2 rounded-full shrink-0', cor.dot)} />
-                      <span className={cn('text-xs font-semibold flex-1', cor.label)}>{grupo.label}</span>
-                      <span className="text-[10px] text-muted-foreground mr-1">{grupo.cids.length} diagnósticos</span>
-                      <svg className={cn('h-3.5 w-3.5 text-muted-foreground transition-transform shrink-0', aberto ? 'rotate-180' : '')} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </button>
-
-                    {aberto && (
-                      <div className={cn('px-4 pb-3 flex flex-wrap gap-1.5 border-t', dark ? 'border-[rgba(255,255,255,0.05)]' : 'border-border/50')}>
-                        {grupo.cids.map(c => (
-                          <Link
-                            key={c.co_cid}
-                            to={`/?q=${encodeURIComponent(c.co_cid)}&ctx=1`}
-                            title={c.no_cid}
-                            className={cn(
-                              'mt-2 flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition',
-                              dark
-                                ? `border-[rgba(255,255,255,0.08)] bg-[#1a2236] text-[#e8edf5] ${cor.chip}`
-                                : `border-border bg-background text-foreground ${cor.chip}`
-                            )}
-                          >
-                            <span className="font-mono text-[10px] text-muted-foreground shrink-0">{c.co_cid}</span>
-                            <span className={cn('h-3 w-px shrink-0', dark ? 'bg-white/10' : 'bg-border')} />
-                            {c.label}
-                          </Link>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )
-              })}
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {CORINGAS_GRUPOS.map(grupo => (
+                <GrupoCard key={grupo.id} grupo={grupo} dark={dark} />
+              ))}
             </div>
           </div>
         )}
