@@ -10,7 +10,7 @@ import { useGrupos } from '../hooks/useGrupos'
 import { useFavoritos } from '../contexts/FavoritosContext'
 import { useModoUE } from '../contexts/ModoUEContext'
 import { GRUPO_MAP } from '../data/grupos'
-import { CORINGAS_CID } from '../data/coringas'
+import { CORINGAS_GRUPOS } from '../data/coringas'
 import { supabase } from '../lib/supabase'
 import { expandirSinonimos } from '../data/sinonimos'
 import { formatBRL, formatCodigo } from '../utils/formatters'
@@ -75,6 +75,98 @@ function Chevron() {
     <svg className="h-3.5 w-3.5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
     </svg>
+  )
+}
+
+const COR_MAP = {
+  red:    { dot: 'bg-red-400',    label: 'text-red-400',    border: 'border-red-400/30',    activeBg: 'bg-red-400/10'    },
+  orange: { dot: 'bg-orange-400', label: 'text-orange-400', border: 'border-orange-400/30', activeBg: 'bg-orange-400/10' },
+  blue:   { dot: 'bg-blue-400',   label: 'text-blue-400',   border: 'border-blue-400/30',   activeBg: 'bg-blue-400/10'   },
+  purple: { dot: 'bg-purple-400', label: 'text-purple-400', border: 'border-purple-400/30', activeBg: 'bg-purple-400/10' },
+  yellow: { dot: 'bg-yellow-400', label: 'text-yellow-400', border: 'border-yellow-400/30', activeBg: 'bg-yellow-400/10' },
+  teal:   { dot: 'bg-teal-400',   label: 'text-teal-400',   border: 'border-teal-400/30',   activeBg: 'bg-teal-400/10'   },
+}
+
+function CoringasDoPS({ dark }) {
+  const [abertos, setAbertos] = useState(() => new Set(['infeccioso', 'cardiovascular']))
+
+  function toggle(id) {
+    setAbertos(prev => {
+      const next = new Set(prev)
+      next.has(id) ? next.delete(id) : next.add(id)
+      return next
+    })
+  }
+
+  return (
+    <div className="mb-8">
+      <div className="mb-3 flex items-center justify-between">
+        <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
+          <svg className="h-4 w-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+          Coringas do PS
+        </h2>
+        <Link to="/cid" className="text-xs text-primary hover:opacity-80 transition">
+          Busca de CID-10 →
+        </Link>
+      </div>
+
+      <div className="space-y-2">
+        {CORINGAS_GRUPOS.map(grupo => {
+          const cor = COR_MAP[grupo.cor] || COR_MAP.blue
+          const aberto = abertos.has(grupo.id)
+          return (
+            <div key={grupo.id} className={cn(
+              'rounded-xl border overflow-hidden transition-colors',
+              dark ? 'border-[rgba(255,255,255,0.07)] bg-[#111827]' : 'border-border bg-card'
+            )}>
+              {/* Header do grupo */}
+              <button
+                onClick={() => toggle(grupo.id)}
+                className="flex w-full items-center gap-2 px-4 py-2.5 text-left"
+              >
+                <span className={cn('h-2 w-2 rounded-full shrink-0', cor.dot)} />
+                <span className={cn('text-xs font-semibold flex-1', cor.label)}>{grupo.label}</span>
+                <span className="text-[10px] text-muted-foreground mr-1">{grupo.cids.length} CIDs</span>
+                <svg
+                  className={cn('h-3.5 w-3.5 text-muted-foreground transition-transform', aberto ? 'rotate-180' : '')}
+                  fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              {/* Pills do grupo */}
+              {aberto && (
+                <div className={cn(
+                  'px-4 pb-3 pt-0.5 flex flex-wrap gap-1.5 border-t',
+                  dark ? 'border-[rgba(255,255,255,0.05)]' : 'border-border/50'
+                )}>
+                  {grupo.cids.map(c => (
+                    <Link
+                      key={c.co_cid}
+                      to={`/cid?q=${encodeURIComponent(c.co_cid)}&ctx=1`}
+                      title={c.no_cid}
+                      className={cn(
+                        'flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition',
+                        dark
+                          ? `border-[rgba(255,255,255,0.08)] bg-[#1a2236] text-[#e8edf5] hover:${cor.border} hover:${cor.activeBg}`
+                          : `border-border bg-background text-foreground hover:${cor.border} hover:${cor.activeBg}`
+                      )}
+                    >
+                      <span className="font-mono text-[10px] text-muted-foreground shrink-0">{c.co_cid}</span>
+                      <span className={cn('h-3 w-px shrink-0', dark ? 'bg-white/10' : 'bg-border')} />
+                      {c.label}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          )
+        })}
+      </div>
+    </div>
   )
 }
 
@@ -764,40 +856,8 @@ export function Home() {
         {/* ── Estado inicial — grupos com drill-down ── */}
         {!searched && (
           <div>
-            {/* Coringas — diagnósticos frequentes do PS com contexto clínico */}
-            <div className="mb-8">
-              <div className="mb-3 flex items-center justify-between">
-                <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                  <svg className="h-4 w-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                      d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                  Coringas do PS
-                </h2>
-                <Link to="/cid" className="text-xs text-primary hover:opacity-80 transition">
-                  Busca de CID-10 →
-                </Link>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {CORINGAS_CID.map(c => (
-                  <Link
-                    key={c.co_cid}
-                    to={`/cid?q=${encodeURIComponent(c.co_cid)}&ctx=1`}
-                    title={c.no_cid}
-                    className={cn(
-                      'flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition',
-                      dark
-                        ? 'border-[rgba(255,255,255,0.1)] bg-[#1a2236] text-[#e8edf5] hover:border-[rgba(56,189,248,0.4)] hover:text-[#38bdf8]'
-                        : 'border-border bg-card text-foreground hover:border-primary/40 hover:text-primary'
-                    )}
-                  >
-                    <span className="font-mono text-[10px] text-muted-foreground shrink-0">{c.co_cid}</span>
-                    <span className="h-3 w-px bg-border shrink-0" />
-                    {c.label}
-                  </Link>
-                ))}
-              </div>
-            </div>
+            {/* Coringas — diagnósticos frequentes do PS organizados por categoria */}
+            <CorингасDoPS dark={dark} />
 
             {/* Favoritos */}
             {favoritos.length > 0 && (
