@@ -205,7 +205,7 @@ export function DiagnosticoPage() {
               onChange={handleChange}
               autoFocus
               placeholder="pneumonia, infarto, AVC, sepse, fratura..."
-              className="w-full rounded-xl border-0 bg-white/10 text-white py-4 pl-12 pr-12 text-base shadow-lg placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-white/30 backdrop-blur-sm"
+              className="w-full rounded-xl border-0 bg-white/10 text-white py-4 pl-12 pr-12 text-base shadow-lg placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-white/30"
             />
             {value && (
               <button
