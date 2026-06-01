@@ -44,12 +44,7 @@ function ProcReg({ p, dark }) {
   return (
     <Link
       to={`/procedimento/${p.co_procedimento}`}
-      className={cn(
-        'flex items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition',
-        dark
-          ? 'border-border bg-secondary hover:border-border/80'
-          : 'border-border bg-secondary/50 hover:border-foreground/20'
-      )}
+      className="group flex items-center gap-3 rounded-lg px-3 py-2 text-left transition hover:bg-secondary"
     >
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2 mb-0.5">
@@ -58,7 +53,7 @@ function ProcReg({ p, dark }) {
           <button
             onClick={copiar}
             title="Copiar código"
-            className="rounded p-0.5 text-muted-foreground/40 hover:text-muted-foreground transition"
+            className="opacity-0 group-hover:opacity-100 rounded p-0.5 text-muted-foreground/40 hover:text-muted-foreground transition"
           >
             <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -68,10 +63,7 @@ function ProcReg({ p, dark }) {
         </div>
         <p className="text-xs font-medium text-foreground leading-snug">{p.no_procedimento}</p>
       </div>
-      <div className="shrink-0 text-right">
-        <p className="text-[10px] text-muted-foreground">Total SUS</p>
-        <p className="text-xs font-bold text-emerald-500 tabular-nums">{formatBRL(total)}</p>
-      </div>
+      <p className="shrink-0 text-xs font-bold text-emerald-500 tabular-nums">{formatBRL(total)}</p>
     </Link>
   )
 }
@@ -160,6 +152,37 @@ function ProcRegList({ procs, dark }) {
       <p className="text-[10px] text-muted-foreground/60 pt-1">
         Dados da tabela SIGTAP · clique para ver detalhes do procedimento
       </p>
+    </div>
+  )
+}
+
+function CorrelatosColapsaveis({ correlatos, dark }) {
+  const [aberto, setAberto] = useState(false)
+  return (
+    <div className="mt-3 pt-3 border-t border-border/50">
+      <button
+        onClick={() => setAberto(v => !v)}
+        className="flex items-center gap-1.5 text-[10px] font-medium text-amber-500/80 hover:text-amber-500 transition"
+      >
+        <svg className={cn('h-3 w-3 transition-transform', aberto ? 'rotate-90' : '')} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+        </svg>
+        {aberto ? 'Ocultar' : `Ver ${correlatos.length} códigos alternativos do mesmo sistema`}
+      </button>
+      {aberto && (
+        <div className="mt-2 space-y-1.5">
+          {correlatos.map(p => (
+            <div key={p.co_procedimento}>
+              <ProcReg p={p} dark={dark} />
+              {p.co_cid_ref && (
+                <p className="ml-3 text-[10px] text-muted-foreground/50">
+                  via <span className="font-mono">{p.co_cid_ref}</span> · {p.no_cid_ref}
+                </p>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
@@ -421,29 +444,7 @@ export function ContextoClinico({ cid, autoOpen = false }) {
               )}
 
               {correlatos && correlatos.length > 0 && !/^A41/i.test(cid.co_cid?.trim()) && (
-                <div className={cn('mt-4 pt-4 border-t space-y-2', dark ? 'border-[rgba(255,255,255,0.06)]' : 'border-border')}>
-                  <div className="mb-3">
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-amber-500 mb-0.5">
-                      Códigos clínicos alternativos — mesmo sistema orgânico
-                    </p>
-                    <p className="text-[10px] text-muted-foreground">
-                      Procedimentos clínicos do mesmo sistema disponíveis no SIGTAP — use quando o código principal já está em uso
-                    </p>
-                  </div>
-                  {correlatos.map(p => (
-                    <div key={p.co_procedimento}>
-                      <ProcReg p={p} dark={dark} />
-                      {p.co_cid_ref && (
-                        <p className="mt-0.5 ml-1 text-[10px] text-muted-foreground/60">
-                          via CID <span className="font-mono">{p.co_cid_ref}</span> · {p.no_cid_ref}
-                        </p>
-                      )}
-                    </div>
-                  ))}
-                  <p className="text-[10px] text-muted-foreground/60 pt-1">
-                    Dados do SIGTAP · confirme compatibilidade com a regulação local
-                  </p>
-                </div>
+                <CorrelatosColapsaveis correlatos={correlatos} dark={dark} />
               )}
             </div>
           )}
