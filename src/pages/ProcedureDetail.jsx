@@ -61,7 +61,7 @@ export function ProcedureDetail() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <div className={dark ? "bg-gradient-to-br from-[#0A1628] via-[#0D2347] to-[#0F3460]" : "border-b border-border bg-card"}>
+        <div className="border-b border-border bg-card">
           <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6">
             <Skeleton className="h-4 w-24 bg-white/10" />
             <div className="mt-4 space-y-2">
@@ -105,20 +105,17 @@ export function ProcedureDetail() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className={modoUE ? "bg-gradient-to-br from-red-950 via-red-900 to-red-800" : dark ? "bg-gradient-to-br from-[#0A1628] via-[#0D2347] to-[#0F3460]" : "border-b border-border bg-card"}>
+      <div className={modoUE ? "bg-gradient-to-br from-red-950 via-red-900 to-red-800" : "border-b border-border bg-card"}>
         <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6">
           {/* Breadcrumb */}
           <nav className="flex items-center gap-1.5 text-xs">
-            <Link to="/" className={cn("transition", modoUE ? "text-red-300 hover:text-white" : (dark ? "text-blue-300 hover:text-white" : "text-muted-foreground hover:text-foreground"))}>
+            <Link to="/" className={cn("transition", modoUE ? "text-red-300 hover:text-white" : "text-muted-foreground hover:text-foreground")}>
               Busca
             </Link>
             {data.co_grupo && (
               <>
-                <span className={modoUE ? "text-red-600" : (dark ? "text-blue-600" : "text-border")}>/</span>
-                <Link
-                  to={`/grupo/${data.co_grupo}`}
-                  className={cn("transition", modoUE ? "text-red-300 hover:text-white" : (dark ? "text-blue-300 hover:text-white" : "text-muted-foreground hover:text-foreground"))}
-                >
+                <span className={modoUE ? "text-red-700" : "text-border"}>/</span>
+                <Link to={`/grupo/${data.co_grupo}`} className={cn("transition", modoUE ? "text-red-300 hover:text-white" : "text-muted-foreground hover:text-foreground")}>
                   {data.no_grupo}
                 </Link>
               </>
@@ -129,11 +126,11 @@ export function ProcedureDetail() {
             <div className="flex items-start justify-between gap-3">
               <div>
                 <div className="flex items-center gap-1">
-                  <p className={cn("font-mono text-xs", modoUE ? "text-red-300" : (dark ? "text-blue-300" : "text-primary"))}>{formatCodigo(data.co_procedimento)}</p>
+                  <p className={cn("font-mono text-xs", modoUE ? "text-red-300" : "text-muted-foreground")}>{formatCodigo(data.co_procedimento)}</p>
                   <button
                     type="button"
                     onClick={() => { navigator.clipboard.writeText(data.co_procedimento); toast.success('Código copiado!', { duration: 1500 }) }}
-                    className={cn("rounded p-0.5 transition", (modoUE || dark) ? "text-white/40 hover:text-white/80" : "text-muted-foreground/50 hover:text-muted-foreground")}
+                    className="rounded p-0.5 text-muted-foreground/40 hover:text-muted-foreground transition"
                     title="Copiar código"
                   >
                     <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -142,17 +139,17 @@ export function ProcedureDetail() {
                     </svg>
                   </button>
                 </div>
-                <h1 className={cn("mt-0.5 text-xl font-bold leading-snug", (modoUE || dark) ? "text-white" : "text-foreground")}>
+                <h1 className={cn("mt-0.5 text-xl font-bold leading-snug", modoUE ? "text-white" : "text-foreground")}>
                   {data.no_procedimento}
                 </h1>
               </div>
               <button
                 onClick={() => toggleFavorito(data)}
-                className={cn("mt-1 shrink-0 rounded-xl p-2.5 transition", (modoUE || dark) ? "bg-white/10 hover:bg-white/20" : "bg-secondary hover:bg-secondary/80")}
+                className="mt-1 shrink-0 rounded-xl p-2.5 transition bg-secondary hover:bg-accent"
                 title={fav ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
               >
                 <svg
-                  className={cn('h-5 w-5 transition', fav ? 'fill-amber-400 text-amber-400' : (modoUE || dark) ? 'fill-none text-white' : 'fill-none text-muted-foreground')}
+                  className={cn('h-5 w-5 transition', fav ? 'fill-amber-400 text-amber-400' : 'fill-none text-muted-foreground')}
                   stroke="currentColor" viewBox="0 0 24 24"
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
@@ -161,7 +158,7 @@ export function ProcedureDetail() {
               </button>
             </div>
             {data.dt_competencia && (
-              <p className={cn("mt-1.5 text-xs", modoUE ? "text-red-300" : dark ? "text-blue-300" : "text-muted-foreground")}>
+              <p className={cn("mt-1.5 text-xs", modoUE ? "text-red-300" : "text-muted-foreground")}>
                 Competência {data.dt_competencia.slice(0, 4)}/{data.dt_competencia.slice(4)}
               </p>
             )}
@@ -188,11 +185,11 @@ export function ProcedureDetail() {
             </div>
             {data.qt_dias_perman > 0 && data.qt_dias_perman < 9999 && (
               <div className="rounded-xl border border-blue-500/30 bg-blue-500/10 p-4 shadow-sm">
-                <p className="text-xs text-blue-400">Permanência mínima (AIH)</p>
-                <p className="mt-1 text-lg font-bold tabular-nums text-blue-300">
+                <p className="text-xs text-muted-foreground">Permanência mínima (AIH)</p>
+                <p className="mt-1 text-lg font-bold tabular-nums text-foreground">
                   {data.qt_dias_perman} {data.qt_dias_perman === 1 ? 'dia' : 'dias'}
                 </p>
-                <p className="mt-1 text-xs text-blue-400/70">
+                <p className="mt-1 text-xs text-muted-foreground/70">
                   Pagamento a partir de {data.qt_dias_perman + 1} dias
                 </p>
               </div>
@@ -395,17 +392,17 @@ function HabilitacoesCard({ habilitacoes }) {
         </div>
       )}
       {programas.length > 0 && (
-        <div className="rounded-xl border border-violet-500/30 bg-violet-500/10 shadow-sm overflow-hidden">
+        <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
           <button
             onClick={() => setOpen(o => !o)}
             className="flex w-full items-center justify-between px-5 py-4 text-left"
           >
             <div className="flex items-center gap-2">
-              <svg className="h-4 w-4 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="h-4 w-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
               </svg>
-              <h2 className="text-sm font-semibold text-violet-300">Credenciamentos em programas</h2>
-              <span className="rounded-full bg-violet-500/20 px-2 py-0.5 text-xs font-medium text-violet-300">{programas.length}</span>
+              <h2 className="text-sm font-semibold text-foreground">Credenciamentos em programas</h2>
+              <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground">{programas.length}</span>
             </div>
             <svg
               className={`h-4 w-4 text-violet-400 transition-transform ${open ? 'rotate-180' : ''}`}
@@ -415,7 +412,7 @@ function HabilitacoesCard({ habilitacoes }) {
             </svg>
           </button>
           {open && (
-            <div className="border-t border-violet-500/20 bg-card divide-y divide-border">
+            <div className="border-t border-border bg-card divide-y divide-border">
               {programas.map(h => <HabRow key={h.co_habilitacao} h={h} />)}
             </div>
           )}
@@ -428,19 +425,19 @@ function HabilitacoesCard({ habilitacoes }) {
 function CompatCard({ compatibilidades }) {
   const [open, setOpen] = useState(false)
   return (
-    <div className="rounded-xl border border-blue-500/30 bg-blue-500/10 shadow-sm overflow-hidden">
+    <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
       <button
         onClick={() => setOpen(o => !o)}
         className="flex w-full items-center justify-between px-5 py-4 text-left"
       >
         <div className="flex items-center gap-2">
-          <svg className="h-4 w-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="h-4 w-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
           </svg>
-          <h2 className="text-sm font-semibold text-blue-300">
+          <h2 className="text-sm font-semibold text-foreground">
             Pode cobrar junto com
           </h2>
-          <span className="rounded-full bg-blue-500/20 px-2 py-0.5 text-xs font-medium text-blue-300">{compatibilidades.length}</span>
+          <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground">{compatibilidades.length}</span>
         </div>
         <svg
           className={`h-4 w-4 text-blue-400 transition-transform ${open ? 'rotate-180' : ''}`}
@@ -450,7 +447,7 @@ function CompatCard({ compatibilidades }) {
         </svg>
       </button>
       {open && (
-        <div className="border-t border-blue-500/20 bg-card">
+        <div className="border-t border-border bg-card">
           <div className="divide-y divide-border max-h-[60vh] overflow-y-auto">
             {compatibilidades.map((c) => (
               <Link
@@ -458,7 +455,7 @@ function CompatCard({ compatibilidades }) {
                 to={`/procedimento/${c.co_procedimento_compativel}`}
                 className="flex items-baseline gap-3 px-5 py-2.5 hover:bg-secondary transition"
               >
-                <span className="shrink-0 font-mono text-xs font-semibold text-blue-400">{formatCodigo(c.co_procedimento_compativel)}</span>
+                <span className="shrink-0 font-mono text-xs font-semibold text-muted-foreground">{formatCodigo(c.co_procedimento_compativel)}</span>
                 <span className="flex-1 text-sm text-foreground/90">{toSentenceCase(c.no_procedimento_compativel)}</span>
                 {c.qt_permitida > 0 && (
                   <span className="shrink-0 rounded-full bg-secondary px-2 py-0.5 text-xs text-muted-foreground">máx {c.qt_permitida}x</span>

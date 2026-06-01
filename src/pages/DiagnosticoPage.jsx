@@ -43,13 +43,10 @@ function CidRow({ cid, dark, autoCtx }) {
       <div className="flex items-start gap-3 mb-2">
         <div className="flex-1 min-w-0">
           <div className="flex items-baseline gap-2.5 flex-wrap">
-            <span className={cn(
-              'font-mono text-base font-bold shrink-0',
-              dark ? 'text-[#38bdf8]' : 'text-primary'
-            )}>
+            <span className="font-mono text-sm font-bold shrink-0 text-foreground">
               {cid.co_cid.trim()}
             </span>
-            <span className="text-sm font-semibold text-foreground leading-snug">
+            <span className="text-sm text-muted-foreground leading-snug">
               {cid.no_cid?.trim()}
             </span>
           </div>

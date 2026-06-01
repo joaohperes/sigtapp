@@ -17,14 +17,12 @@ function PillIA({ p, dark, onClick }) {
       title={`Buscar: ${p.termos_busca?.join(', ') || p.nome}`}
       className={cn(
         'flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition',
-        dark
-          ? 'border-[rgba(255,255,255,0.1)] bg-[#1a2236] text-[#e8edf5] hover:border-[rgba(56,189,248,0.4)] hover:text-[#38bdf8]'
-          : 'border-border bg-secondary text-foreground hover:border-primary/40 hover:text-primary'
+        'border-border bg-secondary text-foreground hover:border-foreground/20 hover:text-foreground'
       )}
     >
       <span className={cn(
         'h-1.5 w-1.5 rounded-full shrink-0',
-        p.grupo === 'cirúrgico' ? 'bg-[#fb923c]' : p.grupo === 'terapêutico' ? 'bg-[#34d399]' : 'bg-[#38bdf8]'
+        p.grupo === 'cirúrgico' ? 'bg-orange-400' : p.grupo === 'terapêutico' ? 'bg-emerald-400' : 'bg-foreground/40'
       )} />
       {p.nome}
     </button>
@@ -34,7 +32,7 @@ function PillIA({ p, dark, onClick }) {
 function ProcReg({ p, dark }) {
   const total = (parseFloat(p.vl_sh) || 0) + (parseFloat(p.vl_sa) || 0) + (parseFloat(p.vl_sp) || 0)
   const grupo = p.grupo === '03' ? 'Clínico' : 'Cirúrgico'
-  const corGrupo = p.grupo === '03' ? 'text-[#38bdf8]' : 'text-[#fb923c]'
+  const corGrupo = p.grupo === '03' ? 'text-foreground/60' : 'text-orange-400'
 
   function copiar(e) {
     e.preventDefault()
@@ -49,8 +47,8 @@ function ProcReg({ p, dark }) {
       className={cn(
         'flex items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition',
         dark
-          ? 'border-[rgba(255,255,255,0.07)] bg-[#1a2236] hover:border-[rgba(56,189,248,0.3)]'
-          : 'border-border bg-secondary/50 hover:border-primary/30'
+          ? 'border-border bg-secondary hover:border-border/80'
+          : 'border-border bg-secondary/50 hover:border-foreground/20'
       )}
     >
       <div className="min-w-0 flex-1">
@@ -115,7 +113,7 @@ function ProcList({ procs, dark, labelClinicos = 'Clínicos — use para regula�
         <>
           {clinicos.length > 0 && (
             <div className="space-y-1.5">
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-[#38bdf8] mb-1">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
                 {labelClinicos}
               </p>
               {clinicosVisiveis.map(p => <ProcReg key={p.co_procedimento} p={p} dark={dark} />)}
@@ -168,7 +166,7 @@ function ProcRegList({ procs, dark }) {
 
 function GrupoCorrelato({ grupo, dark }) {
   return (
-    <div className={cn('rounded-lg border p-3', dark ? 'border-[rgba(255,255,255,0.07)] bg-[#0a0e1a]' : 'border-border bg-secondary/30')}>
+    <div className="rounded-lg border border-border bg-background p-3">
       <div className="mb-2.5">
         <div className="flex items-center gap-2">
           <span className={cn('font-mono text-xs font-bold shrink-0', dark ? 'text-amber-400' : 'text-amber-600')}>{grupo.co_cid}</span>
@@ -322,12 +320,8 @@ export function ContextoClinico({ cid, autoOpen = false }) {
         className={cn(
           'flex items-center gap-1 rounded-lg border px-2.5 py-1 text-xs font-medium transition whitespace-nowrap',
           aberto
-            ? dark
-              ? 'border-[rgba(56,189,248,0.4)] bg-[rgba(56,189,248,0.1)] text-[#38bdf8]'
-              : 'border-primary/30 bg-primary/10 text-primary'
-            : dark
-              ? 'border-[rgba(255,255,255,0.1)] text-muted-foreground hover:border-[rgba(56,189,248,0.3)] hover:text-[#38bdf8]'
-              : 'border-border text-muted-foreground hover:border-primary/30 hover:text-primary'
+            ? 'border-foreground/30 bg-foreground/5 text-foreground'
+            : 'border-border text-muted-foreground hover:border-foreground/20 hover:text-foreground'
         )}
       >
         <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -340,16 +334,16 @@ export function ContextoClinico({ cid, autoOpen = false }) {
       {aberto && (
         <div className={cn(
           'mt-2 rounded-xl border overflow-hidden',
-          dark ? 'border-[rgba(56,189,248,0.15)] bg-[#111827]' : 'border-primary/15 bg-card'
+          'border-border bg-card'
         )}>
           {/* Abas */}
-          <div className={cn('flex border-b', dark ? 'border-[rgba(255,255,255,0.06)]' : 'border-border')}>
+          <div className="flex border-b border-border">
             <button
               onClick={() => mudarAba('regulacao')}
               className={cn(
-                'flex-1 px-4 py-2.5 text-xs font-semibold transition',
+                'flex-1 px-4 py-2.5 text-xs font-medium transition',
                 aba === 'regulacao'
-                  ? dark ? 'text-[#38bdf8] border-b-2 border-[#38bdf8]' : 'text-primary border-b-2 border-primary'
+                  ? 'text-foreground border-b border-foreground'
                   : 'text-muted-foreground hover:text-foreground'
               )}
             >
@@ -358,9 +352,9 @@ export function ContextoClinico({ cid, autoOpen = false }) {
             <button
               onClick={() => mudarAba('ia')}
               className={cn(
-                'flex-1 px-4 py-2.5 text-xs font-semibold transition',
+                'flex-1 px-4 py-2.5 text-xs font-medium transition',
                 aba === 'ia'
-                  ? dark ? 'text-[#38bdf8] border-b-2 border-[#38bdf8]' : 'text-primary border-b-2 border-primary'
+                  ? 'text-foreground border-b border-foreground'
                   : 'text-muted-foreground hover:text-foreground'
               )}
             >
@@ -417,7 +411,7 @@ export function ContextoClinico({ cid, autoOpen = false }) {
                         { cid: 'L089', label: 'Foco cutâneo → Tratamento de infecções de pele' },
                       ].map(item => (
                         <p key={item.cid} className="text-[10px] text-muted-foreground">
-                          <span className={cn('font-mono font-semibold', dark ? 'text-[#38bdf8]' : 'text-primary')}>{item.cid}</span>
+                          <span className="font-mono font-semibold text-foreground">{item.cid}</span>
                           {' · '}{item.label}
                         </p>
                       ))}
