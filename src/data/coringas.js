@@ -157,8 +157,8 @@ export const CORINGAS_GRUPOS = [
     cids: [
       { co_cid: 'N179', label: 'IRA'                   },
       { co_cid: 'N189', label: 'DRC agudizada'         },
-      { co_cid: 'E101', label: 'CAD tipo 1'            },
-      { co_cid: 'E111', label: 'CAD tipo 2'            },
+      { co_cid: 'E101', label: 'DM1 c/ cetoacidose'     },
+      { co_cid: 'E111', label: 'DM2 c/ cetoacidose'    },
       { co_cid: 'E162', label: 'Hipoglicemia'          },
       { co_cid: 'E876', label: 'Hipocalemia'           },
       { co_cid: 'E875', label: 'Hiperpotassemia'       },
