@@ -12,8 +12,8 @@ export function ProcedureTable({ results, onSelect, compareMode, compareSelectio
       <div className="mb-2 flex justify-end">
         <button
           onClick={() => exportCsv(results)}
-          className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5
-                     text-xs font-medium text-muted-foreground shadow-sm transition hover:border-slate-300 hover:text-foreground"
+          className="flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-1.5
+                     text-xs font-medium text-muted-foreground shadow-sm transition hover:border-foreground/20 hover:text-foreground"
         >
           <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -23,10 +23,10 @@ export function ProcedureTable({ results, onSelect, compareMode, compareSelectio
         </button>
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div className="overflow-x-auto rounded-xl border border-border bg-card shadow-sm">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-slate-100 bg-slate-50 text-left">
+            <tr className="border-b border-border bg-secondary/50 text-left">
               <th className="w-[3px] p-0" />
               {compareMode && <th className="w-10 px-4 py-3" />}
               <th className="px-4 py-3 text-xs font-medium uppercase tracking-wide text-muted-foreground whitespace-nowrap">Código</th>
@@ -37,7 +37,7 @@ export function ProcedureTable({ results, onSelect, compareMode, compareSelectio
               <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wide text-muted-foreground whitespace-nowrap">Total</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-border">
             {results.map((p) => {
               const total = (p.vl_sa || 0) + (p.vl_sh || 0) + (p.vl_sp || 0)
               const estilo = GRUPO_MAP[p.co_procedimento?.slice(0, 2)]
@@ -49,9 +49,9 @@ export function ProcedureTable({ results, onSelect, compareMode, compareSelectio
                 <tr
                   key={p.co_procedimento}
                   onClick={handleClick}
-                  className={`cursor-pointer transition-colors ${selected ? 'bg-blue-50' : 'hover:bg-blue-50/50'}`}
+                  className={`cursor-pointer transition-colors ${selected ? 'bg-secondary' : 'hover:bg-secondary/50'}`}
                 >
-                  <td className={`w-[3px] p-0 ${estilo?.dot ?? 'bg-slate-200'}`} />
+                  <td className={`w-[3px] p-0 ${estilo?.dot ?? 'bg-secondary'}`} />
                   {compareMode && (
                     <td className="px-4 py-3">
                       <input
@@ -59,7 +59,7 @@ export function ProcedureTable({ results, onSelect, compareMode, compareSelectio
                         checked={!!selected}
                         onChange={() => onToggleCompare?.(p)}
                         onClick={e => e.stopPropagation()}
-                        className="h-4 w-4 rounded border-slate-300 text-blue-600 cursor-pointer"
+                        className="h-4 w-4 rounded border-border text-foreground cursor-pointer"
                       />
                     </td>
                   )}
@@ -72,7 +72,7 @@ export function ProcedureTable({ results, onSelect, compareMode, compareSelectio
                   <td className="px-4 py-3 text-right tabular-nums text-muted-foreground whitespace-nowrap">{formatBRL(p.vl_sa)}</td>
                   <td className="px-4 py-3 text-right tabular-nums text-muted-foreground whitespace-nowrap">{formatBRL(p.vl_sh)}</td>
                   <td className="px-4 py-3 text-right tabular-nums text-muted-foreground whitespace-nowrap">{formatBRL(p.vl_sp)}</td>
-                  <td className="px-4 py-3 text-right tabular-nums font-semibold text-emerald-700 whitespace-nowrap">
+                  <td className="px-4 py-3 text-right tabular-nums font-semibold text-emerald-500 whitespace-nowrap">
                     {formatBRL(total)}
                   </td>
                 </tr>

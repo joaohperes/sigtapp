@@ -53,13 +53,13 @@ export function CidSearch() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className={dark ? "bg-gradient-to-br from-[#0A1628] via-[#0D2347] to-[#0F3460]" : "border-b border-border bg-card"}>
+      <div className="border-b border-border bg-card">
         <div className="mx-auto max-w-3xl px-4 pb-12 pt-10 text-center">
-          <Link to="/" className={cn("text-xs font-semibold uppercase tracking-widest transition", dark ? "text-indigo-300 hover:text-white" : "text-muted-foreground hover:text-foreground")}>
+          <Link to="/" className="text-xs font-semibold uppercase tracking-widest transition text-muted-foreground hover:text-foreground">
             ← SIGTAP
           </Link>
-          <h1 className={cn("mt-3 text-3xl font-bold tracking-tight", dark ? "text-white" : "text-foreground")}>Busca de CID-10</h1>
-          <p className={cn("mt-1.5 text-sm", dark ? "text-indigo-200" : "text-muted-foreground")}>
+          <h1 className="mt-3 text-3xl font-bold tracking-tight text-foreground">Busca de CID-10</h1>
+          <p className="mt-1.5 text-sm text-muted-foreground">
             Encontre códigos e veja procedimentos SIGTAP sugeridos por contexto clínico
           </p>
 
@@ -82,12 +82,7 @@ export function CidSearch() {
               onChange={handleChange}
               autoFocus
               placeholder="Ex: câncer de ovário, infarto, pressão alta..."
-              className={cn(
-                "w-full rounded-xl border py-3.5 pl-12 pr-4 text-sm focus:outline-none focus:ring-2",
-                dark
-                  ? "border-[rgba(255,255,255,0.1)] bg-[#1a2236] text-[#e8edf5] placeholder:text-[#8896a8] focus:border-[#38bdf8] focus:ring-[#38bdf8]/20"
-                  : "border-border bg-background text-foreground placeholder:text-muted-foreground shadow-sm focus:border-primary focus:ring-primary/20"
-              )}
+              className="w-full rounded-xl border border-border bg-background text-foreground py-3.5 pl-12 pr-4 text-sm placeholder:text-muted-foreground/60 shadow-sm focus:outline-none focus:ring-2 focus:border-foreground/30 focus:ring-foreground/10"
             />
           </div>
 
@@ -97,7 +92,7 @@ export function CidSearch() {
                 <button
                   key={term}
                   onClick={() => handleExemplo(term)}
-                  className={cn("rounded-full px-3 py-1 text-xs transition", dark ? "bg-white/10 text-indigo-100 hover:bg-white/20" : "bg-secondary text-muted-foreground hover:bg-secondary/80")}
+                  className="rounded-full px-3 py-1 text-xs transition bg-secondary text-muted-foreground hover:bg-accent hover:text-foreground"
                 >
                   {term}
                 </button>

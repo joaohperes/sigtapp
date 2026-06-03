@@ -48,29 +48,29 @@ function PriceTooltip({ total, vl_sa, vl_sh, vl_sp, qt_dias_perman, children }) 
       <TooltipTrigger asChild>{children}</TooltipTrigger>
       <TooltipContent
         side="left"
-        className="bg-slate-900 text-white px-3 py-2 rounded-lg shadow-xl text-xs space-y-1 min-w-[160px]"
+        className="text-xs space-y-1 min-w-[160px]"
       >
         <div className="flex justify-between gap-4">
-          <span className="text-muted-foreground/70">Ambulatorial</span>
+          <span className="text-muted-foreground">Ambulatorial</span>
           <span className="tabular-nums">{formatBRL(vl_sa)}</span>
         </div>
         <div className="flex justify-between gap-4">
-          <span className="text-muted-foreground/70">Hospitalar</span>
+          <span className="text-muted-foreground">Hospitalar</span>
           <span className="tabular-nums">{formatBRL(vl_sh)}</span>
         </div>
         <div className="flex justify-between gap-4">
-          <span className="text-muted-foreground/70">Profissional</span>
+          <span className="text-muted-foreground">Profissional</span>
           <span className="tabular-nums">{formatBRL(vl_sp)}</span>
         </div>
-        <div className="flex justify-between gap-4 border-t border-slate-700 pt-1 mt-1">
-          <span className="font-semibold text-white">Total</span>
-          <span className="tabular-nums font-semibold text-emerald-400">{formatBRL(total)}</span>
+        <div className="flex justify-between gap-4 border-t border-border pt-1 mt-1">
+          <span className="font-semibold text-foreground">Total</span>
+          <span className="tabular-nums font-semibold text-emerald-500">{formatBRL(total)}</span>
         </div>
         {qt_dias_perman > 0 && qt_dias_perman < 9999 && (
-          <div className="border-t border-slate-700 pt-1 mt-1 space-y-0.5">
+          <div className="border-t border-border pt-1 mt-1 space-y-0.5">
             <div className="flex justify-between gap-4">
-              <span className="text-muted-foreground/70">Permanência mín.</span>
-              <span className="tabular-nums text-blue-300">{qt_dias_perman} {qt_dias_perman === 1 ? 'dia' : 'dias'}</span>
+              <span className="text-muted-foreground">Permanência mín.</span>
+              <span className="tabular-nums text-foreground">{qt_dias_perman} {qt_dias_perman === 1 ? 'dia' : 'dias'}</span>
             </div>
             <p className="text-muted-foreground text-right">Paga a partir de {qt_dias_perman + 1} dias</p>
           </div>
@@ -90,8 +90,8 @@ export function ProcedureCard({ procedure, onSelect, compareMode, compareSelecte
   const inner = (
     <Card className={cn(
       'overflow-hidden border-border bg-card transition-all duration-200',
-      'group-hover:shadow-[0_4px_20px_rgba(15,23,42,0.1),0_1px_4px_rgba(15,23,42,0.06)] group-hover:-translate-y-0.5',
-      compareSelected && 'ring-2 ring-primary ring-offset-1',
+      'group-hover:border-foreground/20 group-hover:-translate-y-0.5',
+      compareSelected && 'ring-2 ring-foreground/30 ring-offset-1 ring-offset-background',
     )}>
       <div className="flex min-h-[88px]">
         {/* Barra lateral colorida */}
@@ -106,7 +106,7 @@ export function ProcedureCard({ procedure, onSelect, compareMode, compareSelecte
               checked={!!compareSelected}
               onChange={() => onToggleCompare?.(procedure)}
               onClick={e => e.stopPropagation()}
-              className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-blue-600 cursor-pointer"
+              className="mt-0.5 h-4 w-4 shrink-0 rounded border-border text-foreground cursor-pointer"
             />
           )}
 
@@ -179,9 +179,9 @@ export function ProcedureCard({ procedure, onSelect, compareMode, compareSelecte
 
 export function ProcedureCardSkeleton() {
   return (
-    <Card className="overflow-hidden border-slate-100">
+    <Card className="overflow-hidden border-border">
       <div className="flex min-h-[88px]">
-        <div className="w-1 shrink-0 bg-slate-200" />
+        <div className="w-1 shrink-0 bg-secondary" />
         <CardContent className="flex flex-1 items-start gap-3 p-4">
           <div className="min-w-0 flex-1 space-y-2">
             <Skeleton className="h-3 w-24" />
@@ -215,9 +215,9 @@ export function ProcedureRow({ procedure, onSelect, compareMode, compareSelected
 
   const inner = (
     <Card className={cn(
-      'border-slate-100 bg-white transition-all duration-200',
-      'group-hover:shadow-[0_2px_12px_rgba(15,23,42,0.08)] group-hover:border-slate-200',
-      compareSelected && 'ring-2 ring-blue-500 ring-offset-1',
+      'border-border bg-card transition-all duration-200',
+      'group-hover:border-foreground/20',
+      compareSelected && 'ring-2 ring-foreground/30 ring-offset-1 ring-offset-background',
     )}>
       <CardContent className="flex items-center gap-3 px-4 py-3">
         {compareMode && (
@@ -226,7 +226,7 @@ export function ProcedureRow({ procedure, onSelect, compareMode, compareSelected
             checked={!!compareSelected}
             onChange={() => onToggleCompare?.(procedure)}
             onClick={e => e.stopPropagation()}
-            className="h-4 w-4 shrink-0 rounded border-slate-300 text-blue-600 cursor-pointer"
+            className="h-4 w-4 shrink-0 rounded border-border text-foreground cursor-pointer"
           />
         )}
         {estilo && <div className={cn('self-stretch w-[3px] shrink-0 rounded-sm', estilo.dot)} />}
@@ -256,7 +256,7 @@ export function ProcedureRow({ procedure, onSelect, compareMode, compareSelected
         <PriceTooltip total={total} vl_sa={vl_sa} vl_sh={vl_sh} vl_sp={vl_sp} qt_dias_perman={qt_dias_perman}>
           <div className="shrink-0 text-right cursor-default">
             <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">Total SUS</p>
-            <p className="text-sm font-bold tabular-nums text-emerald-600">{formatBRL(total)}</p>
+            <p className="text-sm font-bold tabular-nums text-emerald-500">{formatBRL(total)}</p>
           </div>
         </PriceTooltip>
       </CardContent>

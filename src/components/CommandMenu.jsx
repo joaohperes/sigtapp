@@ -280,7 +280,7 @@ export function CommandMenu() {
                             <p className="font-mono text-[10px] text-muted-foreground">
                               {cid.co_cid.trim()}
                             </p>
-                            <p className="truncate text-sm font-medium text-slate-800">
+                            <p className="truncate text-sm font-medium text-foreground">
                               {cid.no_cid}
                             </p>
                           </div>

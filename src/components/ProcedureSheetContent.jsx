@@ -14,7 +14,7 @@ import { cn } from '@/lib/utils'
 function StarIcon({ filled }) {
   return (
     <svg
-      className={cn('h-5 w-5 transition', filled ? 'fill-amber-400 text-amber-400' : 'fill-none text-slate-400')}
+      className={cn('h-5 w-5 transition', filled ? 'fill-amber-400 text-amber-400' : 'fill-none text-muted-foreground')}
       stroke="currentColor" viewBox="0 0 24 24"
     >
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
@@ -134,7 +134,7 @@ export function ProcedureSheetContent({ procedure }) {
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <span className="cursor-default rounded-full bg-violet-100 px-2.5 py-1 text-xs font-medium text-violet-700">SIA</span>
+                  <span className="cursor-default rounded-full bg-violet-500/15 px-2.5 py-1 text-xs font-medium text-violet-400">SIA</span>
                 </TooltipTrigger>
                 <TooltipContent className="max-w-[200px] text-xs">
                   Sistema de Informações Ambulatoriais — procedimento cobrado via BPA (ambulatório)
@@ -146,7 +146,7 @@ export function ProcedureSheetContent({ procedure }) {
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <span className="cursor-default rounded-full bg-orange-100 px-2.5 py-1 text-xs font-medium text-orange-700">SIH</span>
+                  <span className="cursor-default rounded-full bg-orange-500/15 px-2.5 py-1 text-xs font-medium text-orange-400">SIH</span>
                 </TooltipTrigger>
                 <TooltipContent className="max-w-[200px] text-xs">
                   Sistema de Informações Hospitalares — procedimento cobrado via AIH (internação)
@@ -235,8 +235,8 @@ function isProgramaSUS(nome) {
 function SheetHabRow({ h }) {
   return (
     <div className="flex items-center gap-2 px-3 py-2">
-      <span className="shrink-0 font-mono text-xs font-semibold text-teal-600">{h.co_habilitacao}</span>
-      <span className="text-sm text-slate-600">{toSentenceCase(h.no_habilitacao)}</span>
+      <span className="shrink-0 font-mono text-xs font-semibold text-teal-400">{h.co_habilitacao}</span>
+      <span className="text-sm text-muted-foreground">{toSentenceCase(h.no_habilitacao)}</span>
     </div>
   )
 }
@@ -249,23 +249,23 @@ function HabilitacoesSection({ habilitacoes }) {
     <div className="space-y-2">
       {reais.length > 0 && (
         <div>
-          <p className="mb-2 text-xs font-medium text-slate-400">Habilitações necessárias</p>
-          <div className="divide-y divide-slate-100 rounded-lg border border-slate-100">
+          <p className="mb-2 text-xs font-medium text-muted-foreground">Habilitações necessárias</p>
+          <div className="divide-y divide-border rounded-lg border border-border">
             {reais.map(h => <SheetHabRow key={h.co_habilitacao} h={h} />)}
           </div>
         </div>
       )}
       {programas.length > 0 && (
-        <div className="rounded-lg border border-violet-200 bg-violet-50 overflow-hidden">
+        <div className="rounded-lg border border-violet-500/30 bg-violet-500/10 overflow-hidden">
           <button
             onClick={() => setOpen(o => !o)}
             className="flex w-full items-center justify-between px-3 py-2.5 text-left"
           >
             <div className="flex items-center gap-1.5">
-              <svg className="h-3.5 w-3.5 text-violet-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="h-3.5 w-3.5 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
               </svg>
-              <span className="text-xs font-semibold text-violet-800">Credenciamentos em programas ({programas.length})</span>
+              <span className="text-xs font-semibold text-violet-300">Credenciamentos em programas ({programas.length})</span>
             </div>
             <svg
               className={`h-3.5 w-3.5 text-violet-400 transition-transform ${open ? 'rotate-180' : ''}`}
@@ -275,7 +275,7 @@ function HabilitacoesSection({ habilitacoes }) {
             </svg>
           </button>
           {open && (
-            <div className="border-t border-violet-200 bg-white divide-y divide-slate-100">
+            <div className="border-t border-violet-500/20 bg-card divide-y divide-border">
               {programas.map(h => <SheetHabRow key={h.co_habilitacao} h={h} />)}
             </div>
           )}
@@ -288,16 +288,16 @@ function HabilitacoesSection({ habilitacoes }) {
 function CompatSection({ compatibilidades }) {
   const [open, setOpen] = useState(false)
   return (
-    <div className="rounded-lg border border-blue-200 bg-blue-50 overflow-hidden">
+    <div className="rounded-lg border border-border bg-secondary/30 overflow-hidden">
       <button
         onClick={() => setOpen(o => !o)}
         className="flex w-full items-center justify-between px-3 py-2.5 text-left"
       >
         <div className="flex items-center gap-1.5">
-          <svg className="h-3.5 w-3.5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="h-3.5 w-3.5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
           </svg>
-          <span className="text-xs font-semibold text-blue-800">Pode cobrar junto com ({compatibilidades.length})</span>
+          <span className="text-xs font-semibold text-foreground">Pode cobrar junto com ({compatibilidades.length})</span>
         </div>
         <svg
           className={`h-3.5 w-3.5 transition-transform ${open ? 'rotate-180' : ''}`}
@@ -307,17 +307,17 @@ function CompatSection({ compatibilidades }) {
         </svg>
       </button>
       {open && (
-        <div className="border-t border-blue-200 bg-white divide-y divide-slate-100 max-h-72 overflow-y-auto">
+        <div className="border-t border-border bg-card divide-y divide-border max-h-72 overflow-y-auto">
           {compatibilidades.map((c) => (
             <Link
               key={c.co_procedimento_compativel}
               to={`/procedimento/${c.co_procedimento_compativel}`}
-              className="flex items-baseline gap-2 px-3 py-2 hover:bg-blue-50 transition"
+              className="flex items-baseline gap-2 px-3 py-2 hover:bg-secondary transition"
             >
-              <span className="shrink-0 font-mono text-xs font-semibold text-blue-600">{formatCodigo(c.co_procedimento_compativel)}</span>
-              <span className="flex-1 text-sm text-slate-600">{toSentenceCase(c.no_procedimento_compativel)}</span>
+              <span className="shrink-0 font-mono text-xs font-semibold text-muted-foreground">{formatCodigo(c.co_procedimento_compativel)}</span>
+              <span className="flex-1 text-sm text-muted-foreground">{toSentenceCase(c.no_procedimento_compativel)}</span>
               {c.qt_permitida > 0 && (
-                <span className="shrink-0 rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-500">máx {c.qt_permitida}x</span>
+                <span className="shrink-0 rounded-full bg-secondary px-1.5 py-0.5 text-[10px] text-muted-foreground">máx {c.qt_permitida}x</span>
               )}
             </Link>
           ))}

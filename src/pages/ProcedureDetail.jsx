@@ -63,11 +63,11 @@ export function ProcedureDetail() {
       <div className="min-h-screen bg-background">
         <div className="border-b border-border bg-card">
           <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6">
-            <Skeleton className="h-4 w-24 bg-white/10" />
+            <Skeleton className="h-4 w-24 bg-secondary" />
             <div className="mt-4 space-y-2">
-              <Skeleton className="h-3 w-32 bg-white/10" />
-              <Skeleton className="h-7 w-3/4 bg-white/10" />
-              <Skeleton className="h-3 w-28 bg-white/10" />
+              <Skeleton className="h-3 w-32 bg-secondary" />
+              <Skeleton className="h-7 w-3/4 bg-secondary" />
+              <Skeleton className="h-3 w-28 bg-secondary" />
             </div>
           </div>
         </div>
@@ -91,7 +91,7 @@ export function ProcedureDetail() {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-3">
         <p className="text-sm text-red-600">Procedimento não encontrado.</p>
-        <Link to="/" className="text-sm text-blue-600 hover:underline">← Voltar</Link>
+        <Link to="/" className="text-sm text-muted-foreground hover:text-foreground transition">← Voltar</Link>
       </div>
     )
   }
@@ -184,7 +184,7 @@ export function ProcedureDetail() {
               </div>
             </div>
             {data.qt_dias_perman > 0 && data.qt_dias_perman < 9999 && (
-              <div className="rounded-xl border border-blue-500/30 bg-blue-500/10 p-4 shadow-sm">
+              <div className="rounded-xl border border-border bg-secondary/50 p-4 shadow-sm">
                 <p className="text-xs text-muted-foreground">Permanência mínima (AIH)</p>
                 <p className="mt-1 text-lg font-bold tabular-nums text-foreground">
                   {data.qt_dias_perman} {data.qt_dias_perman === 1 ? 'dia' : 'dias'}
@@ -440,7 +440,7 @@ function CompatCard({ compatibilidades }) {
           <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-muted-foreground">{compatibilidades.length}</span>
         </div>
         <svg
-          className={`h-4 w-4 text-blue-400 transition-transform ${open ? 'rotate-180' : ''}`}
+          className={`h-4 w-4 text-muted-foreground transition-transform ${open ? 'rotate-180' : ''}`}
           fill="none" stroke="currentColor" viewBox="0 0 24 24"
         >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />

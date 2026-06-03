@@ -116,8 +116,8 @@ export function GroupPage() {
   if (!grupo) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-3">
-        <p className="text-sm text-red-600">Grupo não encontrado.</p>
-        <Link to="/" className="text-sm text-blue-600 hover:underline">← Voltar</Link>
+        <p className="text-sm text-destructive">Grupo não encontrado.</p>
+        <Link to="/" className="text-sm text-muted-foreground hover:text-foreground transition">← Voltar</Link>
       </div>
     )
   }
@@ -125,18 +125,18 @@ export function GroupPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className={dark ? "bg-gradient-to-br from-[#0A1628] via-[#0D2347] to-[#0F3460]" : "border-b border-border bg-card"}>
+      <div className="border-b border-border bg-card">
         <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6">
-          <nav className={cn("flex items-center gap-1.5 text-xs", dark ? "text-blue-300" : "text-muted-foreground")}>
-            <Link to="/" className={cn("transition", dark ? "hover:text-white" : "hover:text-foreground")}>Busca</Link>
-            <span className={dark ? "text-blue-600" : "text-border"}>/</span>
-            <span className={dark ? "text-white/80" : "text-foreground"}>Grupos</span>
+          <nav className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Link to="/" className="transition hover:text-foreground">Busca</Link>
+            <span className="text-border">/</span>
+            <span className="text-foreground">Grupos</span>
           </nav>
           <div className="mt-2 flex items-center gap-3">
             <span className={`rounded-lg px-2.5 py-1 text-sm font-bold ${grupo.bg} ${grupo.text}`}>
               {grupo.co}
             </span>
-            <h1 className={cn("text-xl font-semibold", dark ? "text-white" : "text-foreground")}>{grupo.no}</h1>
+            <h1 className="text-xl font-semibold text-foreground">{grupo.no}</h1>
           </div>
         </div>
       </div>
@@ -148,20 +148,20 @@ export function GroupPage() {
           {subgrupos.length > 0 && (
             <aside className="hidden lg:block w-56 shrink-0">
               <div className="sticky top-[60px] overflow-hidden rounded-xl border border-border bg-card shadow-sm">
-                <div className="border-b border-slate-100 px-4 py-3">
+                <div className="border-b border-border px-4 py-3">
                   <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Subgrupos</p>
                 </div>
-                <div className="divide-y divide-slate-50 max-h-[80vh] overflow-y-auto">
+                <div className="divide-y divide-border max-h-[80vh] overflow-y-auto">
                   <button
                     onClick={() => setSubgrupoAtivo(null)}
                     className={`flex w-full items-center justify-between px-4 py-2.5 text-left transition ${
                       !subgrupoAtivo
                         ? `${grupo.bg} ${grupo.text} font-medium`
-                        : 'text-muted-foreground hover:bg-slate-50'
+                        : 'text-muted-foreground hover:bg-secondary'
                     }`}
                   >
                     <span className="text-xs leading-snug">Todos</span>
-                    <span className="ml-2 shrink-0 rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] text-muted-foreground">
+                    <span className="ml-2 shrink-0 rounded-full bg-secondary px-1.5 py-0.5 text-[10px] text-muted-foreground">
                       {totalSubgrupos.toLocaleString('pt-BR')}
                     </span>
                   </button>
@@ -172,11 +172,11 @@ export function GroupPage() {
                       className={`flex w-full items-center justify-between px-4 py-2.5 text-left transition ${
                         subgrupoAtivo === s.co_subgrupo
                           ? `${grupo.bg} ${grupo.text} font-medium`
-                          : 'text-muted-foreground hover:bg-slate-50'
+                          : 'text-muted-foreground hover:bg-secondary'
                       }`}
                     >
                       <span className="text-xs leading-snug">{s.no_subgrupo}</span>
-                      <span className="ml-2 shrink-0 rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] text-muted-foreground">
+                      <span className="ml-2 shrink-0 rounded-full bg-secondary px-1.5 py-0.5 text-[10px] text-muted-foreground">
                         {Number(s.qt_procedimentos).toLocaleString('pt-BR')}
                       </span>
                     </button>
@@ -201,8 +201,8 @@ export function GroupPage() {
                   onChange={(e) => setFiltroTexto(e.target.value)}
                   placeholder="Filtrar por nome neste grupo..."
                   className="w-full rounded-xl border border-border bg-background text-foreground py-2.5 pl-9 pr-4 text-sm shadow-sm
-                             placeholder:text-muted-foreground/70 focus:border-blue-500 focus:outline-none
-                             focus:ring-2 focus:ring-blue-500/20"
+                             placeholder:text-muted-foreground/70 focus:border-foreground/30 focus:outline-none
+                             focus:ring-2 focus:ring-foreground/10"
                 />
               </div>
 
@@ -224,8 +224,8 @@ export function GroupPage() {
                   onClick={() => setShowFilters(s => !s)}
                   className={`flex items-center gap-1.5 rounded-xl border px-3 py-2.5 text-xs font-medium transition ${
                     showFilters || filtrosAtivos > 0
-                      ? 'border-blue-300 bg-blue-50 text-blue-700'
-                      : 'border-border bg-card text-muted-foreground hover:border-border/80'
+                      ? 'border-foreground/30 bg-foreground/5 text-foreground'
+                      : 'border-border bg-card text-muted-foreground hover:border-border/80 hover:text-foreground'
                   }`}
                 >
                   <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -234,7 +234,7 @@ export function GroupPage() {
                   </svg>
                   Filtros
                   {filtrosAtivos > 0 && (
-                    <span className="rounded-full bg-blue-600 px-1.5 py-0.5 text-[10px] font-bold text-white leading-none">
+                    <span className="rounded-full bg-foreground px-1.5 py-0.5 text-[10px] font-bold text-background leading-none">
                       {filtrosAtivos}
                     </span>
                   )}
@@ -246,8 +246,8 @@ export function GroupPage() {
                 onClick={() => { setCompareMode(m => !m); setCompareSelection([]) }}
                 className={`flex items-center gap-1.5 rounded-xl border px-3 py-2.5 text-xs font-medium transition ${
                   compareMode
-                    ? 'border-blue-300 bg-blue-50 text-blue-700'
-                    : 'border-border bg-card text-muted-foreground hover:border-border/80'
+                    ? 'border-foreground/30 bg-foreground/5 text-foreground'
+                    : 'border-border bg-card text-muted-foreground hover:border-border/80 hover:text-foreground'
                 }`}
               >
                 <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -264,8 +264,8 @@ export function GroupPage() {
                     onClick={() => setView(m)}
                     className={`rounded-lg px-3 py-1.5 text-xs font-medium capitalize transition ${
                       view === m
-                        ? 'bg-blue-600 text-white shadow-sm'
-                        : 'text-muted-foreground hover:text-foreground/90'
+                        ? 'bg-primary text-primary-foreground shadow-sm'
+                        : 'text-muted-foreground hover:text-foreground'
                     }`}
                   >
                     {m}
@@ -289,8 +289,8 @@ export function GroupPage() {
                             onClick={() => setFiltroFinanciamento(active ? null : tp)}
                             className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
                               active
-                                ? 'border-transparent bg-slate-700 text-white'
-                                : 'border-border bg-card text-muted-foreground hover:border-border/80'
+                                ? 'border-transparent bg-foreground text-background'
+                                : 'border-border bg-card text-muted-foreground hover:border-border/80 hover:text-foreground'
                             }`}
                           >
                             {no || tp}
@@ -310,8 +310,8 @@ export function GroupPage() {
                         type="number" min="0" value={valorMin}
                         onChange={e => setValorMin(e.target.value)}
                         placeholder="Mínimo"
-                        className="w-36 rounded-lg border border-slate-200 pl-8 pr-3 py-2 text-sm
-                                   focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400/20"
+                        className="w-36 rounded-lg border border-border bg-background text-foreground pl-8 pr-3 py-2 text-sm
+                                   focus:border-foreground/30 focus:outline-none focus:ring-2 focus:ring-foreground/10"
                       />
                     </div>
                     <span className="text-muted-foreground/70 text-sm">—</span>
@@ -321,15 +321,15 @@ export function GroupPage() {
                         type="number" min="0" value={valorMax}
                         onChange={e => setValorMax(e.target.value)}
                         placeholder="Máximo"
-                        className="w-36 rounded-lg border border-slate-200 pl-8 pr-3 py-2 text-sm
-                                   focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400/20"
+                        className="w-36 rounded-lg border border-border bg-background text-foreground pl-8 pr-3 py-2 text-sm
+                                   focus:border-foreground/30 focus:outline-none focus:ring-2 focus:ring-foreground/10"
                       />
                     </div>
                   </div>
                 </div>
 
                 {filtrosAtivos > 0 && (
-                  <button onClick={resetFilters} className="text-xs text-blue-600 hover:underline">
+                  <button onClick={resetFilters} className="text-xs text-muted-foreground hover:text-foreground transition">
                     Limpar filtros
                   </button>
                 )}
@@ -384,7 +384,7 @@ export function GroupPage() {
                 <button
                   onClick={() => setVisibleCount(c => c + PAGE_SIZE)}
                   className="rounded-lg border border-border bg-card px-6 py-2.5 text-sm font-medium
-                             text-muted-foreground shadow-sm transition hover:border-slate-300 hover:text-foreground"
+                             text-muted-foreground shadow-sm transition hover:border-foreground/20 hover:text-foreground"
                 >
                   Carregar mais ({sortedResults.length - visibleCount} restantes)
                 </button>
@@ -396,7 +396,7 @@ export function GroupPage() {
                 <p className="text-sm font-medium text-muted-foreground">Nenhum procedimento encontrado</p>
                 <p className="mt-1 text-xs text-muted-foreground/70">Tente outro subgrupo ou termo</p>
                 {filtrosAtivos > 0 && (
-                  <button onClick={resetFilters} className="mt-2 text-xs text-blue-600 hover:underline block mx-auto">
+                  <button onClick={resetFilters} className="mt-2 text-xs text-muted-foreground hover:text-foreground transition block mx-auto">
                     Limpar filtros
                   </button>
                 )}
@@ -423,28 +423,28 @@ export function GroupPage() {
               const estilo = GRUPO_MAP[p.co_procedimento?.slice(0, 2)]
               return (
                 <div key={p.co_procedimento} className="space-y-3">
-                  <div className={cn('rounded-lg p-3', estilo?.bg ?? 'bg-slate-100')}>
-                    <p className={cn('font-mono text-[11px]', estilo?.text ?? 'text-muted-foreground/70')}>
+                  <div className={cn('rounded-lg p-3', estilo?.bg ?? 'bg-secondary')}>
+                    <p className={cn('font-mono text-[11px]', estilo?.text ?? 'text-muted-foreground')}>
                       {p.co_procedimento}
                     </p>
                     <p className={cn('mt-1 text-sm font-semibold leading-snug', estilo?.text ?? 'text-foreground')}>
                       {p.no_procedimento}
                     </p>
                   </div>
-                  <div className="space-y-2 rounded-xl border border-slate-100 bg-slate-50 p-3">
+                  <div className="space-y-2 rounded-xl border border-border bg-secondary/50 p-3">
                     {[
                       { label: 'Ambulatorial (SA)', value: p.vl_sa },
                       { label: 'Hospitalar (SH)', value: p.vl_sh },
                       { label: 'Profissional (SP)', value: p.vl_sp },
                     ].map(({ label, value }) => (
                       <div key={label}>
-                        <p className="text-xs text-muted-foreground/70">{label}</p>
-                        <p className="tabular-nums text-sm font-medium text-foreground/90">{formatBRL(value)}</p>
+                        <p className="text-xs text-muted-foreground">{label}</p>
+                        <p className="tabular-nums text-sm font-medium text-foreground">{formatBRL(value)}</p>
                       </div>
                     ))}
-                    <div className="border-t border-slate-200 pt-2">
-                      <p className="text-xs text-emerald-600">Total SUS</p>
-                      <p className="tabular-nums text-lg font-bold text-emerald-700">{formatBRL(total)}</p>
+                    <div className="border-t border-border pt-2">
+                      <p className="text-xs text-emerald-500">Total SUS</p>
+                      <p className="tabular-nums text-lg font-bold text-emerald-500">{formatBRL(total)}</p>
                     </div>
                   </div>
                 </div>
@@ -463,15 +463,15 @@ export function GroupPage() {
             <button
               onClick={() => setShowCompare(true)}
               disabled={compareSelection.length < 2}
-              className="rounded-lg bg-blue-600 px-4 py-1.5 text-sm font-medium text-white
-                         transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-lg bg-foreground px-4 py-1.5 text-sm font-medium text-background
+                         transition hover:bg-foreground/90 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Comparar
             </button>
             <button
               onClick={() => setCompareSelection([])}
-              className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-muted-foreground
-                         transition hover:bg-slate-50"
+              className="rounded-lg border border-border px-3 py-1.5 text-sm text-muted-foreground
+                         transition hover:bg-secondary hover:text-foreground"
             >
               Limpar
             </button>
