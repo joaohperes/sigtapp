@@ -177,11 +177,55 @@ function CorrelatosColapsaveis({ correlatos, dark }) {
   )
 }
 
+// Procedimento sugerido pela IA já casado com um código SIGTAP real.
+function ProcIASigtap({ p }) {
+  const navigate = useNavigate()
+  const s = p.sigtap
+  const total = (parseFloat(s.vl_sh) || 0) + (parseFloat(s.vl_sa) || 0) + (parseFloat(s.vl_sp) || 0)
+
+  return (
+    <Link
+      to={`/procedimento/${s.co_procedimento}`}
+      className="group flex items-center gap-3 rounded-lg px-3 py-2 text-left transition hover:bg-secondary"
+    >
+      <span className={cn(
+        'h-1.5 w-1.5 rounded-full shrink-0',
+        p.grupo === 'cirúrgico' ? 'bg-orange-400' : p.grupo === 'terapêutico' ? 'bg-emerald-400' : 'bg-foreground/40'
+      )} />
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2 mb-0.5">
+          <span className="font-mono text-[10px] text-muted-foreground">{formatCodigo(s.co_procedimento)}</span>
+        </div>
+        <p className="text-xs font-medium text-foreground leading-snug">{s.no_procedimento_sigtap}</p>
+      </div>
+      <div className="shrink-0 flex items-center gap-2">
+        <button
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            navigate(`/calculadora?add=${s.co_procedimento}`)
+            toast.success('Procedimento adicionado à calculadora', { duration: 1500 })
+          }}
+          title="Montar AIH na calculadora com este procedimento"
+          className="flex items-center gap-1 rounded-md border border-border px-2 py-0.5 text-[10px] font-medium text-muted-foreground hover:border-emerald-500/40 hover:text-emerald-500 transition whitespace-nowrap"
+        >
+          <svg className="h-2.5 w-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+          </svg>
+          AIH
+        </button>
+        {total > 0 && <p className="text-xs font-bold text-emerald-500 tabular-nums">{formatBRL(total)}</p>}
+      </div>
+    </Link>
+  )
+}
+
+// Procedimento sugerido pela IA sem código SIGTAP confiável — vira atalho de busca.
 function PillIA({ p, onClick }) {
   return (
     <button
       onClick={() => onClick(p.termos_busca?.[0] || p.nome)}
-      title={`Buscar: ${p.termos_busca?.join(', ') || p.nome}`}
+      title={`Buscar no SIGTAP: ${p.termos_busca?.join(', ') || p.nome}`}
       className={cn(
         'flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition',
         'border-border bg-secondary text-foreground hover:border-foreground/20 hover:text-foreground'
@@ -192,7 +236,27 @@ function PillIA({ p, onClick }) {
         p.grupo === 'cirúrgico' ? 'bg-orange-400' : p.grupo === 'terapêutico' ? 'bg-emerald-400' : 'bg-foreground/40'
       )} />
       {p.nome}
+      <svg className="h-3 w-3 shrink-0 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z" />
+      </svg>
     </button>
+  )
+}
+
+// Renderiza um grupo de procedimentos da IA: os casados viram lista rica (com código),
+// os não-casados ficam agrupados como pills de busca.
+function ProcsIA({ procs, onBuscar }) {
+  const casados = (procs || []).filter((p) => p.sigtap)
+  const naoCasados = (procs || []).filter((p) => !p.sigtap)
+  return (
+    <div className="space-y-1.5">
+      {casados.map((p, i) => <ProcIASigtap key={`s-${i}`} p={p} />)}
+      {naoCasados.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 pt-0.5">
+          {naoCasados.map((p, i) => <PillIA key={`p-${i}`} p={p} onClick={onBuscar} />)}
+        </div>
+      )}
+    </div>
   )
 }
 
@@ -283,9 +347,9 @@ export function ContextoClinico({ cid, collapsible = false }) {
     }
   }
 
-  async function buscarIA() {
+  async function buscarIA(regenerar = false) {
     const key = cid.co_cid?.trim()
-    if (cacheIA.has(key)) { setDadosIA(cacheIA.get(key)); return }
+    if (!regenerar && cacheIA.has(key)) { setDadosIA(cacheIA.get(key)); return }
     if (buscandoIARef.current) return
     buscandoIARef.current = true
     setLoadingIA(true)
@@ -294,7 +358,7 @@ export function ContextoClinico({ cid, collapsible = false }) {
       const res = await fetch('/api/cid-contexto', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ co_cid: key, no_cid: cid.no_cid?.trim() }),
+        body: JSON.stringify({ co_cid: key, no_cid: cid.no_cid?.trim(), regenerar }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Falha na API')
@@ -451,11 +515,7 @@ export function ContextoClinico({ cid, collapsible = false }) {
                   <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                     Base — presentes na maioria dos casos
                   </p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {dadosIA.coringas.map((p, i) => (
-                      <PillIA key={i} p={p} onClick={irParaBusca} />
-                    ))}
-                  </div>
+                  <ProcsIA procs={dadosIA.coringas} onBuscar={irParaBusca} />
                 </div>
               )}
               {dadosIA.cenarios?.map((c, i) => (
@@ -466,16 +526,25 @@ export function ContextoClinico({ cid, collapsible = false }) {
                     <div className={cn('h-px flex-1', dark ? 'bg-[rgba(255,255,255,0.06)]' : 'bg-border')} />
                   </div>
                   {c.descricao && <p className="mb-1.5 text-[11px] text-muted-foreground">{c.descricao}</p>}
-                  <div className="flex flex-wrap gap-1.5">
-                    {c.procedimentos?.map((p, j) => (
-                      <PillIA key={j} p={p} onClick={irParaBusca} />
-                    ))}
-                  </div>
+                  <ProcsIA procs={c.procedimentos} onBuscar={irParaBusca} />
                 </div>
               ))}
-              <p className="text-[10px] text-muted-foreground/60 border-t border-border pt-2">
-                Sugestões por IA · clique para buscar no SIGTAP
-              </p>
+              <div className="flex items-center justify-between border-t border-border pt-2">
+                <p className="text-[10px] text-muted-foreground/60">
+                  Sugestões por IA · validadas contra a tabela SIGTAP
+                </p>
+                <button
+                  onClick={() => buscarIA(true)}
+                  disabled={loadingIA}
+                  title="Gerar novamente com a IA"
+                  className="flex items-center gap-1 text-[10px] font-medium text-muted-foreground/60 hover:text-foreground transition disabled:opacity-40"
+                >
+                  <svg className={cn('h-3 w-3', loadingIA && 'animate-spin')} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  Regenerar
+                </button>
+              </div>
             </>
           )}
         </div>
