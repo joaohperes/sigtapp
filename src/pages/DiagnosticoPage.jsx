@@ -69,7 +69,7 @@ function CidRow({ cid, dark }) {
           </Link>
         </div>
       </div>
-      <ContextoClinico cid={cid} autoOpen={true} />
+      <ContextoClinico cid={cid} />
     </div>
   )
 }

@@ -5,10 +5,10 @@ import { useTheme } from '../contexts/ThemeContext'
 import { supabase } from '../lib/supabase'
 import { formatBRL, formatCodigo } from '../utils/formatters'
 import { cn } from '@/lib/utils'
-import { CONTEXTO_CLINICO } from '../data/contexto-clinico'
 
 const cacheReg = new Map()
 const cacheCor = new Map()
+const cacheIA = new Map()
 
 function ProcReg({ p, dark }) {
   const navigate = useNavigate()
@@ -69,17 +69,13 @@ function ProcReg({ p, dark }) {
 
 const CLINICOS_PREVIEW = 5
 
-// Renderiza lista de procedimentos com clínicos em destaque e cirúrgicos colapsáveis
-// somente se há clínicos. Se só há cirúrgicos, exibe todos diretamente.
 function ProcList({ procs, dark, labelClinicos = 'Clínicos — use para regulação' }) {
   const [cirurgicosAbertos, setCirurgicosAbertos] = useState(false)
   const [clinicosExpandidos, setClinicosExpandidos] = useState(false)
 
-  // Prioriza procedimentos com valor > 0, depois os demais
   const clinicosRaw = procs.filter(p => p.grupo === '03')
   const clinicosComValor = clinicosRaw.filter(p => (parseFloat(p.vl_sh) || 0) + (parseFloat(p.vl_sa) || 0) + (parseFloat(p.vl_sp) || 0) > 0)
   const clinicosSemValor = clinicosRaw.filter(p => (parseFloat(p.vl_sh) || 0) + (parseFloat(p.vl_sa) || 0) + (parseFloat(p.vl_sp) || 0) === 0)
-  // Mostra primeiro os com valor, depois sem valor — limita preview ao total
   const clinicos = [...clinicosComValor, ...clinicosSemValor]
   const clinicosVisiveis = clinicosExpandidos ? clinicos : clinicos.slice(0, CLINICOS_PREVIEW)
   const temMaisClinicos = clinicos.length > CLINICOS_PREVIEW
@@ -89,7 +85,6 @@ function ProcList({ procs, dark, labelClinicos = 'Clínicos — use para regula�
 
   return (
     <div className="space-y-1.5">
-      {/* Só cirúrgicos — mostra todos diretamente com aviso */}
       {soCirurgicos && (
         <>
           <p className="text-[10px] text-muted-foreground mb-1">
@@ -98,8 +93,6 @@ function ProcList({ procs, dark, labelClinicos = 'Clínicos — use para regula�
           {cirurgicos.map(p => <ProcReg key={p.co_procedimento} p={p} dark={dark} />)}
         </>
       )}
-
-      {/* Tem clínicos — destaca e colapsa cirúrgicos */}
       {!soCirurgicos && (
         <>
           {clinicos.length > 0 && (
@@ -113,9 +106,7 @@ function ProcList({ procs, dark, labelClinicos = 'Clínicos — use para regula�
                   onClick={() => setClinicosExpandidos(v => !v)}
                   className="text-[10px] font-medium text-muted-foreground hover:text-foreground transition"
                 >
-                  {clinicosExpandidos
-                    ? 'Ver menos'
-                    : `Ver mais ${clinicos.length - CLINICOS_PREVIEW} procedimentos`}
+                  {clinicosExpandidos ? 'Ver menos' : `Ver mais ${clinicos.length - CLINICOS_PREVIEW} procedimentos`}
                 </button>
               )}
             </div>
@@ -186,27 +177,29 @@ function CorrelatosColapsaveis({ correlatos, dark }) {
   )
 }
 
-function GrupoCorrelato({ grupo, dark }) {
+function PillIA({ p, onClick }) {
   return (
-    <div className="rounded-lg border border-border bg-background p-3">
-      <div className="mb-2.5">
-        <div className="flex items-center gap-2">
-          <span className={cn('font-mono text-xs font-bold shrink-0', dark ? 'text-amber-400' : 'text-amber-600')}>{grupo.co_cid}</span>
-          <span className="text-xs font-medium text-foreground leading-snug">{grupo.no_cid}</span>
-        </div>
-        {grupo.justificativa && (
-          <p className="mt-0.5 text-[10px] text-muted-foreground italic">{grupo.justificativa}</p>
-        )}
-      </div>
-      <ProcList procs={grupo.procs} dark={dark} labelClinicos="Clínico alternativo para regulação" />
-    </div>
+    <button
+      onClick={() => onClick(p.termos_busca?.[0] || p.nome)}
+      title={`Buscar: ${p.termos_busca?.join(', ') || p.nome}`}
+      className={cn(
+        'flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition',
+        'border-border bg-secondary text-foreground hover:border-foreground/20 hover:text-foreground'
+      )}
+    >
+      <span className={cn(
+        'h-1.5 w-1.5 rounded-full shrink-0',
+        p.grupo === 'cirúrgico' ? 'bg-orange-400' : p.grupo === 'terapêutico' ? 'bg-emerald-400' : 'bg-foreground/40'
+      )} />
+      {p.nome}
+    </button>
   )
 }
 
-export function ContextoClinico({ cid, autoOpen = false }) {
+export function ContextoClinico({ cid }) {
   const { dark } = useTheme()
-  const [aberto, setAberto] = useState(autoOpen)
-  const [aba, setAba] = useState('regulacao') // 'regulacao' | 'clinico'
+  const navigate = useNavigate()
+  const [aba, setAba] = useState('regulacao') // 'regulacao' | 'ia'
 
   // Regulação state
   const [procsReg, setProcsReg] = useState(null)
@@ -218,15 +211,14 @@ export function ContextoClinico({ cid, autoOpen = false }) {
   const [correlatos, setCorrelatos] = useState(null)
   const buscandoCorRef = useRef(false)
 
-  // Contexto clínico curado
-  const cidKey = cid.co_cid?.trim()
-  const ctxCurado = CONTEXTO_CLINICO[cidKey] || null
+  // IA state
+  const [dadosIA, setDadosIA] = useState(null)
+  const [loadingIA, setLoadingIA] = useState(false)
+  const [erroIA, setErroIA] = useState(null)
+  const buscandoIARef = useRef(false)
 
   useEffect(() => {
-    if (autoOpen) {
-      setAberto(true)
-      buscarReg()
-    }
+    buscarReg()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   async function buscarReg() {
@@ -247,7 +239,6 @@ export function ContextoClinico({ cid, autoOpen = false }) {
       setLoadingReg(false)
       buscandoRegRef.current = false
     }
-    // Busca correlatos em paralelo
     buscarCorrelatos()
   }
 
@@ -259,14 +250,12 @@ export function ContextoClinico({ cid, autoOpen = false }) {
     try {
       const { data, error } = await supabase.rpc('cids_correlatos_clinicos', { p_co_cid: key })
       if (error) throw new Error(error.message)
-      // Deduplica por procedimento
       const seen = new Map()
       for (const row of (data || [])) {
         if (seen.has(row.co_procedimento)) continue
         const vl_sh = parseFloat(row.vl_sh) || 0
         const vl_sa = parseFloat(row.vl_sa) || 0
         const vl_sp = parseFloat(row.vl_sp) || 0
-        // Ignora procedimentos sem valor (CAPS, residência terapêutica, etc.)
         if (vl_sh + vl_sa + vl_sp === 0) continue
         seen.set(row.co_procedimento, {
           co_procedimento: row.co_procedimento,
@@ -287,179 +276,182 @@ export function ContextoClinico({ cid, autoOpen = false }) {
     }
   }
 
-  async function toggle() {
-    if (aberto) { setAberto(false); return }
-    setAberto(true)
-    buscarReg()
+  async function buscarIA() {
+    const key = cid.co_cid?.trim()
+    if (cacheIA.has(key)) { setDadosIA(cacheIA.get(key)); return }
+    if (buscandoIARef.current) return
+    buscandoIARef.current = true
+    setLoadingIA(true)
+    setErroIA(null)
+    try {
+      const res = await fetch('/api/cid-contexto', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ co_cid: key, no_cid: cid.no_cid?.trim() }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Falha na API')
+      cacheIA.set(key, data)
+      setDadosIA(data)
+    } catch (err) {
+      setErroIA(err.message)
+    } finally {
+      setLoadingIA(false)
+      buscandoIARef.current = false
+    }
   }
 
   function mudarAba(novaAba) {
     setAba(novaAba)
-    if (novaAba === 'regulacao' && !procsReg && !loadingReg) buscarReg()
+    if (novaAba === 'ia' && !dadosIA && !loadingIA) buscarIA()
   }
 
+  function irParaBusca(termo) {
+    navigate(`/?q=${encodeURIComponent(termo)}&sc=1`)
+  }
+
+  const temIA = dadosIA && (dadosIA.coringas?.length > 0 || dadosIA.cenarios?.length > 0)
+
   return (
-    <div>
-      {/* Botão trigger */}
-      <button
-        onClick={toggle}
-        title="Ver procedimentos SIGTAP por contexto clínico e regulação"
-        className={cn(
-          'flex items-center gap-1 rounded-lg border px-2.5 py-1 text-xs font-medium transition whitespace-nowrap',
-          aberto
-            ? 'border-foreground/30 bg-foreground/5 text-foreground'
-            : 'border-border text-muted-foreground hover:border-foreground/20 hover:text-foreground'
-        )}
-      >
-        <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-        </svg>
-        Contexto
-      </button>
+    <div className={cn('rounded-xl border overflow-hidden', 'border-border bg-card')}>
+      {/* Abas */}
+      <div className="flex border-b border-border">
+        <button
+          onClick={() => mudarAba('regulacao')}
+          className={cn(
+            'flex-1 px-4 py-2.5 text-xs font-medium transition',
+            aba === 'regulacao'
+              ? 'text-foreground border-b border-foreground'
+              : 'text-muted-foreground hover:text-foreground'
+          )}
+        >
+          Regulação · SIGTAP
+        </button>
+        <button
+          onClick={() => mudarAba('ia')}
+          className={cn(
+            'flex-1 px-4 py-2.5 text-xs font-medium transition',
+            aba === 'ia'
+              ? 'text-foreground border-b border-foreground'
+              : 'text-muted-foreground hover:text-foreground'
+          )}
+        >
+          Contexto clínico · IA
+        </button>
+      </div>
 
-      {/* Painel inline */}
-      {aberto && (
-        <div className={cn(
-          'mt-2 rounded-xl border overflow-hidden',
-          'border-border bg-card'
-        )}>
-          {/* Abas */}
-          <div className="flex border-b border-border">
-            <button
-              onClick={() => mudarAba('regulacao')}
-              className={cn(
-                'flex-1 px-4 py-2.5 text-xs font-medium transition',
-                aba === 'regulacao'
-                  ? 'text-foreground border-b border-foreground'
-                  : 'text-muted-foreground hover:text-foreground'
-              )}
-            >
-              Regulação · SIGTAP
-            </button>
-            {ctxCurado && (
-              <button
-                onClick={() => mudarAba('clinico')}
-                className={cn(
-                  'flex-1 px-4 py-2.5 text-xs font-medium transition',
-                  aba === 'clinico'
-                    ? 'text-foreground border-b border-foreground'
-                    : 'text-muted-foreground hover:text-foreground'
-                )}
-              >
-                Contexto clínico
-              </button>
-            )}
-          </div>
+      {/* Aba Regulação */}
+      {aba === 'regulacao' && (
+        <div className="p-4">
+          {loadingReg && (
+            <div className="flex items-center gap-2 py-2">
+              <svg className="h-4 w-4 animate-spin text-primary" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+              </svg>
+              <span className="text-xs text-muted-foreground">Buscando na tabela SIGTAP...</span>
+            </div>
+          )}
+          {erroReg && <p className="text-xs text-red-400">{erroReg}</p>}
+          {procsReg && procsReg.length === 0 && (
+            <p className="text-xs text-muted-foreground">Nenhum procedimento grupo 03/04 vinculado a este CID na tabela SIGTAP.</p>
+          )}
+          {procsReg && procsReg.length > 0 && (
+            <ProcRegList procs={procsReg} dark={dark} />
+          )}
 
-          {/* Aba Regulação */}
-          {aba === 'regulacao' && (
-            <div className="p-4">
-              {loadingReg && (
-                <div className="flex items-center gap-2 py-2">
-                  <svg className="h-4 w-4 animate-spin text-primary" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                  </svg>
-                  <span className="text-xs text-muted-foreground">Buscando na tabela SIGTAP...</span>
-                </div>
-              )}
-              {erroReg && <p className="text-xs text-red-400">{erroReg}</p>}
-              {procsReg && procsReg.length === 0 && (
-                <p className="text-xs text-muted-foreground">Nenhum procedimento grupo 03/04 vinculado a este CID na tabela SIGTAP.</p>
-              )}
-              {procsReg && procsReg.length > 0 && (
-                <ProcRegList procs={procsReg} dark={dark} />
-              )}
-
-              {/* CIDs correlatos com procedimentos adicionais */}
-              {correlatos === null && !loadingReg && (
-                <div className="flex items-center gap-2 mt-4 pt-3 border-t border-border">
-                  <svg className="h-3.5 w-3.5 animate-spin text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                  </svg>
-                  <span className="text-[10px] text-muted-foreground">Buscando códigos alternativos para regulação...</span>
-                </div>
-              )}
-
-              {/* Dica especial para Sepse */}
-              {correlatos !== null && /^A41/i.test(cid.co_cid?.trim()) && (
-                <div className={cn('mt-4 pt-4 border-t', dark ? 'border-[rgba(255,255,255,0.06)]' : 'border-border')}>
-                  <div className={cn('rounded-lg p-3', dark ? 'bg-amber-500/10 border border-amber-500/20' : 'bg-amber-50 border border-amber-200')}>
-                    <p className="text-[10px] font-semibold text-amber-500 uppercase tracking-wider mb-1">
-                      Dica para regulação de Sepse
-                    </p>
-                    <p className="text-[10px] text-muted-foreground leading-relaxed">
-                      Para sepse, considere usar o <strong className="text-foreground">CID do foco infeccioso</strong> com seu código de tratamento específico:
-                    </p>
-                    <div className="mt-1.5 space-y-0.5">
-                      {[
-                        { cid: 'J189', label: 'Foco pulmonar → Tratamento de pneumonias' },
-                        { cid: 'N390', label: 'Foco urinário → Tratamento de doenças renais' },
-                        { cid: 'K659', label: 'Foco abdominal → Tratamento de doenças do peritônio' },
-                        { cid: 'L089', label: 'Foco cutâneo → Tratamento de infecções de pele' },
-                      ].map(item => (
-                        <p key={item.cid} className="text-[10px] text-muted-foreground">
-                          <span className="font-mono font-semibold text-foreground">{item.cid}</span>
-                          {' · '}{item.label}
-                        </p>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {correlatos && correlatos.length > 0 && !/^A41/i.test(cid.co_cid?.trim()) && (
-                <CorrelatosColapsaveis correlatos={correlatos} dark={dark} />
-              )}
+          {correlatos === null && !loadingReg && (
+            <div className="flex items-center gap-2 mt-4 pt-3 border-t border-border">
+              <svg className="h-3.5 w-3.5 animate-spin text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+              </svg>
+              <span className="text-[10px] text-muted-foreground">Buscando códigos alternativos para regulação...</span>
             </div>
           )}
 
-          {/* Aba Contexto clínico curado */}
-          {aba === 'clinico' && ctxCurado && (
-            <div className="p-4 space-y-3">
-              {/* Nota clínica */}
-              <p className="text-xs text-foreground leading-relaxed">{ctxCurado.nota}</p>
+          {/* Dica especial para Sepse */}
+          {correlatos !== null && /^A41/i.test(cid.co_cid?.trim()) && (
+            <div className={cn('mt-4 pt-4 border-t', dark ? 'border-[rgba(255,255,255,0.06)]' : 'border-border')}>
+              <div className={cn('rounded-lg p-3', dark ? 'bg-amber-500/10 border border-amber-500/20' : 'bg-amber-50 border border-amber-200')}>
+                <p className="text-[10px] font-semibold text-amber-500 uppercase tracking-wider mb-1">
+                  Dica para regulação de Sepse
+                </p>
+                <p className="text-[10px] text-muted-foreground leading-relaxed">
+                  Para sepse, considere usar o <strong className="text-foreground">CID do foco infeccioso</strong> com seu código de tratamento específico:
+                </p>
+                <div className="mt-1.5 space-y-0.5">
+                  {[
+                    { cid: 'J189', label: 'Foco pulmonar → Tratamento de pneumonias' },
+                    { cid: 'N390', label: 'Foco urinário → Tratamento de doenças renais' },
+                    { cid: 'K659', label: 'Foco abdominal → Tratamento de doenças do peritônio' },
+                    { cid: 'L089', label: 'Foco cutâneo → Tratamento de infecções de pele' },
+                  ].map(item => (
+                    <p key={item.cid} className="text-[10px] text-muted-foreground">
+                      <span className="font-mono font-semibold text-foreground">{item.cid}</span>
+                      {' · '}{item.label}
+                    </p>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
 
-              {/* CIDs alternativos */}
-              {ctxCurado.cids_alt?.length > 0 && (
+          {correlatos && correlatos.length > 0 && !/^A41/i.test(cid.co_cid?.trim()) && (
+            <CorrelatosColapsaveis correlatos={correlatos} dark={dark} />
+          )}
+        </div>
+      )}
+
+      {/* Aba IA */}
+      {aba === 'ia' && (
+        <div className="p-4 space-y-4">
+          {loadingIA && (
+            <div className="flex items-center gap-2 py-2">
+              <svg className="h-4 w-4 animate-spin text-primary" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+              </svg>
+              <span className="text-xs text-muted-foreground">Consultando IA...</span>
+            </div>
+          )}
+          {erroIA && <p className="text-xs text-red-400">{erroIA}</p>}
+          {!loadingIA && !erroIA && !temIA && dadosIA && (
+            <p className="text-xs text-muted-foreground">Nenhum procedimento específico identificado para este CID.</p>
+          )}
+          {temIA && (
+            <>
+              {dadosIA.coringas?.length > 0 && (
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
-                    CIDs alternativos para regulação
+                  <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    Base — presentes na maioria dos casos
                   </p>
-                  <div className="space-y-1.5">
-                    {ctxCurado.cids_alt.map(alt => (
-                      <Link
-                        key={alt.co_cid}
-                        to={`/?q=${encodeURIComponent(alt.co_cid)}&ctx=1`}
-                        className="flex items-start gap-2 rounded-lg px-2.5 py-2 transition hover:bg-secondary group"
-                      >
-                        <span className="font-mono text-xs font-bold text-foreground shrink-0">{alt.co_cid}</span>
-                        <div className="min-w-0">
-                          <span className="text-xs text-foreground">{alt.label}</span>
-                          {alt.motivo && (
-                            <p className="text-[10px] text-muted-foreground leading-snug">{alt.motivo}</p>
-                          )}
-                        </div>
-                      </Link>
+                  <div className="flex flex-wrap gap-1.5">
+                    {dadosIA.coringas.map((p, i) => (
+                      <PillIA key={i} p={p} onClick={irParaBusca} />
                     ))}
                   </div>
                 </div>
               )}
-
-              {/* Dica de regulação */}
-              {ctxCurado.dica_regulacao && (
-                <div className={cn(
-                  'rounded-lg border p-2.5',
-                  dark ? 'border-border bg-secondary/30' : 'border-border bg-secondary/50'
-                )}>
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
-                    Dica SIGTAP
-                  </p>
-                  <p className="text-[11px] text-muted-foreground leading-relaxed">{ctxCurado.dica_regulacao}</p>
+              {dadosIA.cenarios?.map((c, i) => (
+                <div key={i}>
+                  <div className="mb-1.5 flex items-center gap-2">
+                    <div className={cn('h-px flex-1', dark ? 'bg-[rgba(255,255,255,0.06)]' : 'bg-border')} />
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground px-1">{c.titulo}</span>
+                    <div className={cn('h-px flex-1', dark ? 'bg-[rgba(255,255,255,0.06)]' : 'bg-border')} />
+                  </div>
+                  {c.descricao && <p className="mb-1.5 text-[11px] text-muted-foreground">{c.descricao}</p>}
+                  <div className="flex flex-wrap gap-1.5">
+                    {c.procedimentos?.map((p, j) => (
+                      <PillIA key={j} p={p} onClick={irParaBusca} />
+                    ))}
+                  </div>
                 </div>
-              )}
-            </div>
+              ))}
+              <p className="text-[10px] text-muted-foreground/60 border-t border-border pt-2">
+                Sugestões por IA · clique para buscar no SIGTAP
+              </p>
+            </>
           )}
         </div>
       )}

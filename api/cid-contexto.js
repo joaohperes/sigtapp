@@ -1,4 +1,10 @@
 import Groq from 'groq-sdk'
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(
+  process.env.VITE_SUPABASE_URL,
+  process.env.VITE_SUPABASE_ANON_KEY
+)
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -8,6 +14,19 @@ export default async function handler(req, res) {
   const { co_cid, no_cid } = req.body ?? {}
   if (!co_cid?.trim()) {
     return res.status(400).json({ error: 'CID não informado' })
+  }
+
+  const cidKey = co_cid.trim().toUpperCase()
+
+  // Tenta cache primeiro
+  const { data: cached } = await supabase
+    .from('cid_contexto_ia')
+    .select('payload')
+    .eq('co_cid', cidKey)
+    .maybeSingle()
+
+  if (cached?.payload) {
+    return res.status(200).json(cached.payload)
   }
 
   const apiKey = process.env.GROQ_API_KEY
@@ -118,7 +137,15 @@ Regras finais:
 
     const coringas = filtrarProcs(raw.coringas)
 
-    return res.status(200).json({ cenarios, coringas })
+    const resultado = { cenarios, coringas }
+
+    // Salva no cache (fire-and-forget)
+    supabase
+      .from('cid_contexto_ia')
+      .insert({ co_cid: cidKey, payload: resultado })
+      .then(() => {})
+
+    return res.status(200).json(resultado)
   } catch (err) {
     console.error('Erro cid-contexto:', err)
     return res.status(500).json({ error: 'Falha ao processar' })
