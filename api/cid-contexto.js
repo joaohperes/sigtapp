@@ -7,7 +7,7 @@ const supabase = createClient(
 )
 
 // Bump quando o prompt ou o pós-processamento mudar — invalida o cache automaticamente.
-const PROMPT_VERSION = 4
+const PROMPT_VERSION = 5
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Helpers
@@ -96,10 +96,26 @@ function cobertura(consulta, nomeProc) {
   return inter / sc.size
 }
 
+// Núcleos clínicos genéricos demais para casar com segurança: sozinhos, casariam
+// com procedimentos de contexto errado (ex: "choque"→"choque anafilático",
+// "dor"→"dor por estereotaxia"). Se o nome da IA se resume a um destes, não casa.
+// Valores são os radicais já processados por radical() (ver tokens()).
+const NUCLEOS_GENERICOS = new Set([
+  'dor', 'choque', 'infecca', 'infeca', 'hemorragi', 'sangrament',
+  'traum', 'traumatism', 'fratur', 'lesa', 'sepse', 'septicemi', 'edem',
+])
+
+// Verifica se o nome (sem stopwords) é só um conceito genérico perigoso.
+function ehNomeGenerico(nome) {
+  const t = tokens(nome)
+  return t.length > 0 && t.every((tok) => NUCLEOS_GENERICOS.has(tok))
+}
+
 // Casa o nome sugerido pela IA com um procedimento SIGTAP real.
 //
 // Estratégia: confia no ranking da buscar_procedimentos (trigram + substring),
 // que já fez o trabalho semântico, e valida o TOP resultado de cada consulta:
+//  - rejeita nomes genéricos perigosos (só "dor", "choque", "fratura"...);
 //  - filtra para procedimentos de AIH (grupo 0303 clínico / 04 cirúrgico);
 //  - exige que a consulta esteja inteiramente coberta pelo nome do procedimento;
 //  - desambigua termos genéricos de 1 palavra (ex: "ventilação", "fratura")
@@ -107,8 +123,15 @@ function cobertura(consulta, nomeProc) {
 //    com o núcleo do procedimento (1ª palavra significativa — "pneumonias..."
 //    casa "pneumonia", mas "...tubo de ventilação" não casa "ventilação").
 async function casarSigtap(nome, termosBusca) {
+  // Rede de segurança: nome genérico demais nunca casa (vira pill de busca).
+  if (ehNomeGenerico(nome)) return null
+
   // Termos primeiro (mais limpos que o nome completo), depois o nome.
-  const consultas = [...(termosBusca || []), nome].filter(Boolean)
+  // Descarta termos de busca que também sejam genéricos isolados.
+  const consultas = [...(termosBusca || []), nome]
+    .filter(Boolean)
+    .filter((q) => !ehNomeGenerico(q))
+  if (consultas.length === 0) return null
   const tokensNome = new Set(tokens(nome))
 
   for (const q of consultas) {
@@ -162,16 +185,42 @@ function montarPrompt(co_cid, no_cid) {
 
 Para o CID-10 "${co_cid}" — "${no_cid}", liste os PROCEDIMENTOS SIGTAP que um médico colocaria na AIH deste paciente, agrupados por cenário clínico.
 
-REGRAS ABSOLUTAS — o que PODE estar na AIH:
-✓ Tratamentos clínicos específicos da condição (ex: "tratamento de pneumonia", "tratamento de septicemia")
-✓ Cirurgias e intervenções cirúrgicas (ex: "apendicectomia", "drenagem de empiema")
-✓ Ventilação mecânica invasiva ou não invasiva — SÓ quando o quadro requer suporte ventilatório
+╔═══════════════════════════════════════════════════════════════════════╗
+║ REGRA Nº 1 — ESPECIFICIDADE (a mais importante de todas)              ║
+╚═══════════════════════════════════════════════════════════════════════╝
+Cada procedimento deve ter um nome ESPECÍFICO E NOMEÁVEL que exista na
+tabela SIGTAP. NUNCA escreva um conceito clínico genérico.
+
+PROIBIDO (conceitos vagos — geram código ERRADO):
+✗ "Tratamento de dor"        → casaria erradamente com "dor por estereotaxia"
+✗ "Tratamento de choque"     → casaria erradamente com "choque anafilático"
+✗ "Tratamento de infecção"   → vago demais, qualquer infecção
+✗ "Tratamento de hemorragia" → casaria com "hemorragia das vias respiratórias"
+✗ "Tratamento de fratura"    → qual fratura? de qual osso/região?
+✗ "Tratamento de trauma"     → vago demais
+
+CORRETO (procedimento específico, nomeável):
+✓ "Laparotomia exploradora"
+✓ "Craniotomia descompressiva"
+✓ "Tratamento de pneumonias ou influenza"
+✓ "Tratamento de fratura de fêmur"
+✓ "Drenagem de tórax fechada"
+✓ "Tratamento de septicemia"
+
+REGRA DE OURO: se você não consegue nomear o procedimento SIGTAP específico
+e real, NÃO o inclua. É melhor 2 procedimentos certos que 4 com 1 errado.
+
+╔═══════════════════════════════════════════════════════════════════════╗
+║ O que PODE estar na AIH                                                ║
+╚═══════════════════════════════════════════════════════════════════════╝
+✓ Tratamentos clínicos específicos da condição
+✓ Cirurgias e intervenções cirúrgicas nomeadas
+✓ Ventilação mecânica invasiva ou não invasiva — SÓ quando requer suporte ventilatório
 ✓ Diálise/hemodiálise — SÓ quando há IRA ou DRC dialítica no quadro
 ✓ Transfusão de concentrado de hemácias — SÓ quando há sangramento ativo ou anemia grave
 ✓ Trombolítico sistêmico — SÓ em TEP maciço, AVC isquêmico, IAM com indicação
 ✓ Cardioversão elétrica — SÓ em arritmias com instabilidade
 ✓ Drenagem torácica — SÓ em pneumotórax, hemotórax, empiema
-✓ Filtro de veia cava — SÓ em TEP com contraindicação a anticoagulação
 
 PROIBIDO — NUNCA inclua:
 ✗ Exames laboratoriais (hemograma, gasometria, troponina, PCR, lactato, culturas)
@@ -179,20 +228,22 @@ PROIBIDO — NUNCA inclua:
 ✗ Medicamentos e infusões (antibióticos, anticoagulantes, vasopressores, analgésicos, hidratação)
 ✗ Monitoramento (oximetria, PVC, débito urinário, sinais vitais)
 ✗ Suporte nutricional, cateter venoso central isolado, acesso periférico
-✗ Procedimentos não relacionados ao CID em questão (ex: diálise para TEP, transfusão para pneumonia sem sangramento)
+✗ Procedimentos não relacionados ao CID em questão
 
-TESTE ANTES DE INCLUIR cada procedimento: "Este procedimento estaria na AIH de um paciente com ${co_cid} internado por ${no_cid}?" — se a resposta não for "sim, na maioria ou em cenário específico bem definido", EXCLUA.
+TESTE ANTES DE INCLUIR cada procedimento: "Este procedimento estaria na AIH de
+um paciente com ${co_cid} internado por ${no_cid}, E eu consigo nomeá-lo
+especificamente?" — se a resposta a qualquer parte for não, EXCLUA.
 
 Retorne APENAS JSON válido:
 {
   "cenarios": [
     {
-      "titulo": "cenário clínico específico (ex: TEP maciço com instabilidade, AVC isquêmico com trombolítico)",
+      "titulo": "cenário clínico específico (ex: TCE grave com indicação cirúrgica)",
       "descricao": "uma frase objetiva sobre quando este cenário se aplica",
       "procedimentos": [
         {
-          "nome": "nome exato do procedimento SIGTAP",
-          "termos_busca": ["termo1 para busca"],
+          "nome": "nome específico e nomeável do procedimento SIGTAP",
+          "termos_busca": ["palavra-chave específica para busca na tabela"],
           "grupo": "clínico | cirúrgico | terapêutico"
         }
       ]
@@ -200,18 +251,19 @@ Retorne APENAS JSON válido:
   ],
   "coringas": [
     {
-      "nome": "procedimento presente em quase todos os casos deste CID",
-      "termos_busca": ["termo1"],
+      "nome": "procedimento específico presente em quase todos os casos deste CID",
+      "termos_busca": ["palavra-chave específica"],
       "grupo": "clínico | cirúrgico | terapêutico"
     }
   ]
 }
 
 Regras finais:
-- "coringas": máximo 3. Apenas procedimentos que aparecem em >80% das AIH deste CID.
-- "cenarios": 2 a 3 cenários. Cada um com 2 a 3 procedimentos realmente específicos.
+- "coringas": máximo 3. Apenas procedimentos específicos que aparecem em >80% das AIH deste CID.
+- "cenarios": 2 a 3 cenários. Cada um com 1 a 3 procedimentos específicos e nomeáveis.
 - Se o CID não gera internação hospitalar tipicamente, retorne coringas:[] e cenarios:[].
-- Terminologia SUS: "tratamento de" não "manejo de", use nomes que aparecem na tabela SIGTAP.
+- "termos_busca": use a palavra-chave mais distintiva do procedimento (ex: "laparotomia",
+  "craniotomia", "pneumonia"), nunca um conceito genérico isolado ("dor", "choque", "infecção").
 - Use acentuação correta em português em todos os textos.`
 }
 
