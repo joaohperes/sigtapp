@@ -379,7 +379,7 @@ export function Home() {
                         </span>
                         <span className="flex-1 text-sm text-foreground leading-snug">{cid.no_cid?.trim()}</span>
                         <div className="shrink-0 flex items-center gap-2">
-                          <ContextoClinico cid={cid} />
+                          <ContextoClinico cid={cid} collapsible />
                           <button
                             onClick={() => handleCidSelect(cid.co_cid.trim())}
                             className="rounded-md border border-primary/30 bg-primary/10 px-2.5 py-1

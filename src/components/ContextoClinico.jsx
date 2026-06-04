@@ -196,9 +196,10 @@ function PillIA({ p, onClick }) {
   )
 }
 
-export function ContextoClinico({ cid }) {
+export function ContextoClinico({ cid, collapsible = false }) {
   const { dark } = useTheme()
   const navigate = useNavigate()
+  const [aberto, setAberto] = useState(!collapsible)
   const [aba, setAba] = useState('regulacao') // 'regulacao' | 'ia'
 
   // Regulação state
@@ -218,8 +219,14 @@ export function ContextoClinico({ cid }) {
   const buscandoIARef = useRef(false)
 
   useEffect(() => {
-    buscarReg()
+    if (!collapsible) buscarReg()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  function toggle() {
+    if (aberto) { setAberto(false); return }
+    setAberto(true)
+    if (!procsReg && !loadingReg) buscarReg()
+  }
 
   async function buscarReg() {
     const key = cid.co_cid?.trim()
@@ -313,7 +320,25 @@ export function ContextoClinico({ cid }) {
   const temIA = dadosIA && (dadosIA.coringas?.length > 0 || dadosIA.cenarios?.length > 0)
 
   return (
-    <div className={cn('rounded-xl border overflow-hidden', 'border-border bg-card')}>
+    <div>
+      {collapsible && (
+        <button
+          onClick={toggle}
+          title="Ver procedimentos SIGTAP por contexto clínico e regulação"
+          className={cn(
+            'flex items-center gap-1 rounded-lg border px-2.5 py-1 text-xs font-medium transition whitespace-nowrap',
+            aberto
+              ? 'border-foreground/30 bg-foreground/5 text-foreground'
+              : 'border-border text-muted-foreground hover:border-foreground/20 hover:text-foreground'
+          )}
+        >
+          <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+          Contexto
+        </button>
+      )}
+      {aberto && <div className={cn('rounded-xl border overflow-hidden mt-2', 'border-border bg-card')}>
       {/* Abas */}
       <div className="flex border-b border-border">
         <button
@@ -455,6 +480,7 @@ export function ContextoClinico({ cid }) {
           )}
         </div>
       )}
+      </div>}
     </div>
   )
 }

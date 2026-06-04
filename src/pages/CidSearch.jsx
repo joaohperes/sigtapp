@@ -215,8 +215,7 @@ function CidRow({ cid, dark, autoCtx = false }) {
         </div>
       </div>
 
-      {/* Contexto clínico — botão + painel colapsável */}
-      <ContextoClinico cid={cid} autoOpen={autoCtx} />
+      <ContextoClinico cid={cid} collapsible />
     </div>
   )
 }
