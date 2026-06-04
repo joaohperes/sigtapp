@@ -7,7 +7,7 @@ const supabase = createClient(
 )
 
 // Bump quando o prompt ou o pós-processamento mudar — invalida o cache automaticamente.
-const PROMPT_VERSION = 2
+const PROMPT_VERSION = 3
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Helpers
@@ -89,6 +89,13 @@ function parseJSONTolerante(text) {
 // mesmo com alta similaridade textual (ex: "VM invasiva DOMICILIAR" vs "VM invasiva").
 const CONTEXTO_INCOMPATIVEL = ['domiciliar', 'ambulatorial', 'avaliacao do paciente']
 
+// Só aceita como match procedimentos que podem ser principais de uma AIH:
+// grupo 03 subgrupo 03 (clínicos de internação) ou grupo 04 (cirúrgicos).
+// Exclui diagnósticos (0309), órteses/próteses (07), terapias ambulatoriais, etc.
+function ehProcAIH(co) {
+  return co?.startsWith('0303') || co?.startsWith('04')
+}
+
 // Casa o nome sugerido pela IA com um procedimento SIGTAP real.
 // Só aceita o match se a similaridade for forte o bastante (evita código errado).
 async function casarSigtap(nome, termosBusca) {
@@ -103,6 +110,7 @@ async function casarSigtap(nome, termosBusca) {
     })
     if (error || !data) continue
     for (const proc of data) {
+      if (!ehProcAIH(proc.co_procedimento)) continue
       const nomeProc = normalizar(proc.no_procedimento)
       if (CONTEXTO_INCOMPATIVEL.some((c) => nomeProc.includes(c))) continue
       const score = similaridade(nome, proc.no_procedimento)

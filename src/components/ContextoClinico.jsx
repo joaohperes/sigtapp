@@ -378,7 +378,7 @@ export function ContextoClinico({ cid, collapsible = false }) {
   }
 
   function irParaBusca(termo) {
-    navigate(`/?q=${encodeURIComponent(termo)}&sc=1`)
+    navigate(`/procedimentos?q=${encodeURIComponent(termo)}&sc=1`)
   }
 
   const temIA = dadosIA && (dadosIA.coringas?.length > 0 || dadosIA.cenarios?.length > 0)
