@@ -34,9 +34,8 @@ const COR_MAP_LIGHT = {
   pink:   { dot: 'bg-pink-400',   label: 'text-pink-600',   chip: 'border-pink-200 text-pink-700 hover:border-pink-400 hover:bg-pink-50',   header: 'bg-pink-50'   },
 }
 
-function CidRow({ cid, dark, autoCtx }) {
+function CidRow({ cid, dark }) {
   const sexo = { M: 'Masculino', F: 'Feminino', I: null, A: null }[cid.tp_sexo]
-  const isCat = cid.co_cid.trim().length === 3
 
   return (
     <div className="border-b border-border last:border-0 px-4 py-3.5">
@@ -70,7 +69,7 @@ function CidRow({ cid, dark, autoCtx }) {
           </Link>
         </div>
       </div>
-      <ContextoClinico cid={cid} autoOpen={autoCtx} />
+      <ContextoClinico cid={cid} autoOpen={true} />
     </div>
   )
 }
@@ -114,7 +113,11 @@ function GrupoCard({ grupo, dark }) {
 
       {/* Chips principais */}
       <div className="px-2.5 pt-2 pb-1.5 flex flex-wrap gap-1.5">
-        {grupo.cids.map(c => <Chip key={c.co_cid} c={c} cor={cor} dark={dark} />)}
+        {grupo.cids.map((c, i) =>
+          c.break
+            ? <div key={`br-${i}`} className="w-full" />
+            : <Chip key={c.co_cid} c={c} cor={cor} dark={dark} />
+        )}
       </div>
 
       {/* Extras colapsáveis */}
@@ -251,8 +254,8 @@ export function DiagnosticoPage() {
               {results.length} código{results.length !== 1 ? 's' : ''} encontrado{results.length !== 1 ? 's' : ''}
             </p>
             <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
-              {results.map((cid, i) => (
-                <CidRow key={cid.co_cid} cid={cid} dark={dark} autoCtx={autoCtx && i === 0} />
+              {results.map((cid) => (
+                <CidRow key={cid.co_cid} cid={cid} dark={dark} />
               ))}
             </div>
           </div>

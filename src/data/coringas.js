@@ -9,6 +9,7 @@ export const CORINGAS_GRUPOS = [
       { co_cid: 'I500', label: 'ICC'                   },
       { co_cid: 'I509', label: 'IC inespecífica'       },
       { co_cid: 'I48',  label: 'FA / flutter'          },
+      { break: true },
       { co_cid: 'I472', label: 'TV'                    },
       { co_cid: 'I460', label: 'PCR ressuscitada'      },
       { co_cid: 'I490', label: 'FV'                    },
@@ -20,6 +21,10 @@ export const CORINGAS_GRUPOS = [
       { co_cid: 'I420', label: 'Cardiomiopatia dilatada'},
       { co_cid: 'I350', label: 'Estenose aórtica'      },
       { co_cid: 'I340', label: 'Insuf. mitral'         },
+      { co_cid: 'I702', label: 'DAOP'                  },
+      { co_cid: 'I739', label: 'Doença vasc. periférica'},
+      { co_cid: 'I748', label: 'Embolia arterial'      },
+      { co_cid: 'I830', label: 'Varizes c/ úlcera'     },
     ],
   },
   {

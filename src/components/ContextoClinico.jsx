@@ -1,33 +1,14 @@
 import { useState, useRef, useEffect } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { useTheme } from '../contexts/ThemeContext'
 import { supabase } from '../lib/supabase'
 import { formatBRL, formatCodigo } from '../utils/formatters'
 import { cn } from '@/lib/utils'
+import { CONTEXTO_CLINICO } from '../data/contexto-clinico'
 
-const cacheIA = new Map()
 const cacheReg = new Map()
 const cacheCor = new Map()
-
-function PillIA({ p, dark, onClick }) {
-  return (
-    <button
-      onClick={() => onClick(p.termos_busca?.[0] || p.nome)}
-      title={`Buscar: ${p.termos_busca?.join(', ') || p.nome}`}
-      className={cn(
-        'flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition',
-        'border-border bg-secondary text-foreground hover:border-foreground/20 hover:text-foreground'
-      )}
-    >
-      <span className={cn(
-        'h-1.5 w-1.5 rounded-full shrink-0',
-        p.grupo === 'cirúrgico' ? 'bg-orange-400' : p.grupo === 'terapêutico' ? 'bg-emerald-400' : 'bg-foreground/40'
-      )} />
-      {p.nome}
-    </button>
-  )
-}
 
 function ProcReg({ p, dark }) {
   const navigate = useNavigate()
@@ -224,15 +205,8 @@ function GrupoCorrelato({ grupo, dark }) {
 
 export function ContextoClinico({ cid, autoOpen = false }) {
   const { dark } = useTheme()
-  const navigate = useNavigate()
   const [aberto, setAberto] = useState(autoOpen)
-  const [aba, setAba] = useState('regulacao') // 'ia' | 'regulacao'
-
-  // IA state
-  const [dadosIA, setDadosIA] = useState(null)
-  const [loadingIA, setLoadingIA] = useState(false)
-  const [erroIA, setErroIA] = useState(null)
-  const buscandoIARef = useRef(false)
+  const [aba, setAba] = useState('regulacao') // 'regulacao' | 'clinico'
 
   // Regulação state
   const [procsReg, setProcsReg] = useState(null)
@@ -244,37 +218,16 @@ export function ContextoClinico({ cid, autoOpen = false }) {
   const [correlatos, setCorrelatos] = useState(null)
   const buscandoCorRef = useRef(false)
 
+  // Contexto clínico curado
+  const cidKey = cid.co_cid?.trim()
+  const ctxCurado = CONTEXTO_CLINICO[cidKey] || null
+
   useEffect(() => {
     if (autoOpen) {
       setAberto(true)
       buscarReg()
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
-
-  async function buscarIA() {
-    const key = cid.co_cid?.trim()
-    if (cacheIA.has(key)) { setDadosIA(cacheIA.get(key)); return }
-    if (buscandoIARef.current) return
-    buscandoIARef.current = true
-    setLoadingIA(true)
-    setErroIA(null)
-    try {
-      const res = await fetch('/api/cid-contexto', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ co_cid: key, no_cid: cid.no_cid?.trim() }),
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Falha na API')
-      cacheIA.set(key, data)
-      setDadosIA(data)
-    } catch (err) {
-      setErroIA(err.message)
-    } finally {
-      setLoadingIA(false)
-      buscandoIARef.current = false
-    }
-  }
 
   async function buscarReg() {
     const key = cid.co_cid?.trim()
@@ -342,15 +295,8 @@ export function ContextoClinico({ cid, autoOpen = false }) {
 
   function mudarAba(novaAba) {
     setAba(novaAba)
-    if (novaAba === 'ia' && !dadosIA && !loadingIA) buscarIA()
     if (novaAba === 'regulacao' && !procsReg && !loadingReg) buscarReg()
   }
-
-  function irParaBusca(termo) {
-    navigate(`/?q=${encodeURIComponent(termo)}&sc=1`)
-  }
-
-  const temIA = dadosIA && (dadosIA.coringas?.length > 0 || dadosIA.cenarios?.length > 0)
 
   return (
     <div>
@@ -390,17 +336,19 @@ export function ContextoClinico({ cid, autoOpen = false }) {
             >
               Regulação · SIGTAP
             </button>
-            <button
-              onClick={() => mudarAba('ia')}
-              className={cn(
-                'flex-1 px-4 py-2.5 text-xs font-medium transition',
-                aba === 'ia'
-                  ? 'text-foreground border-b border-foreground'
-                  : 'text-muted-foreground hover:text-foreground'
-              )}
-            >
-              Contexto clínico · IA
-            </button>
+            {ctxCurado && (
+              <button
+                onClick={() => mudarAba('clinico')}
+                className={cn(
+                  'flex-1 px-4 py-2.5 text-xs font-medium transition',
+                  aba === 'clinico'
+                    ? 'text-foreground border-b border-foreground'
+                    : 'text-muted-foreground hover:text-foreground'
+                )}
+              >
+                Contexto clínico
+              </button>
+            )}
           </div>
 
           {/* Aba Regulação */}
@@ -467,55 +415,49 @@ export function ContextoClinico({ cid, autoOpen = false }) {
             </div>
           )}
 
-          {/* Aba IA */}
-          {aba === 'ia' && (
-            <div className="p-4 space-y-4">
-              {loadingIA && (
-                <div className="flex items-center gap-2 py-2">
-                  <svg className="h-4 w-4 animate-spin text-primary" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                  </svg>
-                  <span className="text-xs text-muted-foreground">Consultando IA...</span>
+          {/* Aba Contexto clínico curado */}
+          {aba === 'clinico' && ctxCurado && (
+            <div className="p-4 space-y-3">
+              {/* Nota clínica */}
+              <p className="text-xs text-foreground leading-relaxed">{ctxCurado.nota}</p>
+
+              {/* CIDs alternativos */}
+              {ctxCurado.cids_alt?.length > 0 && (
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+                    CIDs alternativos para regulação
+                  </p>
+                  <div className="space-y-1.5">
+                    {ctxCurado.cids_alt.map(alt => (
+                      <Link
+                        key={alt.co_cid}
+                        to={`/?q=${encodeURIComponent(alt.co_cid)}&ctx=1`}
+                        className="flex items-start gap-2 rounded-lg px-2.5 py-2 transition hover:bg-secondary group"
+                      >
+                        <span className="font-mono text-xs font-bold text-foreground shrink-0">{alt.co_cid}</span>
+                        <div className="min-w-0">
+                          <span className="text-xs text-foreground">{alt.label}</span>
+                          {alt.motivo && (
+                            <p className="text-[10px] text-muted-foreground leading-snug">{alt.motivo}</p>
+                          )}
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
                 </div>
               )}
-              {erroIA && <p className="text-xs text-red-400">{erroIA}</p>}
-              {!loadingIA && !erroIA && !temIA && dadosIA && (
-                <p className="text-xs text-muted-foreground">Nenhum procedimento específico identificado para este CID.</p>
-              )}
-              {temIA && (
-                <>
-                  {dadosIA.coringas?.length > 0 && (
-                    <div>
-                      <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                        Base — presentes na maioria dos casos
-                      </p>
-                      <div className="flex flex-wrap gap-1.5">
-                        {dadosIA.coringas.map((p, i) => (
-                          <PillIA key={i} p={p} dark={dark} onClick={irParaBusca} />
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  {dadosIA.cenarios?.map((c, i) => (
-                    <div key={i}>
-                      <div className="mb-1.5 flex items-center gap-2">
-                        <div className={cn('h-px flex-1', dark ? 'bg-[rgba(255,255,255,0.06)]' : 'bg-border')} />
-                        <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground px-1">{c.titulo}</span>
-                        <div className={cn('h-px flex-1', dark ? 'bg-[rgba(255,255,255,0.06)]' : 'bg-border')} />
-                      </div>
-                      {c.descricao && <p className="mb-1.5 text-[11px] text-muted-foreground">{c.descricao}</p>}
-                      <div className="flex flex-wrap gap-1.5">
-                        {c.procedimentos?.map((p, j) => (
-                          <PillIA key={j} p={p} dark={dark} onClick={irParaBusca} />
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                  <p className="text-[10px] text-muted-foreground/60 border-t border-border pt-2">
-                    Sugestões por IA · clique para buscar no SIGTAP
+
+              {/* Dica de regulação */}
+              {ctxCurado.dica_regulacao && (
+                <div className={cn(
+                  'rounded-lg border p-2.5',
+                  dark ? 'border-border bg-secondary/30' : 'border-border bg-secondary/50'
+                )}>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
+                    Dica SIGTAP
                   </p>
-                </>
+                  <p className="text-[11px] text-muted-foreground leading-relaxed">{ctxCurado.dica_regulacao}</p>
+                </div>
               )}
             </div>
           )}
