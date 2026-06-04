@@ -7,7 +7,7 @@ const supabase = createClient(
 )
 
 // Bump quando o prompt ou o pós-processamento mudar — invalida o cache automaticamente.
-const PROMPT_VERSION = 5
+const PROMPT_VERSION = 6
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Helpers
@@ -169,21 +169,124 @@ async function casarSigtap(nome, termosBusca) {
   return null
 }
 
-// Enriquece uma lista de procedimentos da IA com os códigos SIGTAP correspondentes.
-async function enriquecerProcs(procs) {
+// Busca o cardápio de procedimentos REAIS vinculados ao CID (diretos + correlatos
+// clínicos) — os mesmos que a aba Regulação mostra. A IA recebe essa lista para
+// ancorar suas sugestões em procedimentos que de fato existem para este CID.
+async function buscarCardapio(co_cid) {
+  const [diretos, correlatos] = await Promise.all([
+    supabase.rpc('procedimentos_por_cid_regulacao', { p_co_cid: co_cid }),
+    supabase.rpc('cids_correlatos_clinicos', { p_co_cid: co_cid }),
+  ])
+  const seen = new Map()
+  const add = (p) => {
+    if (!p?.co_procedimento || seen.has(p.co_procedimento)) return
+    seen.set(p.co_procedimento, {
+      co_procedimento: p.co_procedimento,
+      no_procedimento: p.no_procedimento,
+      vl_sh: p.vl_sh ?? 0,
+      vl_sa: p.vl_sa ?? 0,
+      vl_sp: p.vl_sp ?? 0,
+    })
+  }
+  ;(diretos.data || []).forEach(add)
+  ;(correlatos.data || []).forEach(add)
+  return Array.from(seen.values())
+}
+
+// Casa um procedimento sugerido pela IA, priorizando o cardápio real do CID:
+// se a IA cita o co_procedimento de um item do cardápio, usa-o direto; senão
+// tenta casar o NOME contra o cardápio; por último cai na busca textual global.
+async function casarComCardapio(p, cardapio) {
+  // 1) A IA pode citar o código exato de um item do cardápio.
+  if (p.co_procedimento) {
+    const exato = cardapio.find((c) => c.co_procedimento === p.co_procedimento)
+    if (exato) return toSigtap(exato)
+  }
+  // 2) Casa o nome da IA contra o cardápio (cobertura total + núcleo).
+  const doCardapio = casarNoCardapio(p.nome, p.termos_busca, cardapio)
+  if (doCardapio) return doCardapio
+  // 3) Fallback: busca textual global (com toda a rede de segurança).
+  return casarSigtap(p.nome, p.termos_busca)
+}
+
+function toSigtap(c) {
+  return {
+    co_procedimento: c.co_procedimento,
+    no_procedimento_sigtap: c.no_procedimento,
+    vl_sh: c.vl_sh,
+    vl_sa: c.vl_sa,
+    vl_sp: c.vl_sp,
+  }
+}
+
+// Casa o nome da IA contra a lista do cardápio (sem ir ao banco).
+function casarNoCardapio(nome, termosBusca, cardapio) {
+  if (ehNomeGenerico(nome)) return null
+  const consultas = [...(termosBusca || []), nome].filter(Boolean).filter((q) => !ehNomeGenerico(q))
+  const tokensNome = new Set(tokens(nome))
+  for (const q of consultas) {
+    for (const c of cardapio) {
+      if (cobertura(q, c.no_procedimento) !== 1) continue
+      const tProc = tokens(c.no_procedimento)
+      const setProc = new Set(tProc)
+      const nomeCoberto = [...tokensNome].filter((t) => setProc.has(t)).length
+      const nucleoBate = tProc.length > 0 && new Set(tokens(q)).has(tProc[0])
+      if (nomeCoberto >= 2 || nucleoBate) return toSigtap(c)
+    }
+  }
+  return null
+}
+
+// Enriquece os procedimentos da IA com códigos SIGTAP reais, priorizando o cardápio.
+async function enriquecerProcs(procs, cardapio) {
   const filtrados = (procs || []).filter((p) => p?.nome && !ehBloqueado(p.nome))
   return Promise.all(
     filtrados.map(async (p) => {
-      const match = await casarSigtap(p.nome, p.termos_busca)
+      const match = await casarComCardapio(p, cardapio)
       return { ...p, sigtap: match } // sigtap = null quando não houve match confiável
     })
   )
 }
 
-function montarPrompt(co_cid, no_cid) {
+// Remove duplicatas numa lista de procedimentos: mesmo código casado, ou mesmo
+// nome normalizado (pega procs repetidos que a IA mandou sem código).
+function dedupProcs(procs) {
+  const vistos = new Set()
+  const out = []
+  for (const p of procs || []) {
+    const chave = p.sigtap?.co_procedimento || normalizar(p.nome)
+    if (vistos.has(chave)) continue
+    vistos.add(chave)
+    out.push(p)
+  }
+  return out
+}
+
+function montarPrompt(co_cid, no_cid, cardapio) {
+  const listaCardapio =
+    cardapio.length > 0
+      ? cardapio
+          .map((c) => `- [${c.co_procedimento}] ${c.no_procedimento}`)
+          .join('\n')
+      : '(nenhum procedimento vinculado diretamente a este CID na tabela)'
+
   return `Você é um médico intensivista e codificador do SUS com 20 anos de experiência preenchendo AIH (Autorização de Internação Hospitalar) no Brasil.
 
 Para o CID-10 "${co_cid}" — "${no_cid}", liste os PROCEDIMENTOS SIGTAP que um médico colocaria na AIH deste paciente, agrupados por cenário clínico.
+
+╔═══════════════════════════════════════════════════════════════════════╗
+║ PROCEDIMENTOS REAIS DISPONÍVEIS PARA ESTE CID (use-os PRIMEIRO)        ║
+╚═══════════════════════════════════════════════════════════════════════╝
+Estes procedimentos existem na tabela SIGTAP para este diagnóstico.
+PRIORIZE-OS ao montar os cenários — copie o nome EXATAMENTE como está e,
+quando usar um, inclua o campo "co_procedimento" com o código entre colchetes:
+
+${listaCardapio}
+
+Você PODE adicionar outros procedimentos clínicos/cirúrgicos específicos que
+sejam pertinentes ao quadro e não estejam na lista acima (ex: laparotomia,
+craniotomia, ventilação mecânica) — mas SEMPRE com nome específico e nomeável.
+NUNCA repita o mesmo procedimento em cenários diferentes.
 
 ╔═══════════════════════════════════════════════════════════════════════╗
 ║ REGRA Nº 1 — ESPECIFICIDADE (a mais importante de todas)              ║
@@ -234,7 +337,8 @@ TESTE ANTES DE INCLUIR cada procedimento: "Este procedimento estaria na AIH de
 um paciente com ${co_cid} internado por ${no_cid}, E eu consigo nomeá-lo
 especificamente?" — se a resposta a qualquer parte for não, EXCLUA.
 
-Retorne APENAS JSON válido:
+Retorne APENAS JSON válido. Inclua "co_procedimento" SOMENTE quando o
+procedimento vier da lista de PROCEDIMENTOS REAIS acima (copie o código):
 {
   "cenarios": [
     {
@@ -243,6 +347,7 @@ Retorne APENAS JSON válido:
       "procedimentos": [
         {
           "nome": "nome específico e nomeável do procedimento SIGTAP",
+          "co_procedimento": "código se veio da lista real, senão omita",
           "termos_busca": ["palavra-chave específica para busca na tabela"],
           "grupo": "clínico | cirúrgico | terapêutico"
         }
@@ -252,6 +357,7 @@ Retorne APENAS JSON válido:
   "coringas": [
     {
       "nome": "procedimento específico presente em quase todos os casos deste CID",
+      "co_procedimento": "código se veio da lista real, senão omita",
       "termos_busca": ["palavra-chave específica"],
       "grupo": "clínico | cirúrgico | terapêutico"
     }
@@ -259,8 +365,10 @@ Retorne APENAS JSON válido:
 }
 
 Regras finais:
+- PRIORIZE os procedimentos da lista real; complemente com outros específicos só se necessário.
 - "coringas": máximo 3. Apenas procedimentos específicos que aparecem em >80% das AIH deste CID.
 - "cenarios": 2 a 3 cenários. Cada um com 1 a 3 procedimentos específicos e nomeáveis.
+- NUNCA repita o mesmo procedimento (mesmo código ou mesmo nome) em cenários diferentes.
 - Se o CID não gera internação hospitalar tipicamente, retorne coringas:[] e cenarios:[].
 - "termos_busca": use a palavra-chave mais distintiva do procedimento (ex: "laparotomia",
   "craniotomia", "pneumonia"), nunca um conceito genérico isolado ("dor", "choque", "infecção").
@@ -335,6 +443,9 @@ export default async function handler(req, res) {
   const client = new Groq({ apiKey })
 
   try {
+    // Busca o cardápio real do CID para ancorar as sugestões da IA.
+    const cardapio = await buscarCardapio(cidKey)
+
     const completion = await client.chat.completions.create({
       model: 'llama-3.3-70b-versatile',
       messages: [
@@ -343,7 +454,7 @@ export default async function handler(req, res) {
           content:
             'Você é especialista em medicina clínica e codificação SUS. Responda sempre em JSON válido com acentuação correta em português.',
         },
-        { role: 'user', content: montarPrompt(co_cid, no_cid) },
+        { role: 'user', content: montarPrompt(co_cid, no_cid, cardapio) },
       ],
       response_format: { type: 'json_object' },
       temperature: 0.0,
@@ -355,15 +466,29 @@ export default async function handler(req, res) {
       return res.status(502).json({ error: 'Resposta da IA em formato inválido' })
     }
 
-    // Pós-processamento: filtra proibidos e casa com códigos SIGTAP reais.
+    // Pós-processamento: filtra proibidos e casa com códigos SIGTAP reais (cardápio primeiro).
     const cenariosBrutos = await Promise.all(
       (raw.cenarios || []).map(async (c) => ({
         ...c,
-        procedimentos: await enriquecerProcs(c.procedimentos),
+        procedimentos: await enriquecerProcs(c.procedimentos, cardapio),
       }))
     )
-    const cenarios = cenariosBrutos.filter((c) => c.procedimentos.length > 0)
-    const coringas = await enriquecerProcs(raw.coringas)
+    const coringas = dedupProcs(await enriquecerProcs(raw.coringas, cardapio))
+
+    // Deduplica códigos já usados nos coringas e entre cenários (1ª ocorrência vence).
+    const usados = new Set(coringas.map((p) => p.sigtap?.co_procedimento).filter(Boolean))
+    const cenarios = cenariosBrutos
+      .map((c) => {
+        const procedimentos = []
+        for (const p of dedupProcs(c.procedimentos)) {
+          const co = p.sigtap?.co_procedimento
+          if (co && usados.has(co)) continue // já apareceu antes — não repete
+          if (co) usados.add(co)
+          procedimentos.push(p)
+        }
+        return { ...c, procedimentos }
+      })
+      .filter((c) => c.procedimentos.length > 0)
 
     const resultado = { cenarios, coringas }
 
