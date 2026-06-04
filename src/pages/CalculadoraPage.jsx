@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { formatBRL, formatCodigo } from '../utils/formatters'
 import { GRUPO_MAP } from '../data/grupos'
@@ -174,11 +174,19 @@ function TrashIcon() {
   )
 }
 
+const CALC_STORAGE_KEY = 'sigtap-calc-items'
+
 export function CalculadoraPage() {
   const { dark } = useTheme()
+  const [searchParams, setSearchParams] = useSearchParams()
   const [helpOpen, setHelpOpen] = useState(false)
   // items: { procedure, qty } — o primeiro é sempre o principal
-  const [items, setItems] = useState([])
+  const [items, setItems] = useState(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem(CALC_STORAGE_KEY) || '[]')
+      return Array.isArray(saved) ? saved : []
+    } catch { return [] }
+  })
   const [compatList, setCompatList] = useState(null)
   const [compatLoading, setCompatLoading] = useState(false)
   const [showAllCompat, setShowAllCompat] = useState(false)
@@ -191,6 +199,39 @@ export function CalculadoraPage() {
   // O item na posição 0 é sempre o principal
   const principalCo = items[0]?.procedure.co_procedimento
   const existingCodes = new Set(items.map(i => i.procedure.co_procedimento))
+
+  // Persiste items no localStorage (não perde no reload — crucial em plantão)
+  useEffect(() => {
+    try { localStorage.setItem(CALC_STORAGE_KEY, JSON.stringify(items)) } catch { /* quota */ }
+  }, [items])
+
+  // Kit AIH via URL: ?add=cod1,cod2 — monta a calculadora automaticamente
+  useEffect(() => {
+    const addParam = searchParams.get('add')
+    if (!addParam) return
+    const codes = addParam.split(',').map(c => c.trim().replace(/[.\-]/g, '')).filter(Boolean)
+    if (codes.length === 0) return
+    setSearchParams({}, { replace: true })  // limpa a URL após consumir
+    supabase
+      .from('procedimentos')
+      .select('co_procedimento, no_procedimento, vl_sa, vl_sh, vl_sp, tp_financiamento, no_financiamento, qt_dias_perman')
+      .in('co_procedimento', codes)
+      .then(({ data }) => {
+        if (!data) return
+        // Mantém a ordem dos códigos na URL (primeiro = principal)
+        const ordenados = codes.map(c => data.find(d => d.co_procedimento === c)).filter(Boolean)
+        setItems(prev => {
+          const existing = new Set(prev.map(i => i.procedure.co_procedimento))
+          const novos = ordenados
+            .filter(p => !existing.has(p.co_procedimento))
+            .map(p => {
+              const temDiaria = p.qt_dias_perman > 0 && p.qt_dias_perman < 9999
+              return { procedure: p, qty: 1, dias: temDiaria ? p.qt_dias_perman : 1 }
+            })
+          return [...prev, ...novos]
+        })
+      })
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const compatMap = compatList
     ? new Map(compatList.map(r => [r.co_procedimento_compativel, r.qt_permitida]))
@@ -579,7 +620,11 @@ export function CalculadoraPage() {
             {items.length === 0 && (
               <div className="rounded-xl border border-dashed border-border bg-card p-12 text-center">
                 <p className="text-sm text-muted-foreground/70">Nenhum procedimento adicionado ainda.</p>
-                <p className="mt-1 text-xs text-muted-foreground/50">Use o campo acima para buscar e adicionar procedimentos.</p>
+                <p className="mt-1 text-xs text-muted-foreground/50">
+                  Busque acima ou monte direto de um diagnóstico em{' '}
+                  <Link to="/" className="text-foreground hover:underline">Diagnóstico</Link>
+                  {' '}→ botão <span className="font-medium">AIH</span>.
+                </p>
               </div>
             )}
           </div>

@@ -30,6 +30,7 @@ function PillIA({ p, dark, onClick }) {
 }
 
 function ProcReg({ p, dark }) {
+  const navigate = useNavigate()
   const total = (parseFloat(p.vl_sh) || 0) + (parseFloat(p.vl_sa) || 0) + (parseFloat(p.vl_sp) || 0)
   const grupo = p.grupo === '03' ? 'Clínico' : 'Cirúrgico'
   const corGrupo = p.grupo === '03' ? 'text-emerald-500' : 'text-orange-400'
@@ -63,7 +64,24 @@ function ProcReg({ p, dark }) {
         </div>
         <p className="text-xs font-medium text-foreground leading-snug">{p.no_procedimento}</p>
       </div>
-      <p className="shrink-0 text-xs font-bold text-emerald-500 tabular-nums">{formatBRL(total)}</p>
+      <div className="shrink-0 flex items-center gap-2">
+        <button
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            navigate(`/calculadora?add=${p.co_procedimento}`)
+            toast.success('Procedimento adicionado à calculadora', { duration: 1500 })
+          }}
+          title="Montar AIH na calculadora com este procedimento"
+          className="opacity-0 group-hover:opacity-100 flex items-center gap-1 rounded-md border border-border px-2 py-0.5 text-[10px] font-medium text-muted-foreground hover:border-emerald-500/40 hover:text-emerald-500 transition whitespace-nowrap"
+        >
+          <svg className="h-2.5 w-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+          </svg>
+          AIH
+        </button>
+        <p className="text-xs font-bold text-emerald-500 tabular-nums">{formatBRL(total)}</p>
+      </div>
     </Link>
   )
 }
