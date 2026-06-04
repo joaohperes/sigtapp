@@ -7,7 +7,7 @@ const supabase = createClient(
 )
 
 // Bump quando o prompt ou o pós-processamento mudar — invalida o cache automaticamente.
-const PROMPT_VERSION = 3
+const PROMPT_VERSION = 4
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Helpers
@@ -40,16 +40,6 @@ const tokens = (s) =>
     .split(/\s+/)
     .filter((t) => t.length > 2 && !STOPWORDS.has(t))
     .map(radical)
-
-// Similaridade de Jaccard entre conjuntos de radicais significativos.
-function similaridade(a, b) {
-  const sa = new Set(tokens(a))
-  const sb = new Set(tokens(b))
-  if (sa.size === 0 || sb.size === 0) return 0
-  let inter = 0
-  for (const t of sa) if (sb.has(t)) inter++
-  return inter / Math.min(sa.size, sb.size)
-}
 
 const BLOQUEADOS = [
   'monitoriz', 'monitoring', 'acompanhamento', 'suporte clinico', 'suporte geral',
@@ -96,39 +86,61 @@ function ehProcAIH(co) {
   return co?.startsWith('0303') || co?.startsWith('04')
 }
 
+// Fração dos tokens da consulta presentes no nome do procedimento.
+function cobertura(consulta, nomeProc) {
+  const sc = new Set(tokens(consulta))
+  if (sc.size === 0) return 0
+  const sp = new Set(tokens(nomeProc))
+  let inter = 0
+  for (const t of sc) if (sp.has(t)) inter++
+  return inter / sc.size
+}
+
 // Casa o nome sugerido pela IA com um procedimento SIGTAP real.
-// Só aceita o match se a similaridade for forte o bastante (evita código errado).
+//
+// Estratégia: confia no ranking da buscar_procedimentos (trigram + substring),
+// que já fez o trabalho semântico, e valida o TOP resultado de cada consulta:
+//  - filtra para procedimentos de AIH (grupo 0303 clínico / 04 cirúrgico);
+//  - exige que a consulta esteja inteiramente coberta pelo nome do procedimento;
+//  - desambigua termos genéricos de 1 palavra (ex: "ventilação", "fratura")
+//    aceitando só quando o nome da IA tem 2+ tokens cobertos OU o token bate
+//    com o núcleo do procedimento (1ª palavra significativa — "pneumonias..."
+//    casa "pneumonia", mas "...tubo de ventilação" não casa "ventilação").
 async function casarSigtap(nome, termosBusca) {
-  const consultas = [nome, ...(termosBusca || [])].filter(Boolean)
-  let melhor = null
-  let melhorScore = 0
+  // Termos primeiro (mais limpos que o nome completo), depois o nome.
+  const consultas = [...(termosBusca || []), nome].filter(Boolean)
+  const tokensNome = new Set(tokens(nome))
 
   for (const q of consultas) {
     const { data, error } = await supabase.rpc('buscar_procedimentos', {
       query: q,
-      limite: 5,
+      limite: 8,
     })
     if (error || !data) continue
-    for (const proc of data) {
-      if (!ehProcAIH(proc.co_procedimento)) continue
-      const nomeProc = normalizar(proc.no_procedimento)
-      if (CONTEXTO_INCOMPATIVEL.some((c) => nomeProc.includes(c))) continue
-      const score = similaridade(nome, proc.no_procedimento)
-      if (score > melhorScore) {
-        melhorScore = score
-        melhor = proc
-      }
-    }
-  }
 
-  // Threshold: pelo menos 60% das palavras significativas batem.
-  if (melhor && melhorScore >= 0.6) {
-    return {
-      co_procedimento: melhor.co_procedimento,
-      no_procedimento_sigtap: melhor.no_procedimento,
-      vl_sh: melhor.vl_sh,
-      vl_sa: melhor.vl_sa,
-      vl_sp: melhor.vl_sp,
+    const candidatos = data.filter(
+      (p) =>
+        ehProcAIH(p.co_procedimento) &&
+        !CONTEXTO_INCOMPATIVEL.some((c) => normalizar(p.no_procedimento).includes(c))
+    )
+    if (candidatos.length === 0) continue
+
+    const top = candidatos[0] // melhor ranqueado pela busca
+    if (cobertura(q, top.no_procedimento) !== 1) continue // consulta não coberta
+
+    const tokensProc = tokens(top.no_procedimento)
+    const setProc = new Set(tokensProc)
+    const nomeCoberto = [...tokensNome].filter((t) => setProc.has(t)).length
+    const nucleoBate = tokensProc.length > 0 && new Set(tokens(q)).has(tokensProc[0])
+
+    if (nomeCoberto >= 2 || nucleoBate) {
+      return {
+        co_procedimento: top.co_procedimento,
+        no_procedimento_sigtap: top.no_procedimento,
+        vl_sh: top.vl_sh,
+        vl_sa: top.vl_sa,
+        vl_sp: top.vl_sp,
+      }
     }
   }
   return null
