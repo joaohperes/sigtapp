@@ -192,22 +192,26 @@ export function DiagnosticoPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Busca — protagonista no estado inicial, discreta após buscar */}
-      <div className={cn('border-b border-border bg-background transition-all', searched ? 'py-0' : '')}>
-        <div className={cn('mx-auto max-w-3xl px-4', searched ? 'py-3' : 'pt-10 pb-7')}>
-          {!searched && (
-            <div className="mb-4 text-center">
-              <h1 className="text-lg font-semibold text-foreground">Qual o diagnóstico?</h1>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Busque para ver CID, procedimentos SIGTAP e códigos de regulação
-              </p>
-            </div>
-          )}
+      {/* Busca — tamanho fixo; só o entorno (título) muda, com fade suave */}
+      <div className="border-b border-border bg-background">
+        <div className={cn('mx-auto max-w-3xl px-4 transition-all duration-300', searched ? 'py-3' : 'pt-8 pb-6')}>
+          {/* Título com fade — não empurra o input bruscamente */}
+          <div
+            className={cn(
+              'overflow-hidden text-center transition-all duration-300',
+              searched ? 'max-h-0 opacity-0 mb-0' : 'max-h-20 opacity-100 mb-4'
+            )}
+          >
+            <h1 className="text-lg font-semibold text-foreground">Comece pelo diagnóstico</h1>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Busque para ver CID, procedimentos SIGTAP e códigos de regulação
+            </p>
+          </div>
           <div className="relative flex items-center gap-3">
-            <div className="pointer-events-none absolute inset-y-0 left-3 flex items-center">
+            <div className="pointer-events-none absolute inset-y-0 left-3.5 flex items-center">
               {loading
-                ? <svg className={cn('animate-spin text-muted-foreground', searched ? 'h-4 w-4' : 'h-5 w-5')} fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" /></svg>
-                : <svg className={cn('text-muted-foreground/50', searched ? 'h-4 w-4' : 'h-5 w-5')} viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clipRule="evenodd" /></svg>
+                ? <svg className="h-4 w-4 animate-spin text-muted-foreground" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" /></svg>
+                : <svg className="h-4 w-4 text-muted-foreground/50" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clipRule="evenodd" /></svg>
               }
             </div>
             <input
@@ -217,10 +221,7 @@ export function DiagnosticoPage() {
               onChange={handleChange}
               autoFocus
               placeholder="Buscar diagnóstico — pneumonia, infarto, AVC, sepse..."
-              className={cn(
-                'w-full rounded-lg border border-border bg-card text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all',
-                searched ? 'py-2.5 pl-9 pr-8 text-sm' : 'py-3.5 pl-11 pr-9 text-base shadow-sm'
-              )}
+              className="w-full rounded-lg border border-border bg-card py-3 pl-10 pr-9 text-[15px] text-foreground placeholder:text-muted-foreground/50 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/30 transition"
             />
             {value && (
               <button
@@ -234,7 +235,7 @@ export function DiagnosticoPage() {
         </div>
       </div>
 
-      <main className="mx-auto max-w-6xl px-4 py-8">
+      <main className={cn('mx-auto max-w-6xl px-4 pb-8', searched ? 'pt-8' : 'pt-6')}>
         {/* Banner sinônimo */}
         {meta?.substituicoes?.length > 0 && (
           <div className="mb-4 flex items-start gap-2.5 rounded-lg border border-amber-200/40 bg-amber-500/10 px-4 py-3 text-sm">
