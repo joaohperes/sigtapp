@@ -1,10 +1,14 @@
 import { StrictMode } from 'react'
 
-// Desregistra todos os service workers antigos para forçar atualização
+// Desregistra qualquer service worker antigo e apaga seus caches — o app não
+// usa mais PWA, e SW remanescente servia bundle JS desatualizado após deploy.
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.getRegistrations().then(regs => {
     regs.forEach(r => r.unregister())
   })
+}
+if ('caches' in window) {
+  caches.keys().then(keys => keys.forEach(k => caches.delete(k)))
 }
 
 import { createRoot } from 'react-dom/client'
