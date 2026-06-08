@@ -27,7 +27,12 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
-        cacheId: 'sigtapp-v2',
+        cacheId: 'sigtapp-v3',
+        // Assume o controle imediatamente e remove caches de versões anteriores,
+        // evitando que um SW antigo sirva bundle JS desatualizado após deploy.
+        skipWaiting: true,
+        clientsClaim: true,
+        cleanupOutdatedCaches: true,
         runtimeCaching: [
           {
             urlPattern: ({ url }) => url.hostname.includes('supabase.co'),
