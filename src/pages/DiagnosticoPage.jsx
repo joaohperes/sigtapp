@@ -34,7 +34,7 @@ const COR_MAP_LIGHT = {
   pink:   { dot: 'bg-pink-400',   label: 'text-pink-600',   chip: 'border-pink-200 text-pink-700 hover:border-pink-400 hover:bg-pink-50',   header: 'bg-pink-50'   },
 }
 
-function CidRow({ cid, dark }) {
+function CidRow({ cid, dark, expandirAuto }) {
   const sexo = { M: 'Masculino', F: 'Feminino', I: null, A: null }[cid.tp_sexo]
 
   return (
@@ -69,7 +69,7 @@ function CidRow({ cid, dark }) {
           </Link>
         </div>
       </div>
-      <ContextoClinico cid={cid} />
+      <ContextoClinico cid={cid} collapsible={!expandirAuto} />
     </div>
   )
 }
@@ -156,8 +156,12 @@ export function DiagnosticoPage() {
 
   const { results, loading, error, meta, search } = useCidSearch()
   const [value, setValue] = useState(initialQuery)
+  const [mostrarTodos, setMostrarTodos] = useState(false)
   const debounceRef = useRef(null)
   const inputRef = useRef(null)
+
+  // Reseta "ver mais" a cada nova busca
+  useEffect(() => { setMostrarTodos(false) }, [results])
 
   useEffect(() => {
     document.title = 'SIGTAPP — Diagnóstico e Regulação SUS'
@@ -256,18 +260,35 @@ export function DiagnosticoPage() {
         )}
 
         {/* Resultados de busca */}
-        {searched && results.length > 0 && (
-          <div className="mb-6">
-            <p className="mb-3 text-sm text-muted-foreground">
-              {results.length} código{results.length !== 1 ? 's' : ''} encontrado{results.length !== 1 ? 's' : ''}
-            </p>
-            <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
-              {results.map((cid) => (
-                <CidRow key={cid.co_cid} cid={cid} dark={dark} />
-              ))}
+        {searched && results.length > 0 && (() => {
+          const LIMITE = 20
+          // Auto-expande o contexto só quando há poucos resultados (busca específica).
+          const expandirAuto = results.length <= 3
+          const visiveis = mostrarTodos ? results : results.slice(0, LIMITE)
+          const ocultos = results.length - visiveis.length
+
+          return (
+            <div className="mb-6">
+              <p className="mb-3 text-sm text-muted-foreground">
+                {results.length} código{results.length !== 1 ? 's' : ''} encontrado{results.length !== 1 ? 's' : ''}
+                {!expandirAuto && <span className="text-muted-foreground/60"> · clique em Contexto para ver regulação</span>}
+              </p>
+              <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+                {visiveis.map((cid) => (
+                  <CidRow key={cid.co_cid} cid={cid} dark={dark} expandirAuto={expandirAuto} />
+                ))}
+              </div>
+              {ocultos > 0 && (
+                <button
+                  onClick={() => setMostrarTodos(true)}
+                  className="mt-3 w-full rounded-lg border border-border bg-card py-2.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:border-foreground/20 transition"
+                >
+                  Ver mais {ocultos} resultado{ocultos !== 1 ? 's' : ''}
+                </button>
+              )}
             </div>
-          </div>
-        )}
+          )
+        })()}
 
         {searched && !loading && results.length === 0 && !error && (
           <div className="py-12 text-center">
