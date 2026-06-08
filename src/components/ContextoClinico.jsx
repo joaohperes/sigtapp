@@ -10,11 +10,45 @@ const cacheReg = new Map()
 const cacheCor = new Map()
 const cacheIA = new Map()
 
+// Badge de grupo unificado entre as abas — derivado do código real do procedimento
+// (0303… = clínico, 04… = cirúrgico). Mesma linguagem visual em Regulação e IA.
+function BadgeGrupo({ co_procedimento }) {
+  const cirurgico = co_procedimento?.startsWith('04')
+  return (
+    <span className={cn(
+      'inline-flex items-center gap-1 rounded px-1.5 py-px text-[9px] font-semibold uppercase tracking-wide',
+      cirurgico ? 'bg-orange-400/10 text-orange-400' : 'bg-emerald-500/10 text-emerald-500'
+    )}>
+      <span className={cn('h-1 w-1 rounded-full', cirurgico ? 'bg-orange-400' : 'bg-emerald-500')} />
+      {cirurgico ? 'Cirúrgico' : 'Clínico'}
+    </span>
+  )
+}
+
+// Botão "AIH" — adiciona o procedimento à calculadora. Compartilhado entre abas.
+function BotaoAIH({ co_procedimento, navigate }) {
+  return (
+    <button
+      onClick={(e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        navigate(`/calculadora?add=${co_procedimento}`)
+        toast.success('Procedimento adicionado à calculadora', { duration: 1500 })
+      }}
+      title="Montar AIH na calculadora com este procedimento"
+      className="flex items-center gap-1 rounded-md border border-border px-2 py-0.5 text-[10px] font-medium text-muted-foreground hover:border-emerald-500/40 hover:text-emerald-500 transition whitespace-nowrap"
+    >
+      <svg className="h-2.5 w-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+      </svg>
+      AIH
+    </button>
+  )
+}
+
 function ProcReg({ p, dark }) {
   const navigate = useNavigate()
   const total = (parseFloat(p.vl_sh) || 0) + (parseFloat(p.vl_sa) || 0) + (parseFloat(p.vl_sp) || 0)
-  const grupo = p.grupo === '03' ? 'Clínico' : 'Cirúrgico'
-  const corGrupo = p.grupo === '03' ? 'text-emerald-500' : 'text-orange-400'
 
   function copiar(e) {
     e.preventDefault()
@@ -31,7 +65,7 @@ function ProcReg({ p, dark }) {
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2 mb-0.5">
           <span className="font-mono text-[10px] text-muted-foreground">{formatCodigo(p.co_procedimento)}</span>
-          <span className={cn('text-[10px] font-semibold', corGrupo)}>{grupo}</span>
+          <BadgeGrupo co_procedimento={p.co_procedimento} />
           <button
             onClick={copiar}
             title="Copiar código"
@@ -45,23 +79,9 @@ function ProcReg({ p, dark }) {
         </div>
         <p className="text-xs font-medium text-foreground leading-snug">{p.no_procedimento}</p>
       </div>
-      <div className="shrink-0 flex items-center gap-2">
-        <button
-          onClick={(e) => {
-            e.preventDefault()
-            e.stopPropagation()
-            navigate(`/calculadora?add=${p.co_procedimento}`)
-            toast.success('Procedimento adicionado à calculadora', { duration: 1500 })
-          }}
-          title="Montar AIH na calculadora com este procedimento"
-          className="flex items-center gap-1 rounded-md border border-border px-2 py-0.5 text-[10px] font-medium text-muted-foreground hover:border-emerald-500/40 hover:text-emerald-500 transition whitespace-nowrap"
-        >
-          <svg className="h-2.5 w-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-          </svg>
-          AIH
-        </button>
-        <p className="text-xs font-bold text-emerald-500 tabular-nums">{formatBRL(total)}</p>
+      <div className="shrink-0 flex items-center gap-2.5">
+        <BotaoAIH co_procedimento={p.co_procedimento} navigate={navigate} />
+        <p className="text-xs font-medium text-muted-foreground tabular-nums">{formatBRL(total)}</p>
       </div>
     </Link>
   )
@@ -188,53 +208,33 @@ function ProcIASigtap({ p }) {
       to={`/procedimento/${s.co_procedimento}`}
       className="group flex items-center gap-3 rounded-lg px-3 py-2 text-left transition hover:bg-secondary"
     >
-      <span className={cn(
-        'h-1.5 w-1.5 rounded-full shrink-0',
-        p.grupo === 'cirúrgico' ? 'bg-orange-400' : p.grupo === 'terapêutico' ? 'bg-emerald-400' : 'bg-foreground/40'
-      )} />
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2 mb-0.5">
           <span className="font-mono text-[10px] text-muted-foreground">{formatCodigo(s.co_procedimento)}</span>
+          <BadgeGrupo co_procedimento={s.co_procedimento} />
         </div>
         <p className="text-xs font-medium text-foreground leading-snug">{s.no_procedimento_sigtap}</p>
       </div>
-      <div className="shrink-0 flex items-center gap-2">
-        <button
-          onClick={(e) => {
-            e.preventDefault()
-            e.stopPropagation()
-            navigate(`/calculadora?add=${s.co_procedimento}`)
-            toast.success('Procedimento adicionado à calculadora', { duration: 1500 })
-          }}
-          title="Montar AIH na calculadora com este procedimento"
-          className="flex items-center gap-1 rounded-md border border-border px-2 py-0.5 text-[10px] font-medium text-muted-foreground hover:border-emerald-500/40 hover:text-emerald-500 transition whitespace-nowrap"
-        >
-          <svg className="h-2.5 w-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-          </svg>
-          AIH
-        </button>
-        {total > 0 && <p className="text-xs font-bold text-emerald-500 tabular-nums">{formatBRL(total)}</p>}
+      <div className="shrink-0 flex items-center gap-2.5">
+        <BotaoAIH co_procedimento={s.co_procedimento} navigate={navigate} />
+        {total > 0 && <p className="text-xs font-medium text-muted-foreground tabular-nums">{formatBRL(total)}</p>}
       </div>
     </Link>
   )
 }
 
 // Procedimento sugerido pela IA sem código SIGTAP confiável — vira atalho de busca.
+// Sem badge de grupo (não há código real); o ícone de lupa comunica a ação.
 function PillIA({ p, onClick }) {
   return (
     <button
       onClick={() => onClick(p.termos_busca?.[0] || p.nome)}
       title={`Buscar no SIGTAP: ${p.termos_busca?.join(', ') || p.nome}`}
       className={cn(
-        'flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition',
-        'border-border bg-secondary text-foreground hover:border-foreground/20 hover:text-foreground'
+        'flex items-center gap-1.5 rounded-full border border-dashed px-3 py-1.5 text-xs font-medium transition',
+        'border-border bg-transparent text-muted-foreground hover:border-foreground/30 hover:text-foreground'
       )}
     >
-      <span className={cn(
-        'h-1.5 w-1.5 rounded-full shrink-0',
-        p.grupo === 'cirúrgico' ? 'bg-orange-400' : p.grupo === 'terapêutico' ? 'bg-emerald-400' : 'bg-foreground/40'
-      )} />
       {p.nome}
       <svg className="h-3 w-3 shrink-0 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z" />
@@ -510,6 +510,16 @@ export function ContextoClinico({ cid, collapsible = false }) {
           )}
           {temIA && (
             <>
+              {/* Selo de confiança — destaca que os códigos são reais do SIGTAP */}
+              <div className="flex items-center gap-1.5 rounded-md bg-emerald-500/5 border border-emerald-500/15 px-2.5 py-1.5">
+                <svg className="h-3.5 w-3.5 shrink-0 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="text-[10px] text-muted-foreground leading-snug">
+                  Cenários sugeridos por IA · <span className="text-foreground font-medium">códigos validados contra a tabela SIGTAP real</span>
+                </span>
+              </div>
+
               {dadosIA.coringas?.length > 0 && (
                 <div>
                   <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
@@ -518,21 +528,18 @@ export function ContextoClinico({ cid, collapsible = false }) {
                   <ProcsIA procs={dadosIA.coringas} onBuscar={irParaBusca} />
                 </div>
               )}
+
               {dadosIA.cenarios?.map((c, i) => (
-                <div key={i}>
-                  <div className="mb-1.5 flex items-center gap-2">
-                    <div className={cn('h-px flex-1', dark ? 'bg-[rgba(255,255,255,0.06)]' : 'bg-border')} />
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground px-1">{c.titulo}</span>
-                    <div className={cn('h-px flex-1', dark ? 'bg-[rgba(255,255,255,0.06)]' : 'bg-border')} />
+                <div key={i} className="rounded-lg border border-border/60 bg-secondary/20 p-3">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-foreground/80">{c.titulo}</p>
+                  {c.descricao && <p className="mt-0.5 mb-2 text-[11px] text-muted-foreground leading-snug">{c.descricao}</p>}
+                  <div className={c.descricao ? '' : 'mt-2'}>
+                    <ProcsIA procs={c.procedimentos} onBuscar={irParaBusca} />
                   </div>
-                  {c.descricao && <p className="mb-1.5 text-[11px] text-muted-foreground">{c.descricao}</p>}
-                  <ProcsIA procs={c.procedimentos} onBuscar={irParaBusca} />
                 </div>
               ))}
-              <div className="flex items-center justify-between border-t border-border pt-2">
-                <p className="text-[10px] text-muted-foreground/60">
-                  Sugestões por IA · validadas contra a tabela SIGTAP
-                </p>
+
+              <div className="flex items-center justify-end border-t border-border pt-2">
                 <button
                   onClick={() => buscarIA(true)}
                   disabled={loadingIA}
