@@ -1,6 +1,10 @@
 import { useState, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 import { expandirSinonimos } from '../data/sinonimos'
+import { CORINGAS_CID } from '../data/coringas'
+
+// CIDs dos diagnósticos frequentes do app — sobem ao topo da busca quando aparecem.
+const CIDS_PRIORITARIOS = CORINGAS_CID.map(c => c.co_cid)
 
 // Palavras irrelevantes para a busca
 const STOPWORDS = new Set(['de', 'do', 'da', 'dos', 'das', 'e', 'a', 'o', 'em', 'por', 'com', 'sem', 'ao', 'na', 'no'])
@@ -69,7 +73,7 @@ export function useCidSearch() {
     const termos = palavras.length > 0 ? palavras : [expanded]
 
     const { data, error: err } = await supabase
-      .rpc('search_cid_unaccent', { search_terms: termos })
+      .rpc('search_cid_unaccent', { search_terms: termos, prioritarios: CIDS_PRIORITARIOS })
 
     if (err) {
       setError(err.message)
