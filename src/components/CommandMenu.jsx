@@ -154,7 +154,7 @@ export function CommandMenu() {
       }
     }, 300)
     return () => clearTimeout(debounceRef.current)
-  }, [query, open])
+  }, [query, open, filtro])
 
   const handleSelect = useCallback((to) => {
     setOpen(false)
