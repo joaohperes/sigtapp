@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
-import { expandirSinonimos } from '../data/sinonimos'
+import { gruposDeSinonimos } from '../data/sinonimos'
 import { CORINGAS_CID } from '../data/coringas'
 
 // CIDs dos diagnósticos frequentes do app — sobem ao topo da busca quando aparecem.
@@ -69,14 +69,17 @@ export function useCidSearch() {
       return
     }
 
-    const { expanded, substituicoes } = expandirSinonimos(q)
-    setMeta({ original: q, expanded, substituicoes })
+    setMeta({ original: q })
 
-    const palavras = palavrasSignificativas(expanded)
-    const termos = palavras.length > 0 ? palavras : [expanded]
+    // Sinônimos aditivos: grupos de alternativas (OR interno), grupos entre si AND.
+    // Filtra grupos cuja palavra-base é stopword (ex: "de", "do") — mas preserva
+    // os que carregam sinônimos formais.
+    const grupos = gruposDeSinonimos(q)
+      .filter(g => g[0].length >= 3 && !STOPWORDS.has(g[0]))
+    const gruposFinais = grupos.length > 0 ? grupos : [[q]]
 
     const { data, error: err } = await supabase
-      .rpc('search_cid_unaccent', { search_terms: termos, prioritarios: CIDS_PRIORITARIOS })
+      .rpc('search_cid_grupos', { termos_grupos: gruposFinais, prioritarios: CIDS_PRIORITARIOS })
 
     if (err) {
       setError(err.message)

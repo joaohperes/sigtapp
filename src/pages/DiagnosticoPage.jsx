@@ -4,8 +4,12 @@ import { useCidSearch } from '../hooks/useCidSearch'
 import { useTheme } from '../contexts/ThemeContext'
 import { useModoUE } from '../contexts/ModoUEContext'
 import { ContextoClinico } from '../components/ContextoClinico'
-import { CORINGAS_GRUPOS } from '../data/coringas'
+import { CORINGAS_GRUPOS, CORINGAS_CID } from '../data/coringas'
+import { agruparPorRelevancia, pillsDeSistema, sistemaDoCid } from '../lib/relevanciaCid'
 import { cn } from '@/lib/utils'
+
+// Set dos CIDs curados do app — usados como sinal forte de "comum" no agrupamento.
+const CORINGAS_SET = new Set(CORINGAS_CID.map(c => c.co_cid.trim()))
 
 const COR_MAP = {
   red:    { dot: 'bg-red-400',    label: 'text-red-400',    chip: 'border-red-400/20 text-red-300 hover:border-red-400/60 hover:bg-red-400/10',    header: 'bg-red-400/10'    },
@@ -55,17 +59,13 @@ function CidRow({ cid, dark, expandirAuto }) {
             </span>
           )}
         </div>
+        {/* Link discreto — faturamento é secundário; o valor (regulação) abre inline abaixo */}
         <div className="shrink-0">
           <Link
             to={`/procedimentos?q=${encodeURIComponent(cid.co_cid.trim())}&sc=1`}
-            className={cn(
-              'rounded-lg border px-2.5 py-1 text-xs font-medium transition whitespace-nowrap',
-              dark
-                ? 'border-[rgba(255,255,255,0.1)] text-muted-foreground hover:border-[rgba(255,255,255,0.2)] hover:text-foreground'
-                : 'border-border text-muted-foreground hover:text-foreground'
-            )}
+            className="text-[11px] text-muted-foreground/50 hover:text-muted-foreground transition whitespace-nowrap"
           >
-            Procedimentos →
+            procedimentos →
           </Link>
         </div>
       </div>
@@ -156,12 +156,13 @@ export function DiagnosticoPage() {
 
   const { results, loading, error, meta, search } = useCidSearch()
   const [value, setValue] = useState(initialQuery)
-  const [mostrarTodos, setMostrarTodos] = useState(false)
+  const [mostrarVariantes, setMostrarVariantes] = useState(false)
+  const [filtroSistema, setFiltroSistema] = useState(null)
   const debounceRef = useRef(null)
   const inputRef = useRef(null)
 
-  // Reseta "ver mais" a cada nova busca
-  useEffect(() => { setMostrarTodos(false) }, [results])
+  // Reseta "ver variantes" e filtro de sistema a cada nova busca
+  useEffect(() => { setMostrarVariantes(false); setFiltroSistema(null) }, [results])
 
   useEffect(() => {
     document.title = 'SIGTAPP — Diagnóstico e Regulação SUS'
@@ -240,19 +241,6 @@ export function DiagnosticoPage() {
       </div>
 
       <main className={cn('mx-auto max-w-6xl px-4 pb-8', searched ? 'pt-8' : 'pt-6')}>
-        {/* Banner sinônimo */}
-        {meta?.substituicoes?.length > 0 && (
-          <div className="mb-4 flex items-start gap-2.5 rounded-lg border border-amber-200/40 bg-amber-500/10 px-4 py-3 text-sm">
-            <svg className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-            <div className="text-foreground">
-              Busquei por{' '}
-              {meta.substituicoes.map((s, i) => (
-                <span key={i}>{i > 0 && ' e '}<span className="font-medium">"{s.para}"</span><span className="text-muted-foreground"> (de "{s.de}")</span></span>
-              ))}
-            </div>
-          </div>
-        )}
-
         {error && (
           <div className="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
             Erro: {error}
@@ -261,30 +249,109 @@ export function DiagnosticoPage() {
 
         {/* Resultados de busca */}
         {searched && results.length > 0 && (() => {
-          const LIMITE = 20
+          // Pills de filtro por sistema — só quando a busca é ampla o bastante
+          // pra valer (>12) e há mais de um sistema representado.
+          const pills = pillsDeSistema(results)
+          const mostrarPills = results.length > 12 && pills.length > 1
+
+          // Aplica o filtro de sistema ativo (se houver) antes de tudo.
+          const resultsFiltrados = filtroSistema
+            ? results.filter((cid) => sistemaDoCid(cid).id === filtroSistema)
+            : results
+
           // Auto-expande o contexto só quando há poucos resultados (busca específica).
-          const expandirAuto = results.length <= 3
-          const visiveis = mostrarTodos ? results : results.slice(0, LIMITE)
-          const ocultos = results.length - visiveis.length
+          const expandirAuto = resultsFiltrados.length <= 3
+
+          // Separa diagnósticos que o plantonista codifica (comuns) do ruído
+          // (variantes por agente, causa externa, perinatal...). Só agrupa quando
+          // a lista é grande o bastante pra valer — buscas curtas ficam inteiras.
+          const { comuns, variantes } = agruparPorRelevancia(resultsFiltrados, CORINGAS_SET)
+          const agrupar = resultsFiltrados.length > 12 && variantes.length >= 3
 
           return (
             <div className="mb-6">
               <p className="mb-3 text-sm text-muted-foreground">
                 {results.length} código{results.length !== 1 ? 's' : ''} encontrado{results.length !== 1 ? 's' : ''}
-                {!expandirAuto && <span className="text-muted-foreground/60"> · clique em Contexto para ver regulação</span>}
+                {filtroSistema && <span className="text-muted-foreground/60"> · filtrado: {pills.find(p => p.id === filtroSistema)?.label}</span>}
+                {!filtroSistema && agrupar && (
+                  <span className="text-muted-foreground/60"> · {comuns.length} mais usado{comuns.length !== 1 ? 's' : ''} no PS</span>
+                )}
               </p>
-              <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
-                {visiveis.map((cid) => (
-                  <CidRow key={cid.co_cid} cid={cid} dark={dark} expandirAuto={expandirAuto} />
-                ))}
-              </div>
-              {ocultos > 0 && (
-                <button
-                  onClick={() => setMostrarTodos(true)}
-                  className="mt-3 w-full rounded-lg border border-border bg-card py-2.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:border-foreground/20 transition"
-                >
-                  Ver mais {ocultos} resultado{ocultos !== 1 ? 's' : ''}
-                </button>
+
+              {/* Pills de sistema */}
+              {mostrarPills && (
+                <div className="mb-4 flex flex-wrap gap-1.5">
+                  <button
+                    onClick={() => setFiltroSistema(null)}
+                    className={cn(
+                      'rounded-full border px-3 py-1 text-xs font-medium transition',
+                      !filtroSistema
+                        ? 'border-primary/40 bg-primary/10 text-foreground'
+                        : 'border-border text-muted-foreground hover:text-foreground hover:border-foreground/20'
+                    )}
+                  >
+                    Todos <span className="tabular-nums opacity-60">{results.length}</span>
+                  </button>
+                  {pills.map((p) => (
+                    <button
+                      key={p.id}
+                      onClick={() => setFiltroSistema(filtroSistema === p.id ? null : p.id)}
+                      className={cn(
+                        'rounded-full border px-3 py-1 text-xs font-medium transition',
+                        filtroSistema === p.id
+                          ? 'border-primary/40 bg-primary/10 text-foreground'
+                          : 'border-border text-muted-foreground hover:text-foreground hover:border-foreground/20'
+                      )}
+                    >
+                      {p.label} <span className="tabular-nums opacity-60">{p.count}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {agrupar ? (
+                <>
+                  <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+                    {comuns.map((cid) => (
+                      <CidRow key={cid.co_cid} cid={cid} dark={dark} expandirAuto={expandirAuto} />
+                    ))}
+                  </div>
+
+                  {!mostrarVariantes ? (
+                    <button
+                      onClick={() => setMostrarVariantes(true)}
+                      className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg border border-border bg-card py-2.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:border-foreground/20 transition"
+                    >
+                      <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                      Ver {variantes.length} variante{variantes.length !== 1 ? 's' : ''} específica{variantes.length !== 1 ? 's' : ''}
+                      <span className="text-muted-foreground/50">(por agente, perinatal, causa externa)</span>
+                    </button>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => setMostrarVariantes(false)}
+                        className="mt-3 mb-2 flex w-full items-center gap-2 text-left transition group"
+                      >
+                        <svg className="h-3.5 w-3.5 rotate-180 text-muted-foreground/60 group-hover:text-muted-foreground transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                        <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60 group-hover:text-muted-foreground transition">
+                          Variantes específicas · recolher
+                        </span>
+                        <div className="h-px flex-1 bg-border" />
+                      </button>
+                      <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm opacity-80">
+                        {variantes.map((cid) => (
+                          <CidRow key={cid.co_cid} cid={cid} dark={dark} expandirAuto={false} />
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </>
+              ) : (
+                <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+                  {resultsFiltrados.map((cid) => (
+                    <CidRow key={cid.co_cid} cid={cid} dark={dark} expandirAuto={expandirAuto} />
+                  ))}
+                </div>
               )}
             </div>
           )

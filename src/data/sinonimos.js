@@ -17,18 +17,56 @@ export const SINONIMOS = [
   ['sarcoma',          'sarcoma'],
 
   // Cardiovascular
+  // Motor aditivo (OR): múltiplas linhas com o mesmo coloquial somam alternativas.
+  // AVC engloba clinicamente isquêmico (infarto cerebral), hemorrágico (hemorragia
+  // intracerebral) e o genérico — todos entram para a sigla achar os 3.
   ['infarto',          'infarto agudo do miocárdio'],
-  ['ataque cardíaco',  'infarto agudo do miocárdio'],
-  ['derrame cerebral', 'acidente vascular cerebral'],
-  ['derrame',          'acidente vascular cerebral'],
+  ['infarto',          'infarto do miocárdio'],
+  ['iam',              'infarto agudo do miocárdio'],
+  ['iam',              'infarto do miocárdio'],
   ['avc',              'acidente vascular cerebral'],
+  ['avc',              'infarto cerebral'],
+  ['avc',              'hemorragia intracerebral'],
+  ['avc',              'hemorragia subaracnóide'],
   ['avc isquêmico',    'infarto cerebral'],
+  ['avc hemorrágico',  'hemorragia intracerebral'],
   ['avc hemorrágico',  'hemorragia cerebral'],
+  ['avci',             'infarto cerebral'],
+  ['avch',             'hemorragia intracerebral'],
   ['pressão alta',     'hipertensão essencial'],
   ['hipertensão',      'hipertensão essencial'],
   ['angina',           'angina pectoris'],
-  ['insuficiência cardíaca', 'insuficiência cardíaca'],
   ['arritmia',         'transtornos do ritmo cardíaco'],
+  ['icc',              'insuficiência cardíaca'],
+  ['tep',              'embolia pulmonar'],
+  ['tvp',              'trombose venosa profunda'],
+  ['dac',              'doença isquêmica do coração'],
+  ['fa',               'fibrilação atrial'],
+  ['fa',               'fibrilação e flutter atrial'],
+  ['tv',               'taquicardia ventricular'],
+  ['daop',             'aterosclerose das artérias das extremidades'],
+  ['daop',             'doença vascular periférica'],
+  ['dap',              'aterosclerose das artérias das extremidades'],
+
+  // Siglas técnicas de plantão/emergência (redações validadas no banco)
+  ['hsa',              'hemorragia subaracnóide'],
+  ['hic',              'hemorragia intracerebral'],
+  ['hsd',              'hemorragia subdural'],
+  ['hed',              'hemorragia extradural'],
+  ['hda',              'hemorragia gastrointestinal'],
+  ['hdb',              'hemorragia gastrointestinal'],
+  ['tce',              'traumatismo intracraniano'],
+  ['tce',              'lesão cerebral traumática'],
+  ['eap',              'edema pulmonar'],
+  ['irpa',             'insuficiência respiratória aguda'],
+  ['ira',              'insuficiência renal aguda'],
+  ['lra',              'insuficiência renal aguda'],
+  ['drc',              'insuficiência renal crônica'],
+  ['cad',              'cetoacidose'],
+  ['ehh',              'coma hiperosmolar'],
+  ['dip',              'doença inflamatória pélvica'],
+  ['dip',              'salpingite'],
+  ['nia',              'nefrite intersticial'],
 
   // Endocrinologia / Metabólico
   ['diabetes tipo 1',  'diabetes mellitus insulino-dependente'],
@@ -73,7 +111,6 @@ export const SINONIMOS = [
   ['demência',         'demência'],
   ['desmaio',          'síncope'],
   ['ait',              'ataque isquêmico transitório'],
-  ['mini-derrame',     'ataque isquêmico transitório'],
   ['isquemia transitória', 'ataque isquêmico transitório'],
   ['labirintite',      'labirintite'],       // H83.0 — CID usa este termo
   ['tontura',          'vertigem'],
@@ -113,9 +150,7 @@ export const SINONIMOS = [
   // Respiratório
   ['gripe',            'influenza'],
   ['resfriado',        'nasofaringite'],
-  ['tosse comprida',   'coqueluche'],
   ['amigdalite',       'amigdalite aguda'],
-  ['angina na garganta','amigdalite aguda'],
   ['faringite',        'faringite aguda'],
   ['sinusite',         'sinusite'],
   ['rinite',           'rinite alérgica'],
@@ -135,54 +170,41 @@ export const SINONIMOS = [
   // Digestivo / Hepático
   ['refluxo',          'doença de refluxo gastroesofágico'],
   ['azia',             'doença de refluxo gastroesofágico'],
-  ['queimação no estômago', 'doença de refluxo gastroesofágico'],
   ['drge',             'doença de refluxo gastroesofágico'],
   ['gastrite',         'gastrite'],
-  ['prisão de ventre', 'constipação intestinal'],
-  ['intestino preso',  'constipação intestinal'],
   ['constipação',      'constipação intestinal'],
-  ['gordura no fígado','degeneração gordurosa do fígado'],
-  ['fígado gorduroso', 'degeneração gordurosa do fígado'],
   ['esteatose hepática','degeneração gordurosa do fígado'],
   ['nash',             'degeneração gordurosa do fígado'],
   ['intestino irritável','síndrome do intestino irritável'],
-  ['cólon irritável',  'síndrome do intestino irritável'],
   ['sii',              'síndrome do intestino irritável'],
   ['doença de crohn',  'doença de crohn'],
   ['colite ulcerativa','colite ulcerativa'],
   ['retocolite',       'colite ulcerativa'],
   ['hemorroidas',      'hemorróidas'],
-  ['almorreia',        'hemorróidas'],
   ['cirrose',          'cirrose hepática'],
   ['hepatite',         'hepatite'],
   ['úlcera',           'úlcera'],
   ['apendicite',       'apendicite'],
   ['pancreatite',      'pancreatite'],
-  ['pedra na vesícula','colelitíase'],
   ['cálculo biliar',   'colelitíase'],
   ['icterícia',        'icterícia'],
-  ['amarelão',         'icterícia'],
   ['disfagia',         'disfagia'],
-  ['dificuldade de engolir','disfagia'],
   ['diverticulite',    'diverticulite'],
   ['hérnia inguinal',  'hérnia inguinal'],
   ['hérnia de hiato',  'hérnia diafragmática'],
   ['peritonite',       'peritonite'],
 
   // Renal / Urológico
-  ['pedra no rim',     'cálculo do rim'],
   ['cálculo renal',    'cálculo do rim e do ureter'],
   ['insuficiência renal', 'insuficiência renal'],
   ['infecção urinária','cistite'],
   ['itu',              'infecção do trato urinário'],
   ['cistite',          'cistite'],
   ['pielonefrite',     'pielonefrite'],
-  ['próstata aumentada','hiperplasia benigna da próstata'],
   ['hiperplasia prostática','hiperplasia benigna da próstata'],
   ['hpb',              'hiperplasia benigna da próstata'],
   ['incontinência urinária','incontinência urinária'],
   ['retenção urinária','retenção urinária'],
-  ['urina com sangue', 'hematúria'],
   ['glomerulonefrite', 'glomerulonefrite'],
   ['síndrome nefrótica','síndrome nefrótica'],
   ['disfunção erétil', 'disfunção erétil'],
@@ -198,10 +220,8 @@ export const SINONIMOS = [
   ['menopausa',        'menopausa'],
   ['climatério',       'climatério'],
   ['amenorreia',       'amenorreia'],
-  ['sangramento uterino','hemorragia uterina'],
   ['eclampsia',        'eclampsia'],
   ['pré-eclampsia',    'pré-eclampsia'],
-  ['gravidez na trompa','gravidez ectópica'],
   ['gravidez ectópica','gravidez ectópica'],
   ['aborto espontâneo','aborto espontâneo'],
   ['placenta prévia',  'placenta prévia'],
@@ -225,8 +245,6 @@ export const SINONIMOS = [
   ['aneurisma',        'aneurisma'],
   ['dissecção de aorta','dissecção de aorta'],
   ['aterosclerose',    'aterosclerose'],
-  ['artéria entupida', 'aterosclerose'],
-  ['placa de gordura', 'aterosclerose'],
   ['fibrilação atrial','fibrilação e flutter atrial'],
   ['arritmia',         'transtornos do ritmo cardíaco'],
   ['taquicardia',      'taquicardia'],
@@ -239,7 +257,6 @@ export const SINONIMOS = [
   ['prolapso mitral',  'prolapso da valva mitral'],
   ['hipertensão pulmonar','hipertensão pulmonar'],
   ['gangrena',         'gangrena'],
-  ['isquemia de membro','doença vascular periférica'],
 
   // Infecciosas
   ['catapora',         'varicela'],
@@ -251,12 +268,10 @@ export const SINONIMOS = [
   ['rubéola',          'rubéola'],
   ['candidiase',       'candidíase'],
   ['candidíase',       'candidíase'],
-  ['sapinho',          'candidíase'],
   ['chagas',           'doença de chagas'],
   ['doença de chagas', 'doença de chagas'],
   ['toxoplasmose',     'toxoplasmose'],
   ['mononucleose',     'mononucleose infecciosa'],
-  ['doença do beijo',  'mononucleose infecciosa'],
   ['febre tifoide',    'febre tifoide'],
   ['febre amarela',    'febre amarela'],
   ['zika',             'vírus zika'],
@@ -296,8 +311,6 @@ export const SINONIMOS = [
   ['policitemia vera', 'policitemia vera'],
   ['neutropenia',      'neutropenia'],
   ['linfadenopatia',   'linfadenopatia'],
-  ['íngua',            'linfadenopatia'],
-  ['gânglio aumentado','linfadenopatia'],
 
   // Músculo-esquelético
   ['fratura',          'fratura'],
@@ -334,13 +347,11 @@ export const SINONIMOS = [
   ['impetigo',         'impetigo'],
   ['furúnculo',        'furúnculo'],
   ['alopecia',         'alopecia'],
-  ['queda de cabelo',  'alopecia'],
   ['herpes labial',    'herpes simples'],
 
   // Neonatologia / Pediátrico
   ['síndrome de down', 'síndrome de down'],
   ['trissomia 21',     'síndrome de down'],
-  ['mongolismo',       'síndrome de down'],
   ['fibrose cística',  'fibrose cística'],
   ['mucoviscidose',    'fibrose cística'],
   ['fenilcetonúria',   'fenilcetonúria'],
@@ -353,7 +364,6 @@ export const SINONIMOS = [
   ['hidrocefalia congênita','hidrocefalia congênita'],
   ['espinha bífida',   'espinha bífida'],
   ['bronquiolite',     'bronquiolite aguda'],
-  ['dor de ouvido',    'otite média aguda'],
   ['otite',            'otite média'],
   ['convulsão febril', 'convulsões febris'],
   ['doença de kawasaki','síndrome dos linfonodos mucocutâneos'],
@@ -381,23 +391,81 @@ export const SINONIMOS = [
   ['complicação cirúrgica','complicações de procedimentos cirúrgicos'],
 ]
 
+const BOUNDARY_ANTES = '(?<![a-záéíóúãõâêôàüç])'
+const BOUNDARY_DEPOIS = '(?![a-záéíóúãõâêôàüç])'
+
+function escapeRegex(s) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
 /**
- * Expande um termo de busca substituindo sinônimos coloquiais pelos termos formais.
- * Retorna { expanded, substituições } para exibir feedback ao usuário.
+ * Sinônimos ADITIVOS (não substitutivos): a busca procura "termo OU sinônimo",
+ * nunca troca o termo do usuário. Retorna grupos de alternativas a serem unidos
+ * por OR na RPC; grupos entre si são AND.
+ *
+ * Ex: "avc" → [["avc", "acidente vascular cerebral", "infarto cerebral"]]
+ *     "pneumonia grave" → [["pneumonia"], ["grave"]]
+ *
+ * Vantagens sobre a substituição antiga: nunca esconde o termo literal, nunca
+ * restringe demais (AND de 4 palavras), e dispensa o banner "busquei por X".
+ */
+// Siglas curtas que NÃO devem casar como literal: 'ira' casaria em "vIRAl",
+// 'fa' em "FAsciolíase". Quando uma destas dispara, a busca usa SÓ os formais
+// (substitui o literal), não o adiciona. Derivado: todo coloquial ≤4 chars
+// alfanumérico puro é tratado como sigla.
+function ehSigla(termo) {
+  return /^[a-z]{2,4}$/.test(termo)
+}
+
+export function gruposDeSinonimos(query) {
+  const q = query.toLowerCase().trim()
+
+  // Tokeniza a query em palavras.
+  const palavras = q.split(/\s+/).filter(Boolean)
+
+  // Para cada coloquial que casa na query, guarda as formas formais por palavra-chave.
+  const alternativasPorTermo = new Map() // chave = primeira palavra do coloquial
+
+  for (const [coloquial, formal] of SINONIMOS) {
+    if (coloquial === formal) continue // passivas: o termo já se busca a si mesmo
+    const re = new RegExp(`${BOUNDARY_ANTES}${escapeRegex(coloquial)}${BOUNDARY_DEPOIS}`, 'i')
+    if (re.test(q)) {
+      const chave = coloquial.split(/\s+/)[0]
+      if (!alternativasPorTermo.has(chave)) alternativasPorTermo.set(chave, new Set())
+      alternativasPorTermo.get(chave).add(formal)
+    }
+  }
+
+  // Monta um grupo por palavra:
+  //   - palavra normal com sinônimos → [palavra, ...formais]  (aditivo, OR)
+  //   - SIGLA com sinônimos → [...formais]  (substitui: não inclui a sigla literal,
+  //     que casaria substring de qualquer palavra)
+  //   - palavra sem sinônimo → [palavra]  (busca literal)
+  const grupos = palavras.map(p => {
+    const formais = alternativasPorTermo.get(p)
+    if (formais && ehSigla(p)) return [...formais]      // sigla: só os formais
+    if (formais) return [p, ...formais]                 // termo normal: aditivo
+    return [p]                                          // sem sinônimo
+  })
+
+  return grupos.length > 0 ? grupos : [[q]]
+}
+
+/**
+ * COMPAT: expansão substitutiva antiga, usada por Home.jsx e CalculadoraPage.jsx,
+ * que têm fluxo de busca próprio com a RPC search_cid_unaccent. A busca principal
+ * (DiagnosticoPage) usa gruposDeSinonimos (aditivo). Mantido pra não quebrá-las.
  */
 export function expandirSinonimos(query) {
   let expanded = query.toLowerCase().trim()
   const substituicoes = []
-
   for (const [coloquial, formal] of SINONIMOS) {
     if (coloquial === formal) continue
-    // Exige word boundary: não substitui "itu" dentro de "mellitus"
-    const regex = new RegExp(`(?<![a-záéíóúãõâêôàüç])${coloquial.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?![a-záéíóúãõâêôàüç])`, 'i')
+    const regex = new RegExp(`${BOUNDARY_ANTES}${escapeRegex(coloquial)}${BOUNDARY_DEPOIS}`, 'i')
     if (regex.test(expanded)) {
       expanded = expanded.replace(regex, formal)
       substituicoes.push({ de: coloquial, para: formal })
     }
   }
-
   return { expanded, substituicoes }
 }
