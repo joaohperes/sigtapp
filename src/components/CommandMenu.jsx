@@ -15,6 +15,12 @@ import {
 import { supabase } from '../lib/supabase'
 import { formatCodigo, formatBRL } from '../utils/formatters'
 import { GRUPO_MAP } from '../data/grupos'
+import { gruposDeSinonimos } from '../data/sinonimos'
+import { CORINGAS_CID } from '../data/coringas'
+
+// Mesmos prioritários da página Diagnóstico — sobem coringas (J189, etc.) ao topo.
+const CMD_PRIORITARIOS = CORINGAS_CID.map(c => c.co_cid.trim()).filter(Boolean)
+const CMD_STOPWORDS = new Set(['de', 'do', 'da', 'dos', 'das', 'e', 'a', 'o', 'em', 'por', 'com', 'sem', 'ao', 'na', 'no'])
 
 const NAV_SHORTCUTS = [
   { label: 'Busca de procedimentos', to: '/', icon: SearchIcon },
@@ -86,9 +92,13 @@ async function searchCids(q) {
       .limit(5)
     return data || []
   }
-  // Senão, busca por nome
-  const { data } = await supabase.rpc('search_cid_unaccent', {
-    search_terms: trimmed.toLowerCase().split(/\s+/).filter(Boolean),
+  // Senão, busca por nome — mesmo motor da página Diagnóstico: sinônimos aditivos
+  // (avc, daop, ehh...) + prioritários (coringas sobem ao topo, ex: J189).
+  const grupos = gruposDeSinonimos(trimmed)
+    .filter(g => g[0] && g[0].length >= 3 && !CMD_STOPWORDS.has(g[0]))
+  const { data } = await supabase.rpc('search_cid_grupos', {
+    termos_grupos: grupos.length ? grupos : [[trimmed.toLowerCase()]],
+    prioritarios: CMD_PRIORITARIOS,
   })
   return (data || []).slice(0, 5)
 }

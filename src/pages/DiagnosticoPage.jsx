@@ -5,7 +5,7 @@ import { useTheme } from '../contexts/ThemeContext'
 import { useModoUE } from '../contexts/ModoUEContext'
 import { ContextoClinico } from '../components/ContextoClinico'
 import { CORINGAS_GRUPOS, CORINGAS_CID } from '../data/coringas'
-import { agruparPorRelevancia, pillsDeSistema, sistemaDoCid } from '../lib/relevanciaCid'
+import { agruparPorRelevancia, pillsDeSistema, cidTocaSistema } from '../lib/relevanciaCid'
 import { cn } from '@/lib/utils'
 
 // Set dos CIDs curados do app — usados como sinal forte de "comum" no agrupamento.
@@ -254,9 +254,11 @@ export function DiagnosticoPage() {
           const pills = pillsDeSistema(results)
           const mostrarPills = results.length > 12 && pills.length > 1
 
-          // Aplica o filtro de sistema ativo (se houver) antes de tudo.
+          // Aplica o filtro de sistema ativo (se houver). cidTocaSistema inclui
+          // sistemas secundários — clicar "Neuro" acha o aneurisma ambíguo (I72)
+          // que é primariamente vascular mas pode ser cerebral.
           const resultsFiltrados = filtroSistema
-            ? results.filter((cid) => sistemaDoCid(cid).id === filtroSistema)
+            ? results.filter((cid) => cidTocaSistema(cid, filtroSistema))
             : results
 
           // Auto-expande o contexto só quando há poucos resultados (busca específica).
@@ -310,7 +312,7 @@ export function DiagnosticoPage() {
                           : 'border-border text-muted-foreground hover:text-foreground hover:border-foreground/20'
                       )}
                     >
-                      {p.label} <span className="tabular-nums opacity-60">{p.count}</span>
+                      {p.label} <span className="tabular-nums opacity-60">{p.reach}</span>
                     </button>
                   ))}
                 </div>

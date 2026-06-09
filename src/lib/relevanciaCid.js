@@ -111,6 +111,8 @@ export function agruparPorRelevancia(results, coringasSet) {
 const SISTEMAS = [
   // neuro ANTES de cardio: I60–I69 (AVC/hemorragia cerebral) são neurológicos, não cardíacos.
   { id: 'neuro',     label: 'Neurológico',    test: c => /^(G|I6)/.test(c) },
+  // vascular periférico (I70–I79) ANTES de cardio: aorta, artérias, veias dos membros.
+  { id: 'vascular',  label: 'Vascular',       test: c => /^I7/.test(c) },
   { id: 'cardio',    label: 'Cardiovascular', test: c => /^I/.test(c) },
   { id: 'resp',      label: 'Respiratório',   test: c => /^(J|R04|R05|R06|R09)/.test(c) },
   { id: 'digest',    label: 'Digestivo',      test: c => /^K/.test(c) },
@@ -130,25 +132,62 @@ const SISTEMAS = [
   { id: 'externa',   label: 'Causa externa',  test: c => /^[VWXY]/.test(c) },
   { id: 'outros',    label: 'Outros',         test: () => true }, // fallback — sempre por último
 ]
+const SISTEMA_POR_ID = new Map(SISTEMAS.map(s => [s.id, s]))
 
-// Retorna o sistema de um CID (primeiro que casar; 'outros' é o catch-all final).
+// Retorna o sistema PRIMÁRIO de um CID (primeiro que casar). Usado pra CONTAR —
+// cada CID conta uma vez só, então a soma das pills bate com o total.
 export function sistemaDoCid(cid) {
   const c = (cid.co_cid || '').trim().toUpperCase()
   return SISTEMAS.find(s => s.test(c)) || SISTEMAS[SISTEMAS.length - 1]
 }
 
+// Sistemas SECUNDÁRIOS — um CID "toca" outros sistemas quando seu nome é ambíguo,
+// sem ter código que os delate. Ex: aneurisma/aterosclerose de localização não
+// especificada (I72/I77) pode ser cerebral. Usado só pra FILTRAR (pill "tocar"),
+// não pra contar — assim a pill Neuro acha o aneurisma ambíguo, mas a contagem
+// não infla. Deriva do nome, não do código.
+function sistemasSecundarios(cid) {
+  const nome = norm(cid.no_cid)
+  const tags = new Set()
+  // Vascular de localização não especificada → pode ser cerebral (neuro) ou cardíaco.
+  if (/aneurisma|aterosclerose|embolia|trombose|estenose|oclusa/.test(nome)) {
+    if (/localizacao nao especificada|nao especificad[ao]$|outr[ao]s? arteri|de arteria$/.test(nome)) {
+      tags.add('neuro')
+      tags.add('cardio')
+    }
+    if (/cerebr|carotid|vertebr|intracrani|pre-cerebr/.test(nome)) tags.add('neuro')
+    if (/coronari|cardiac|miocard/.test(nome)) tags.add('cardio')
+  }
+  // Sepse/infecção sistêmica toca infeccioso mesmo fora de A/B.
+  if (/sepse|septicemi|choque septic/.test(nome)) tags.add('infecto')
+  return tags
+}
+
+// Um CID pertence a um sistema (pra fins de FILTRO) se é o primário OU um secundário.
+export function cidTocaSistema(cid, sistemaId) {
+  if (sistemaDoCid(cid).id === sistemaId) return true
+  return sistemasSecundarios(cid).has(sistemaId)
+}
+
 /**
- * Conta resultados por sistema e devolve as pills ordenadas por contagem (desc).
- * Só inclui sistemas com ≥1 resultado. Usado pra renderizar os filtros.
+ * Pills de filtro. count = nº de CIDs cujo sistema PRIMÁRIO é este (soma = total).
+ * reach = nº de CIDs que o filtro acha (primário + secundários) — usado pra não
+ * esconder a pill de um sistema que só aparece como secundário (ex: 'neuro' num
+ * resultado só de aneurismas vasculares ambíguos).
  */
 export function pillsDeSistema(results) {
-  const cont = new Map()
+  const contPrim = new Map()
+  const reach = new Map()
   for (const cid of results) {
-    const s = sistemaDoCid(cid)
-    cont.set(s.id, (cont.get(s.id) || 0) + 1)
+    const prim = sistemaDoCid(cid).id
+    contPrim.set(prim, (contPrim.get(prim) || 0) + 1)
+    // alcance: primário + secundários
+    const ids = new Set([prim, ...sistemasSecundarios(cid)])
+    for (const id of ids) reach.set(id, (reach.get(id) || 0) + 1)
   }
   return SISTEMAS
-    .filter(s => cont.has(s.id))
-    .map(s => ({ id: s.id, label: s.label, count: cont.get(s.id) }))
-    .sort((a, b) => b.count - a.count)
+    .filter(s => reach.has(s.id))
+    .map(s => ({ id: s.id, label: s.label, count: contPrim.get(s.id) || 0, reach: reach.get(s.id) }))
+    // ordena por alcance (pills mais úteis primeiro); 'outros' fica no fim por ter label genérico
+    .sort((a, b) => b.reach - a.reach)
 }
