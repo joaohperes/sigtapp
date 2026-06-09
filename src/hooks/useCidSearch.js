@@ -4,7 +4,10 @@ import { expandirSinonimos } from '../data/sinonimos'
 import { CORINGAS_CID } from '../data/coringas'
 
 // CIDs dos diagnósticos frequentes do app — sobem ao topo da busca quando aparecem.
-const CIDS_PRIORITARIOS = CORINGAS_CID.map(c => c.co_cid)
+// Filtra valores inválidos: CORINGAS_CID inclui itens { break: true } (separadores
+// de layout) sem co_cid, que viravam `undefined` → `null` no array e quebravam
+// a ordenação por prioritários no Postgres (= ANY com null degenera).
+const CIDS_PRIORITARIOS = CORINGAS_CID.map(c => c.co_cid).filter(Boolean)
 
 // Palavras irrelevantes para a busca
 const STOPWORDS = new Set(['de', 'do', 'da', 'dos', 'das', 'e', 'a', 'o', 'em', 'por', 'com', 'sem', 'ao', 'na', 'no'])

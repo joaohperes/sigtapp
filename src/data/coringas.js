@@ -220,4 +220,7 @@ export const CORINGAS_GRUPOS = [
   },
 ]
 
-export const CORINGAS_CID = CORINGAS_GRUPOS.flatMap(g => [...g.cids, ...(g.extra || [])])
+// Exclui itens { break: true } (separadores de layout dos cards) que não têm co_cid.
+export const CORINGAS_CID = CORINGAS_GRUPOS
+  .flatMap(g => [...g.cids, ...(g.extra || [])])
+  .filter(c => c.co_cid)
