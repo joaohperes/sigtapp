@@ -82,7 +82,7 @@ export const CORINGAS_GRUPOS = [
       { co_cid: 'G934', label: 'Encefalopatia'         },
       { co_cid: 'G610', label: 'Guillain-Barré'        },
       { co_cid: 'G35',  label: 'Esclerose múltipla'    },
-      { co_cid: 'G450', label: 'AIT'                   },
+      { co_cid: 'G459', label: 'AIT'                   },
       { co_cid: 'G379', label: 'Mielite / desmielin.'  },
       { co_cid: 'G910', label: 'Hidrocefalia'          },
     ],
