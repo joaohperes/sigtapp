@@ -266,7 +266,14 @@ export function DiagnosticoPage() {
           // (variantes por agente, causa externa, perinatal...). Só agrupa quando
           // a lista é grande o bastante pra valer — buscas curtas ficam inteiras.
           const { comuns, variantes } = agruparPorRelevancia(resultsFiltrados, CORINGAS_SET)
-          const agrupar = resultsFiltrados.length > 12 && variantes.length >= 3
+          // Só agrupa quando vale a pena: lista grande, ruído proporcionalmente
+          // relevante (≥40%), E sobram comuns suficientes pra não ficar "careca"
+          // (≥3). Em buscas homogêneas (ex: "hsa" = 14 HSAs, 1 comum + 13 variantes),
+          // não agrupa — mostra tudo junto, pois as "variantes" são legítimas.
+          const agrupar =
+            resultsFiltrados.length > 12 &&
+            comuns.length >= 3 &&
+            variantes.length / resultsFiltrados.length >= 0.4
 
           return (
             <div className="mb-6">

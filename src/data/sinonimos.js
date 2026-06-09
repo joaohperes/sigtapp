@@ -63,7 +63,12 @@ export const SINONIMOS = [
   ['lra',              'insuficiência renal aguda'],
   ['drc',              'insuficiência renal crônica'],
   ['cad',              'cetoacidose'],
-  ['ehh',              'coma hiperosmolar'],
+  // EHH (estado hiperglicêmico hiperosmolar) não tem código próprio no CID-10/SIGTAP.
+  // É codificado como "diabetes ... com coma" (E_00) ou hiperglicemia (R739).
+  ['ehh',              'diabetes mellitus insulino-dependente - com coma'],
+  ['ehh',              'diabetes mellitus não-insulino-dependente - com coma'],
+  ['ehh',              'diabetes mellitus não especificado - com coma'],
+  ['ehh',              'hiperglicemia não especificada'],
   ['dip',              'doença inflamatória pélvica'],
   ['dip',              'salpingite'],
   ['nia',              'nefrite intersticial'],
