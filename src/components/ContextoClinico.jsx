@@ -108,8 +108,8 @@ function ProcList({ procs, dark, labelClinicos = 'Clínicos — use para regula�
     <div className="space-y-1.5">
       {soCirurgicos && (
         <>
-          <p className="text-[11px] text-muted-foreground mb-1">
-            Nenhum código clínico disponível — apenas procedimentos cirúrgicos:
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
+            Procedimentos para regulação
           </p>
           {cirurgicos.map(p => <ProcReg key={p.co_procedimento} p={p} dark={dark} />)}
         </>
@@ -272,9 +272,17 @@ export function ContextoClinico({ cid, collapsible = false }) {
   const [erroIA, setErroIA] = useState(null)
   const buscandoIARef = useRef(false)
 
+  // Re-busca sempre que o CID muda (ex: trocar de pill sem remontar o componente).
+  // Reseta estado e refs — senão um buscandoCorRef preso em true deixa os correlatos
+  // travados em null e o spinner "Buscando códigos alternativos..." roda pra sempre.
   useEffect(() => {
+    buscandoRegRef.current = false
+    buscandoCorRef.current = false
+    setProcsReg(null)
+    setCorrelatos(null)
+    setErroReg(null)
     if (!collapsible) buscarReg()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [cid.co_cid]) // eslint-disable-line react-hooks/exhaustive-deps
 
   function toggle() {
     if (aberto) { setAberto(false); return }
@@ -284,13 +292,14 @@ export function ContextoClinico({ cid, collapsible = false }) {
 
   async function buscarReg() {
     const key = cid.co_cid?.trim()
-    if (cacheReg.has(key)) { setProcsReg(cacheReg.get(key)); return }
-    if (buscandoRegRef.current) return
+    if (cacheReg.has(key)) { setProcsReg(cacheReg.get(key)); buscarCorrelatos(); return }
     buscandoRegRef.current = true
     setLoadingReg(true)
     setErroReg(null)
     try {
       const { data, error } = await supabase.rpc('procedimentos_por_cid_regulacao', { p_co_cid: key })
+      // Resposta obsoleta (usuário trocou de CID antes de chegar): ignora.
+      if (cid.co_cid?.trim() !== key) return
       if (error) throw new Error(error.message)
       cacheReg.set(key, data || [])
       setProcsReg(data || [])
@@ -307,10 +316,11 @@ export function ContextoClinico({ cid, collapsible = false }) {
   async function buscarCorrelatos() {
     const key = cid.co_cid?.trim()
     if (cacheCor.has(key)) { setCorrelatos(cacheCor.get(key)); return }
-    if (buscandoCorRef.current) return
     buscandoCorRef.current = true
     try {
       const { data, error } = await supabase.rpc('cids_correlatos_clinicos', { p_co_cid: key })
+      // Resposta obsoleta (usuário já trocou de CID): ignora, não seta estado.
+      if (cid.co_cid?.trim() !== key) return
       if (error) throw new Error(error.message)
       const seen = new Map()
       for (const row of (data || [])) {
