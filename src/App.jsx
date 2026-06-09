@@ -13,6 +13,7 @@ import { AppNav } from './components/AppNav'
 import { CommandMenu } from './components/CommandMenu'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { Toaster } from 'sonner'
+import { Analytics } from '@vercel/analytics/react'
 import { useTheme } from './contexts/ThemeContext'
 
 class ErrorBoundary extends Component {
@@ -68,6 +69,7 @@ function AppShell() {
         </p>
       </footer>
       <Toaster position="bottom-right" richColors />
+      <Analytics />
     </>
   )
 }

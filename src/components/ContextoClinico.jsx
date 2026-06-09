@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { useTheme } from '../contexts/ThemeContext'
 import { supabase } from '../lib/supabase'
+import { track } from '@vercel/analytics'
 import { formatBRL, formatCodigo } from '../utils/formatters'
 import { cn } from '@/lib/utils'
 
@@ -293,6 +294,7 @@ export function ContextoClinico({ cid, collapsible = false }) {
       if (error) throw new Error(error.message)
       cacheReg.set(key, data || [])
       setProcsReg(data || [])
+      track('regulacao_consultada', { cid: key, n_procs: (data || []).length })
     } catch (err) {
       setErroReg(err.message)
     } finally {
@@ -329,6 +331,7 @@ export function ContextoClinico({ cid, collapsible = false }) {
       const resultado = Array.from(seen.values())
       cacheCor.set(key, resultado)
       setCorrelatos(resultado)
+      if (resultado.length > 0) track('correlatos_exibidos', { cid: key, n: resultado.length })
     } catch {
       setCorrelatos([])
     } finally {
@@ -362,6 +365,7 @@ export function ContextoClinico({ cid, collapsible = false }) {
   }
 
   function mudarAba(novaAba) {
+    if (novaAba !== aba) track('aba_aberta', { aba: novaAba, cid: cid.co_cid?.trim() })
     setAba(novaAba)
     if (novaAba === 'ia' && !dadosIA && !loadingIA) buscarIA()
   }

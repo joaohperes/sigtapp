@@ -6,6 +6,7 @@ import { useModoUE } from '../contexts/ModoUEContext'
 import { ContextoClinico } from '../components/ContextoClinico'
 import { CORINGAS_GRUPOS, CORINGAS_CID } from '../data/coringas'
 import { agruparPorRelevancia, pillsDeSistema, cidTocaSistema } from '../lib/relevanciaCid'
+import { track } from '@vercel/analytics'
 import { cn } from '@/lib/utils'
 
 // Set dos CIDs curados do app — usados como sinal forte de "comum" no agrupamento.
@@ -186,6 +187,7 @@ export function DiagnosticoPage() {
       if (v.trim().length >= 2) {
         setSearchParams({ q: v.trim() })
         search(v)
+        track('busca_diagnostico', { termo: v.trim().slice(0, 60) })
       } else {
         setSearchParams({})
         search('')
