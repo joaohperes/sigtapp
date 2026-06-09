@@ -104,6 +104,7 @@ export const CORINGAS_GRUPOS = [
       { co_cid: 'S328', label: 'Fratura de pelve'      },
       { co_cid: 'T314', label: 'Queimadura grave'      },
       { co_cid: 'T200', label: 'Queimadura facial'     },
+      { co_cid: 'T543', label: 'Queimadura química'    },
       { co_cid: 'S369', label: 'Trauma abdominal'      },
       { co_cid: 'S150', label: 'Trauma vasc. cerv.'    },
     ],
