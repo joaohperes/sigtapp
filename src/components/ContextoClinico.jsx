@@ -16,7 +16,7 @@ function BadgeGrupo({ co_procedimento }) {
   const cirurgico = co_procedimento?.startsWith('04')
   return (
     <span className={cn(
-      'inline-flex items-center gap-1 rounded px-1.5 py-px text-[9px] font-semibold uppercase tracking-wide',
+      'inline-flex items-center gap-1 rounded px-1.5 py-px text-[10px] font-semibold uppercase tracking-wide',
       cirurgico ? 'bg-orange-400/10 text-orange-400' : 'bg-emerald-500/10 text-emerald-500'
     )}>
       <span className={cn('h-1 w-1 rounded-full', cirurgico ? 'bg-orange-400' : 'bg-emerald-500')} />
@@ -36,7 +36,7 @@ function BotaoAIH({ co_procedimento, navigate }) {
         toast.success('Procedimento adicionado à calculadora', { duration: 1500 })
       }}
       title="Montar AIH na calculadora com este procedimento"
-      className="flex items-center gap-1 rounded-md border border-border px-2 py-0.5 text-[10px] font-medium text-muted-foreground hover:border-emerald-500/40 hover:text-emerald-500 transition whitespace-nowrap"
+      className="flex items-center gap-1 rounded-md border border-border px-2 py-0.5 text-[11px] font-medium text-muted-foreground hover:border-emerald-500/40 hover:text-emerald-500 transition whitespace-nowrap"
     >
       <svg className="h-2.5 w-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
@@ -64,7 +64,7 @@ function ProcReg({ p, dark }) {
     >
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2 mb-0.5">
-          <span className="font-mono text-[10px] text-muted-foreground">{formatCodigo(p.co_procedimento)}</span>
+          <span className="font-mono text-[11px] text-muted-foreground">{formatCodigo(p.co_procedimento)}</span>
           <BadgeGrupo co_procedimento={p.co_procedimento} />
           <button
             onClick={copiar}
@@ -107,7 +107,7 @@ function ProcList({ procs, dark, labelClinicos = 'Clínicos — use para regula�
     <div className="space-y-1.5">
       {soCirurgicos && (
         <>
-          <p className="text-[10px] text-muted-foreground mb-1">
+          <p className="text-[11px] text-muted-foreground mb-1">
             Nenhum código clínico disponível — apenas procedimentos cirúrgicos:
           </p>
           {cirurgicos.map(p => <ProcReg key={p.co_procedimento} p={p} dark={dark} />)}
@@ -117,14 +117,14 @@ function ProcList({ procs, dark, labelClinicos = 'Clínicos — use para regula�
         <>
           {clinicos.length > 0 && (
             <div className="space-y-1.5">
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
                 {labelClinicos}
               </p>
               {clinicosVisiveis.map(p => <ProcReg key={p.co_procedimento} p={p} dark={dark} />)}
               {temMaisClinicos && (
                 <button
                   onClick={() => setClinicosExpandidos(v => !v)}
-                  className="text-[10px] font-medium text-muted-foreground hover:text-foreground transition"
+                  className="text-[11px] font-medium text-muted-foreground hover:text-foreground transition"
                 >
                   {clinicosExpandidos ? 'Ver menos' : `Ver mais ${clinicos.length - CLINICOS_PREVIEW} procedimentos`}
                 </button>
@@ -135,7 +135,7 @@ function ProcList({ procs, dark, labelClinicos = 'Clínicos — use para regula�
             <div className={clinicos.length > 0 ? 'pt-2 border-t border-border/40' : ''}>
               <button
                 onClick={() => setCirurgicosAbertos(v => !v)}
-                className="flex items-center gap-1.5 text-[10px] font-medium text-muted-foreground hover:text-foreground transition"
+                className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground hover:text-foreground transition"
               >
                 <svg className={cn('h-3 w-3 transition-transform', cirurgicosAbertos ? 'rotate-90' : '')} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -159,7 +159,7 @@ function ProcRegList({ procs, dark }) {
   return (
     <div className="space-y-2">
       <ProcList procs={procs} dark={dark} />
-      <p className="text-[10px] text-muted-foreground/60 pt-1">
+      <p className="text-[11px] text-muted-foreground/60 pt-1">
         Dados da tabela SIGTAP · clique para ver detalhes do procedimento
       </p>
     </div>
@@ -167,32 +167,21 @@ function ProcRegList({ procs, dark }) {
 }
 
 function CorrelatosColapsaveis({ correlatos, dark }) {
-  const [aberto, setAberto] = useState(true)
   return (
-    <div className="mt-3 pt-3 border-t border-border/50">
-      <button
-        onClick={() => setAberto(v => !v)}
-        className="flex items-center gap-1.5 text-[10px] font-medium text-amber-500/80 hover:text-amber-500 transition"
-      >
-        <svg className={cn('h-3 w-3 transition-transform', aberto ? 'rotate-90' : '')} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-        </svg>
-        {aberto ? 'Ocultar' : `Ver ${correlatos.length} códigos alternativos do mesmo sistema`}
-      </button>
-      {aberto && (
-        <div className="mt-2 space-y-1.5">
-          {correlatos.map(p => (
-            <div key={p.co_procedimento}>
-              <ProcReg p={p} dark={dark} />
-              {p.co_cid_ref && (
-                <p className="ml-3 text-[10px] text-muted-foreground/50">
-                  via <span className="font-mono">{p.co_cid_ref}</span> · {p.no_cid_ref}
-                </p>
-              )}
-            </div>
-          ))}
+    <div className="mt-3 pt-3 border-t border-border/50 space-y-1.5">
+      <p className="text-[11px] font-semibold uppercase tracking-wider text-amber-500 mb-1">
+        Códigos correlatos · mesmo sistema
+      </p>
+      {correlatos.map(p => (
+        <div key={p.co_procedimento}>
+          <ProcReg p={p} dark={dark} />
+          {p.co_cid_ref && (
+            <p className="ml-3 text-[11px] text-muted-foreground/50">
+              via <span className="font-mono">{p.co_cid_ref}</span> · {p.no_cid_ref}
+            </p>
+          )}
         </div>
-      )}
+      ))}
     </div>
   )
 }
@@ -210,7 +199,7 @@ function ProcIASigtap({ p }) {
     >
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2 mb-0.5">
-          <span className="font-mono text-[10px] text-muted-foreground">{formatCodigo(s.co_procedimento)}</span>
+          <span className="font-mono text-[11px] text-muted-foreground">{formatCodigo(s.co_procedimento)}</span>
           <BadgeGrupo co_procedimento={s.co_procedimento} />
         </div>
         <p className="text-xs font-medium text-foreground leading-snug">{s.no_procedimento_sigtap}</p>
@@ -455,7 +444,7 @@ export function ContextoClinico({ cid, collapsible = false }) {
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
               </svg>
-              <span className="text-[10px] text-muted-foreground">Buscando códigos alternativos para regulação...</span>
+              <span className="text-[11px] text-muted-foreground">Buscando códigos alternativos para regulação...</span>
             </div>
           )}
 
@@ -463,10 +452,10 @@ export function ContextoClinico({ cid, collapsible = false }) {
           {correlatos !== null && /^A41/i.test(cid.co_cid?.trim()) && (
             <div className={cn('mt-4 pt-4 border-t', dark ? 'border-[rgba(255,255,255,0.06)]' : 'border-border')}>
               <div className={cn('rounded-lg p-3', dark ? 'bg-amber-500/10 border border-amber-500/20' : 'bg-amber-50 border border-amber-200')}>
-                <p className="text-[10px] font-semibold text-amber-500 uppercase tracking-wider mb-1">
+                <p className="text-[11px] font-semibold text-amber-500 uppercase tracking-wider mb-1">
                   Dica para regulação de Sepse
                 </p>
-                <p className="text-[10px] text-muted-foreground leading-relaxed">
+                <p className="text-[11px] text-muted-foreground leading-relaxed">
                   Para sepse, considere usar o <strong className="text-foreground">CID do foco infeccioso</strong> com seu código de tratamento específico:
                 </p>
                 <div className="mt-1.5 space-y-0.5">
@@ -476,7 +465,7 @@ export function ContextoClinico({ cid, collapsible = false }) {
                     { cid: 'K659', label: 'Foco abdominal → Tratamento de doenças do peritônio' },
                     { cid: 'L089', label: 'Foco cutâneo → Tratamento de infecções de pele' },
                   ].map(item => (
-                    <p key={item.cid} className="text-[10px] text-muted-foreground">
+                    <p key={item.cid} className="text-[11px] text-muted-foreground">
                       <span className="font-mono font-semibold text-foreground">{item.cid}</span>
                       {' · '}{item.label}
                     </p>
@@ -515,14 +504,14 @@ export function ContextoClinico({ cid, collapsible = false }) {
                 <svg className="h-3.5 w-3.5 shrink-0 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <span className="text-[10px] text-muted-foreground leading-snug">
+                <span className="text-[11px] text-muted-foreground leading-snug">
                   Cenários sugeridos por IA · <span className="text-foreground font-medium">códigos validados contra a tabela SIGTAP real</span>
                 </span>
               </div>
 
               {dadosIA.coringas?.length > 0 && (
                 <div>
-                  <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                     Base — presentes na maioria dos casos
                   </p>
                   <ProcsIA procs={dadosIA.coringas} onBuscar={irParaBusca} />
@@ -531,7 +520,7 @@ export function ContextoClinico({ cid, collapsible = false }) {
 
               {dadosIA.cenarios?.map((c, i) => (
                 <div key={i} className="rounded-lg border border-border/60 bg-secondary/20 p-3">
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-foreground/80">{c.titulo}</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-foreground/80">{c.titulo}</p>
                   {c.descricao && <p className="mt-0.5 mb-2 text-[11px] text-muted-foreground leading-snug">{c.descricao}</p>}
                   <div className={c.descricao ? '' : 'mt-2'}>
                     <ProcsIA procs={c.procedimentos} onBuscar={irParaBusca} />
@@ -544,7 +533,7 @@ export function ContextoClinico({ cid, collapsible = false }) {
                   onClick={() => buscarIA(true)}
                   disabled={loadingIA}
                   title="Gerar novamente com a IA"
-                  className="flex items-center gap-1 text-[10px] font-medium text-muted-foreground/60 hover:text-foreground transition disabled:opacity-40"
+                  className="flex items-center gap-1 text-[11px] font-medium text-muted-foreground/60 hover:text-foreground transition disabled:opacity-40"
                 >
                   <svg className={cn('h-3 w-3', loadingIA && 'animate-spin')} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
