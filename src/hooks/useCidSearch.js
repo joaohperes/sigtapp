@@ -102,9 +102,11 @@ export function useCidSearch() {
 
     // Sinônimos aditivos: grupos de alternativas (OR interno), grupos entre si AND.
     // Filtra grupos cuja palavra-base é stopword (ex: "de", "do") — mas preserva
-    // os que carregam sinônimos formais.
+    // os que carregam sinônimos formais. Aceita termos de 2 chars (pé, mão): a
+    // RPC os casa como palavra inteira (\m..\M), então "fratura pe" filtra de
+    // fato pelo pé em vez de virar só "fratura" (que trazia 140 resultados).
     const grupos = gruposDeSinonimos(q)
-      .filter(g => g[0].length >= 3 && !STOPWORDS.has(g[0]))
+      .filter(g => g[0].length >= 2 && !STOPWORDS.has(g[0]))
     const gruposFinais = grupos.length > 0 ? grupos : [[q]]
 
     const { data, error: err } = await supabase
