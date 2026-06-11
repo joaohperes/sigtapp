@@ -11,6 +11,17 @@ const cacheReg = new Map()
 const cacheCor = new Map()
 const cacheIA = new Map()
 
+// Detecta procedimentos de SUPORTE/observação: internar o paciente para
+// segurar/acompanhar uma intercorrência, não para resolver definitivamente a
+// doença. É o motivo MAIS comum de internação pelo PS (sangramento, anemia,
+// dor, observação) e ficava afogado na lista. Caso-âncora: osteossarcoma
+// sangrante → 0304100013 (intercorrência clínica oncológica) existia mas não
+// se destacava, levando a improvisar "anemia" como diagnóstico de internação.
+const RE_SUPORTE = /intercorr|cuidados prolongados|tratamento clinico de paciente|tratamento clínico de paciente|tratamento conservador|observa[çc][aã]o/i
+function isSuporte(p) {
+  return p.grupo === '03' && RE_SUPORTE.test(p.no_procedimento || '')
+}
+
 // Badge de grupo unificado entre as abas — derivado do código real do procedimento
 // (0303… = clínico, 04… = cirúrgico). Mesma linguagem visual em Regulação e IA.
 function BadgeGrupo({ co_procedimento }) {
@@ -95,17 +106,34 @@ function ProcList({ procs, dark, labelClinicos = 'Clínicos — use para regula�
   const [clinicosExpandidos, setClinicosExpandidos] = useState(false)
 
   const clinicosRaw = procs.filter(p => p.grupo === '03')
-  const clinicosComValor = clinicosRaw.filter(p => (parseFloat(p.vl_sh) || 0) + (parseFloat(p.vl_sa) || 0) + (parseFloat(p.vl_sp) || 0) > 0)
-  const clinicosSemValor = clinicosRaw.filter(p => (parseFloat(p.vl_sh) || 0) + (parseFloat(p.vl_sa) || 0) + (parseFloat(p.vl_sp) || 0) === 0)
+  // Separa os de suporte/observação — sobem para uma faixa própria no topo,
+  // pois é o motivo mais comum de internação pelo PS e antes se perdia na lista.
+  const suporte = clinicosRaw.filter(isSuporte)
+  const clinicosResto = clinicosRaw.filter(p => !isSuporte(p))
+  const clinicosComValor = clinicosResto.filter(p => (parseFloat(p.vl_sh) || 0) + (parseFloat(p.vl_sa) || 0) + (parseFloat(p.vl_sp) || 0) > 0)
+  const clinicosSemValor = clinicosResto.filter(p => (parseFloat(p.vl_sh) || 0) + (parseFloat(p.vl_sa) || 0) + (parseFloat(p.vl_sp) || 0) === 0)
   const clinicos = [...clinicosComValor, ...clinicosSemValor]
   const clinicosVisiveis = clinicosExpandidos ? clinicos : clinicos.slice(0, CLINICOS_PREVIEW)
   const temMaisClinicos = clinicos.length > CLINICOS_PREVIEW
 
   const cirurgicos = procs.filter(p => p.grupo === '04')
-  const soCirurgicos = clinicos.length === 0 && cirurgicos.length > 0
+  const soCirurgicos = clinicos.length === 0 && suporte.length === 0 && cirurgicos.length > 0
 
   return (
     <div className="space-y-1.5">
+      {suporte.length > 0 && (
+        <div className="rounded-lg border border-sky-500/25 bg-sky-500/5 p-2.5 space-y-1.5">
+          <div className="flex items-baseline gap-2">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-sky-500">
+              Internação de suporte / observação
+            </p>
+          </div>
+          <p className="text-[11px] text-muted-foreground/80 leading-snug -mt-0.5">
+            Para internar sem ser para tratar a doença de base — intercorrência, suporte clínico ou observação.
+          </p>
+          {suporte.map(p => <ProcReg key={p.co_procedimento} p={p} dark={dark} />)}
+        </div>
+      )}
       {soCirurgicos && (
         <>
           <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
