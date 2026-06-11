@@ -24,9 +24,34 @@ export function useCidSearch() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [meta, setMeta] = useState(null) // { expanded, substituicoes }
+  const [sugestoes, setSugestoes] = useState([]) // vizinhos quando código não existe
+
+  // Busca categorias (3 chars) do mesmo prefixo de 2 caracteres e ordena por
+  // proximidade numérica ao código pedido. Ex: C42 (inexistente) → C41, C43, C40…
+  // Resolve becos sem saída quando o usuário digita um código realocado/excluído
+  // da CID-10 (caso real: osteossarcoma buscado como C42, que não existe).
+  const buscarVizinhos = useCallback(async (code) => {
+    if (code.length < 3) return []
+    const prefixo2 = code.slice(0, 2)
+    const alvo = parseInt(code.slice(1, 3), 10)
+    if (Number.isNaN(alvo)) return []
+
+    const { data } = await supabase
+      .from('cid')
+      .select('co_cid, no_cid, tp_sexo')
+      .ilike('co_cid', `${prefixo2}_`) // _ = exatamente 1 char → categorias de 3 chars
+      .order('co_cid')
+    if (!data) return []
+
+    return data
+      .map(c => ({ ...c, _dist: Math.abs(parseInt(c.co_cid.slice(1, 3), 10) - alvo) }))
+      .sort((a, b) => a._dist - b._dist || a.co_cid.localeCompare(b.co_cid))
+      .slice(0, 6)
+  }, [])
 
   const search = useCallback(async (query) => {
     const q = query?.trim() ?? ''
+    setSugestoes([])
 
     if (q.length < 2) {
       setResults([])
@@ -64,7 +89,11 @@ export function useCidSearch() {
         .order('co_cid')
         .limit(50)
       if (err) { setError(err.message); setResults([]) }
-      else setResults(data ?? [])
+      else {
+        setResults(data ?? [])
+        // Código sem nenhum resultado → oferece vizinhos da mesma faixa.
+        if (!data || data.length === 0) setSugestoes(await buscarVizinhos(code))
+      }
       setLoading(false)
       return
     }
@@ -91,5 +120,5 @@ export function useCidSearch() {
     setLoading(false)
   }, [])
 
-  return { results, loading, error, meta, search }
+  return { results, loading, error, meta, sugestoes, search }
 }

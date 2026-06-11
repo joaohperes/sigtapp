@@ -155,7 +155,7 @@ export function DiagnosticoPage() {
   const initialQuery = searchParams.get('q') || ''
   const autoCtx = searchParams.get('ctx') === '1'
 
-  const { results, loading, error, meta, search } = useCidSearch()
+  const { results, loading, error, meta, sugestoes, search } = useCidSearch()
   const [value, setValue] = useState(initialQuery)
   const [mostrarVariantes, setMostrarVariantes] = useState(false)
   const [filtroSistema, setFiltroSistema] = useState(null)
@@ -370,8 +370,30 @@ export function DiagnosticoPage() {
 
         {searched && !loading && results.length === 0 && !error && (
           <div className="py-12 text-center">
-            <p className="text-sm font-medium text-muted-foreground">Nenhum CID encontrado</p>
-            <p className="mt-1 text-xs text-muted-foreground/70">Tente outros termos ou o código diretamente (ex: C56)</p>
+            <p className="text-sm font-medium text-muted-foreground">
+              {sugestoes.length > 0
+                ? <>O código <span className="font-mono font-bold text-foreground">{value.trim().replace('.', '').toUpperCase()}</span> não existe na CID-10</>
+                : 'Nenhum CID encontrado'}
+            </p>
+            {sugestoes.length > 0 ? (
+              <>
+                <p className="mt-1 text-xs text-muted-foreground/70">Códigos próximos nesta faixa — talvez algum seja o que você procura:</p>
+                <div className="mx-auto mt-4 flex max-w-xl flex-wrap justify-center gap-2">
+                  {sugestoes.map((c) => (
+                    <button
+                      key={c.co_cid}
+                      onClick={() => { setValue(c.co_cid); setSearchParams({ q: c.co_cid }); search(c.co_cid) }}
+                      className="inline-flex max-w-full items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 text-left text-xs transition hover:border-foreground/30 hover:bg-secondary"
+                    >
+                      <span className="font-mono font-bold shrink-0 text-foreground">{c.co_cid}</span>
+                      <span className="truncate text-muted-foreground">{c.no_cid?.trim()}</span>
+                    </button>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <p className="mt-1 text-xs text-muted-foreground/70">Tente outros termos ou o código diretamente (ex: C56)</p>
+            )}
           </div>
         )}
 
