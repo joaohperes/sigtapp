@@ -231,13 +231,13 @@ function CidsRelacionados({ relacionados, generico }) {
   return (
     <div className="mt-3 pt-3 border-t border-border/50 space-y-1.5">
       <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
-        CIDs relacionados · refine para mais opções
+        CIDs relacionados · abrem outros procedimentos
       </p>
-      {generico && (
-        <p className="text-[11px] text-muted-foreground/70 leading-snug -mt-0.5 mb-1.5">
-          Este CID é genérico — se o quadro for mais específico, troque por um destes para ver outros procedimentos.
-        </p>
-      )}
+      <p className="text-[11px] text-muted-foreground/70 leading-snug -mt-0.5 mb-1.5">
+        {generico
+          ? 'Este CID é genérico. Se o quadro for mais específico, estes abrem procedimentos que o atual não tem:'
+          : 'No mesmo sistema, estes têm procedimentos que o atual não oferece:'}
+      </p>
       <div className="flex flex-wrap gap-1.5">
         {relacionados.map(c => (
           <Link
