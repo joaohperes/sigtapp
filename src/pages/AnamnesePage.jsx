@@ -519,7 +519,7 @@ export function AnamnesePage() {
   const cidsBlock = (
     <div>
       <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-muted-foreground">
-        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-100 text-[10px] font-bold text-indigo-600">
+        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-[10px] font-bold text-primary">
           {cids.length}
         </span>
         Diagnósticos CID-10 Prováveis
@@ -533,11 +533,11 @@ export function AnamnesePage() {
             <div key={c.co_cid} className="rounded-xl bg-card p-3 border border-border border-l-2 border-l-foreground/30">
               {/* Header: código pai + badge */}
               <div className="flex items-center gap-2">
-                <span className="font-mono text-sm font-bold text-indigo-600">
+                <span className="font-mono text-sm font-bold text-primary">
                   {c.co_cid_pai || c.co_cid}
                 </span>
                 {i === 0 && (
-                  <span className="rounded-full bg-indigo-600 px-2 py-0.5 text-[10px] font-bold text-white">
+                  <span className="rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground">
                     Principal
                   </span>
                 )}
@@ -553,7 +553,7 @@ export function AnamnesePage() {
               {/* Subcódigo sugerido pela IA (quando diferente do pai) */}
               {c.co_cid.length > 3 && c.no_cid && c.no_cid !== c.no_cid_pai && (
                 <p className="mt-1 flex items-baseline gap-1 text-[11px]">
-                  <span className="font-mono text-indigo-400 shrink-0">{formatCidCode(c.co_cid)}</span>
+                  <span className="font-mono text-primary/70 shrink-0">{formatCidCode(c.co_cid)}</span>
                   <span className="text-muted-foreground leading-snug">{c.no_cid}</span>
                 </p>
               )}
@@ -577,8 +577,8 @@ export function AnamnesePage() {
                 </button>
                 <button
                   onClick={() => toggleCidProcs(c.co_cid, i === 0)}
-                  className="rounded-lg border border-indigo-200 bg-indigo-50 py-1 px-2
-                             text-xs font-medium text-indigo-600 transition hover:bg-indigo-100 flex items-center justify-center gap-1"
+                  className="rounded-lg border border-primary/30 bg-primary/10 py-1 px-2
+                             text-xs font-medium text-primary transition hover:bg-primary/20 flex items-center justify-center gap-1"
                 >
                   Procedimentos
                   <svg
@@ -604,14 +604,14 @@ export function AnamnesePage() {
                         className={cn(
                           'rounded-lg border px-3 py-1.5 text-[11px] leading-snug',
                           s.co_cid === c.co_cid
-                            ? 'border-indigo-200 bg-indigo-50'
+                            ? 'border-primary/30 bg-primary/10'
                             : 'border-border bg-secondary'
                         )}
                       >
-                        <span className="font-mono text-indigo-500 mr-1.5">{formatCidCode(s.co_cid)}</span>
+                        <span className="font-mono text-primary mr-1.5">{formatCidCode(s.co_cid)}</span>
                         <span className="text-muted-foreground">{s.no_cid}</span>
                         {s.co_cid === c.co_cid && (
-                          <span className="ml-1 text-[10px] text-indigo-400 font-medium">← sugerido</span>
+                          <span className="ml-1 text-[10px] text-primary/70 font-medium">← sugerido</span>
                         )}
                       </div>
                     ))
@@ -647,7 +647,7 @@ export function AnamnesePage() {
                       })}
                       <Link
                         to={`/?q=${c.co_cid}`}
-                        className="block pt-0.5 text-center text-[11px] font-medium text-indigo-500 hover:underline"
+                        className="block pt-0.5 text-center text-[11px] font-medium text-primary hover:underline"
                       >
                         Ver todos →
                       </Link>
@@ -700,9 +700,9 @@ export function AnamnesePage() {
                   className="flex w-full items-center justify-between gap-2 px-4 py-3 text-left transition hover:bg-secondary"
                 >
                   <span className="flex items-center gap-2">
-                    <span className="font-mono text-sm font-bold text-indigo-500">{cid.co_cid_pai || cid.co_cid}</span>
+                    <span className="font-mono text-sm font-bold text-primary">{cid.co_cid_pai || cid.co_cid}</span>
                     <span className="text-sm text-muted-foreground truncate">{cid.no_cid_pai || cid.no_cid}</span>
-                    <span className="rounded-full bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-400">{data.length}</span>
+                    <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary/80">{data.length}</span>
                   </span>
                   <svg
                     className={`h-4 w-4 shrink-0 text-muted-foreground/50 transition-transform ${isOpen ? 'rotate-180' : ''}`}
