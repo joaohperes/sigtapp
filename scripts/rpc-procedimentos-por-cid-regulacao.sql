@@ -57,6 +57,9 @@ BEGIN
     AND LEFT(p.co_procedimento, 4) != '0302'
     AND LEFT(p.co_procedimento, 6) NOT IN (
       '030107','030105','030101','030113',
+      -- 030109: atencao ambulatorial ao idoso (geriatria, avaliacao da pessoa
+      -- idosa) — nao e regulacao de internacao. Poluia AVC/HAS/etc.
+      '030109',
       -- Reabilitacao/seguimento ambulatorial: nao sao regulacao de internacao aguda.
       '030319','030111'
     )
