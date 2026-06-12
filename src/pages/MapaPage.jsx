@@ -3,9 +3,9 @@ import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { cn } from '@/lib/utils'
 
-// Sistemas clínicos = nível 1 do mapa. Cada um aponta para suas faixas de CID
-// (prefixos-raiz) — alinhado ao SISTEMAS de relevanciaCid, que o app já usa nas
-// pills de busca. Linguagem do médico ("Neurológico"), não "Capítulo IX".
+// Sistemas clínicos = primeira coluna do mapa. Cada um aponta para suas faixas
+// de CID (prefixos-raiz) — alinhado ao SISTEMAS de relevanciaCid. Linguagem do
+// médico ("Neurológico"), não "Capítulo IX".
 const SISTEMAS_MAPA = [
   { id: 'neuro',     label: 'Neurológico',       prefixos: ['G', 'I6'] },
   { id: 'vascular',  label: 'Vascular',          prefixos: ['I7'] },
@@ -27,106 +27,77 @@ const SISTEMAS_MAPA = [
   { id: 'perinatal', label: 'Perinatal',         prefixos: ['P'] },
 ]
 
-function Chevron({ aberto }) {
-  return (
-    <svg className={cn('h-3.5 w-3.5 shrink-0 transition-transform', aberto && 'rotate-90')} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-    </svg>
-  )
-}
-
 function Spinner() {
   return (
-    <svg className="h-3.5 w-3.5 animate-spin text-muted-foreground" fill="none" viewBox="0 0 24 24">
+    <svg className="h-4 w-4 animate-spin text-muted-foreground" fill="none" viewBox="0 0 24 24">
       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
     </svg>
   )
 }
 
-// Nó folha ou ramo. coCid presente = é um CID navegável; tem_filhos = pode expandir.
-function NoCid({ co_cid, no_cid, tem_filhos, nivel }) {
-  const [aberto, setAberto] = useState(false)
-  const [filhos, setFilhos] = useState(null)
-  const [loading, setLoading] = useState(false)
-
-  async function toggle() {
-    if (!tem_filhos) return
-    if (aberto) { setAberto(false); return }
-    setAberto(true)
-    if (filhos === null) {
-      setLoading(true)
-      const { data } = await supabase.rpc('cids_mapa_filhos', { p_prefixo: co_cid })
-      setFilhos(data || [])
-      setLoading(false)
-    }
-  }
-
+// Uma coluna do Miller view. Recebe os itens e qual está selecionado.
+// Cada item: { co_cid?, label, no_cid?, tem_filhos?, leaf? }
+function Coluna({ titulo, itens, loading, selecionadoId, onSelect, vazioMsg }) {
   return (
-    <div>
-      <div className="flex items-center gap-2 py-1.5" style={{ paddingLeft: `${nivel * 1.25}rem` }}>
-        {tem_filhos ? (
-          <button onClick={toggle} className="flex items-center gap-2 text-left hover:text-foreground transition min-w-0">
-            <Chevron aberto={aberto} />
-            <span className="font-mono text-xs font-bold shrink-0 text-foreground">{co_cid}</span>
-            <span className="text-xs text-muted-foreground truncate">{no_cid}</span>
-          </button>
+    <div className="flex w-64 shrink-0 flex-col border-r border-border last:border-r-0">
+      <div className="border-b border-border bg-secondary/40 px-3 py-2">
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{titulo}</p>
+      </div>
+      <div className="flex-1 overflow-y-auto">
+        {loading ? (
+          <div className="flex items-center gap-2 px-3 py-3"><Spinner /></div>
+        ) : itens.length === 0 ? (
+          <p className="px-3 py-3 text-xs text-muted-foreground">{vazioMsg}</p>
         ) : (
-          <Link to={`/?q=${encodeURIComponent(co_cid)}&ctx=1`} className="flex items-center gap-2 text-left group min-w-0 ml-[1.375rem]">
-            <span className="font-mono text-xs font-bold shrink-0 text-foreground group-hover:text-primary transition">{co_cid}</span>
-            <span className="text-xs text-muted-foreground truncate group-hover:text-foreground transition">{no_cid}</span>
-            <span className="text-[10px] text-muted-foreground/40 group-hover:text-primary transition shrink-0">ver →</span>
-          </Link>
+          itens.map((it) => {
+            const ativo = it.id === selecionadoId
+            return (
+              <button
+                key={it.id}
+                onClick={() => onSelect(it)}
+                className={cn(
+                  'flex w-full items-center gap-2 px-3 py-2 text-left transition border-b border-border/40 last:border-b-0',
+                  ativo ? 'bg-primary/10' : 'hover:bg-secondary/60'
+                )}
+              >
+                {it.co_cid && (
+                  <span className={cn('font-mono text-xs font-bold shrink-0', ativo ? 'text-primary' : 'text-foreground')}>
+                    {it.co_cid}
+                  </span>
+                )}
+                <span className={cn('flex-1 text-xs leading-snug truncate', ativo ? 'text-foreground' : 'text-muted-foreground')}>
+                  {it.label}
+                </span>
+                {(it.tem_filhos || it.leaf) && (
+                  <svg className={cn('h-3 w-3 shrink-0', ativo ? 'text-primary' : 'text-muted-foreground/40')} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                )}
+              </button>
+            )
+          })
         )}
       </div>
-      {aberto && (
-        <div>
-          {loading && <div className="flex items-center gap-2 py-1.5" style={{ paddingLeft: `${(nivel + 1) * 1.25 + 1.375}rem` }}><Spinner /></div>}
-          {filhos?.map(f => (
-            <NoCid key={f.co_cid} {...f} nivel={nivel + 1} />
-          ))}
-        </div>
-      )}
     </div>
   )
 }
 
-function SistemaNo({ sistema }) {
-  const [aberto, setAberto] = useState(false)
-  const [categorias, setCategorias] = useState(null)
-  const [loading, setLoading] = useState(false)
-
-  async function toggle() {
-    if (aberto) { setAberto(false); return }
-    setAberto(true)
-    if (categorias === null) {
-      setLoading(true)
-      const { data } = await supabase.rpc('cids_mapa_categorias', { p_prefixos: sistema.prefixos })
-      setCategorias(data || [])
-      setLoading(false)
-    }
-  }
-
+// Painel final: quando se chega a uma folha (CID sem mais filhos), mostra o
+// atalho para a Regulação daquele CID.
+function PainelCid({ cid }) {
   return (
-    <div className="rounded-lg border border-border bg-card overflow-hidden">
-      <button
-        onClick={toggle}
-        className={cn('flex w-full items-center gap-2 px-3 py-2.5 text-left transition', aberto ? 'bg-secondary' : 'hover:bg-secondary/50')}
+    <div className="flex w-72 shrink-0 flex-col items-start gap-3 p-4">
+      <div>
+        <p className="font-mono text-base font-bold text-foreground">{cid.co_cid}</p>
+        <p className="mt-0.5 text-sm text-muted-foreground leading-snug">{cid.label}</p>
+      </div>
+      <Link
+        to={`/?q=${encodeURIComponent(cid.co_cid)}&ctx=1`}
+        className="rounded-lg border border-primary/40 bg-primary/10 px-3 py-1.5 text-xs font-medium text-foreground hover:bg-primary/20 transition"
       >
-        <Chevron aberto={aberto} />
-        <span className="text-sm font-medium text-foreground">{sistema.label}</span>
-      </button>
-      {aberto && (
-        <div className="border-t border-border px-2 py-1">
-          {loading && <div className="flex items-center gap-2 py-2 pl-4"><Spinner /><span className="text-xs text-muted-foreground">Carregando...</span></div>}
-          {categorias?.length === 0 && !loading && (
-            <p className="py-2 pl-4 text-xs text-muted-foreground">Nenhum CID com procedimento neste sistema.</p>
-          )}
-          {categorias?.map(c => (
-            <NoCid key={c.co_cid} {...c} nivel={0} />
-          ))}
-        </div>
-      )}
+        Ver regulação →
+      </Link>
     </div>
   )
 }
@@ -134,17 +105,87 @@ function SistemaNo({ sistema }) {
 export function MapaPage() {
   useEffect(() => { document.title = 'SIGTAPP — Mapa de diagnósticos' }, [])
 
+  // path = array de seleções, cada uma: { id, co_cid?, label, prefixos? }
+  const [path, setPath] = useState([])
+  // colunas[i] = { titulo, itens, loading } para o nível i (após cada seleção)
+  const [colunas, setColunas] = useState([])
+  const [folha, setFolha] = useState(null) // { co_cid, label } quando chega na ponta
+
+  // Coluna 0: sistemas (estática)
+  const colSistemas = {
+    titulo: 'Sistema',
+    itens: SISTEMAS_MAPA.map(s => ({ id: s.id, label: s.label, tem_filhos: true, prefixos: s.prefixos })),
+    loading: false,
+  }
+
+  async function selecionar(nivel, item) {
+    setFolha(null)
+    // trunca o caminho até este nível e adiciona a nova seleção
+    const novoPath = [...path.slice(0, nivel), item]
+    setPath(novoPath)
+    // remove colunas além deste nível
+    setColunas(prev => prev.slice(0, nivel))
+
+    // É folha? (sem filhos) → mostra painel de regulação
+    if (item.co_cid && !item.tem_filhos) {
+      setFolha({ co_cid: item.co_cid, label: item.label })
+      return
+    }
+
+    // carrega a próxima coluna
+    setColunas(prev => [...prev.slice(0, nivel), { titulo: '...', itens: [], loading: true }])
+    let data
+    if (nivel === 0) {
+      // selecionou um sistema → categorias
+      ;({ data } = await supabase.rpc('cids_mapa_categorias', { p_prefixos: item.prefixos }))
+    } else {
+      // selecionou categoria/subcategoria → filhos
+      ;({ data } = await supabase.rpc('cids_mapa_filhos', { p_prefixo: item.co_cid }))
+    }
+    const itens = (data || []).map(r => ({
+      id: r.co_cid, co_cid: r.co_cid, label: r.no_cid, tem_filhos: r.tem_filhos,
+    }))
+    const titulo = nivel === 0 ? 'Categoria' : 'Subcategoria'
+    setColunas(prev => {
+      const copy = prev.slice(0, nivel)
+      copy[nivel] = { titulo, itens, loading: false }
+      return copy
+    })
+  }
+
   return (
     <div className="min-h-screen bg-background">
-      <div className="mx-auto max-w-3xl px-4 py-8">
-        <div className="mb-6">
+      <div className="mx-auto max-w-7xl px-4 py-6">
+        <div className="mb-4">
           <h1 className="text-lg font-semibold text-foreground">Mapa de diagnósticos</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Navegue por sistema para encontrar o CID — só os que têm procedimento de regulação. Clique num código para ver a regulação.
+            Navegue por sistema até o CID. Só os que têm procedimento de regulação. Clique num código sem seta para ver a regulação.
           </p>
         </div>
-        <div className="space-y-2">
-          {SISTEMAS_MAPA.map(s => <SistemaNo key={s.id} sistema={s} />)}
+
+        <div className="overflow-hidden rounded-xl border border-border bg-card">
+          <div className="flex overflow-x-auto" style={{ minHeight: '28rem', maxHeight: '70vh' }}>
+            <Coluna
+              titulo={colSistemas.titulo}
+              itens={colSistemas.itens}
+              loading={false}
+              selecionadoId={path[0]?.id}
+              onSelect={(it) => selecionar(0, it)}
+              vazioMsg="—"
+            />
+            {colunas.map((col, i) => (
+              <Coluna
+                key={i}
+                titulo={col.titulo}
+                itens={col.itens}
+                loading={col.loading}
+                selecionadoId={path[i + 1]?.id}
+                onSelect={(it) => selecionar(i + 1, it)}
+                vazioMsg="Nenhum CID com procedimento."
+              />
+            ))}
+            {folha && <PainelCid cid={folha} />}
+          </div>
         </div>
       </div>
     </div>
