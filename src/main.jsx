@@ -2,13 +2,22 @@ import { StrictMode } from 'react'
 
 // Desregistra qualquer service worker antigo e apaga seus caches — o app não
 // usa mais PWA, e SW remanescente servia bundle JS desatualizado após deploy.
+// Se de fato havia SW/cache, recarrega UMA vez para pegar o bundle novo já nesta
+// visita (sessionStorage evita loop). A defesa principal é o /sw.js suicida; isto
+// é a rede de segurança para quem chega sem o SW interceptando o próprio main.jsx.
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.getRegistrations().then(regs => {
-    regs.forEach(r => r.unregister())
+  navigator.serviceWorker.getRegistrations().then(async (regs) => {
+    if (regs.length === 0) return
+    await Promise.all(regs.map((r) => r.unregister()))
+    if ('caches' in window) {
+      const keys = await caches.keys()
+      await Promise.all(keys.map((k) => caches.delete(k)))
+    }
+    if (!sessionStorage.getItem('sw-purged')) {
+      sessionStorage.setItem('sw-purged', '1')
+      location.reload()
+    }
   })
-}
-if ('caches' in window) {
-  caches.keys().then(keys => keys.forEach(k => caches.delete(k)))
 }
 
 import { createRoot } from 'react-dom/client'
