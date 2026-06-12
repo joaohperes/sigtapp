@@ -162,6 +162,7 @@ export function AnamnesePage() {
   const [analyzed, setAnalyzed] = useState(() => getSession().analyzed || false)
   const [sheetProc, setSheetProc] = useState(null)
   const [helpOpen, setHelpOpen] = useState(false)
+  const [inputAberto, setInputAberto] = useState(true) // barra de anamnese recolhível após análise
   const [cidProcs, setCidProcs] = useState(() => {  // { [co_cid]: { loading, data, open } }
     const saved = getSession().cidProcsData || {}
     return Object.fromEntries(Object.entries(saved).map(([k, v]) => [k, { loading: false, data: v, open: false }]))
@@ -401,6 +402,7 @@ export function AnamnesePage() {
       setAih(aihTexto)
       setCidProcs(newCidProcs)
       setAnalyzed(true)
+      setInputAberto(false) // recolhe a anamnese para dar espaço aos resultados
     } catch (err) {
       setError(err.message)
     } finally {
@@ -767,17 +769,37 @@ export function AnamnesePage() {
 
       <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
         {/*
-          Mobile  (< lg):  1 coluna
-          Tablet  (lg):    2 colunas — anamnese | CIDs+Procs
-          Desktop (xl+):   3 colunas — anamnese | CIDs | Procs
+          Sem resultados: input grande centralizado (landing).
+          Com resultados: 2 colunas — [CIDs+procs] | [AIH sticky]; input vira
+          barra recolhível no topo (full width).
         */}
-        <div className="grid gap-6 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
+        {/* Barra de anamnese recolhível — só quando há resultados e está fechada */}
+        {showResults && !inputAberto && (
+          <button
+            onClick={() => setInputAberto(true)}
+            className="mb-6 flex w-full items-center gap-2 rounded-xl border border-border bg-card px-4 py-3 text-left shadow-sm transition hover:border-foreground/20"
+          >
+            <svg className="h-4 w-4 shrink-0 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <span className="min-w-0 flex-1 truncate text-sm text-muted-foreground">
+              <span className="font-medium text-foreground">Anamnese analisada</span>
+              <span className="ml-2 text-muted-foreground/70">{anamnese.slice(0, 80)}…</span>
+            </span>
+            <span className="shrink-0 text-xs font-medium text-muted-foreground">editar ▾</span>
+          </button>
+        )}
 
-          {/* ── Col 1: Input + AIH ──
-              Quando !showResults: expande para ocupar todas as colunas e se centraliza */}
-          <div className={`space-y-4 ${!showResults ? 'lg:col-span-2 xl:col-span-3' : ''}`}>
+        <div className={cn('grid gap-6 grid-cols-1', showResults && 'lg:grid-cols-3')}>
 
-            <div className={!showResults ? 'mx-auto max-w-2xl' : ''}>
+          {/* ── Coluna esquerda (2/3): input expandido + CIDs + procedimentos ── */}
+          <div className={cn('space-y-6', showResults && 'lg:col-span-2')}>
+
+            {/* Card de input — escondido quando recolhido */}
+            <div className={cn(
+              !showResults ? 'mx-auto max-w-2xl' : '',
+              showResults && !inputAberto && 'hidden'
+            )}>
               <div className={cn(
                 "rounded-xl border p-6 shadow-sm",
                 "border-border bg-card"
@@ -807,16 +829,13 @@ export function AnamnesePage() {
                   )}
                 />
 
-                <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-                  <p className="text-xs text-muted-foreground/70">
-                    Sugestões geradas por IA — confirme os códigos na tabela oficial antes de usar
-                  </p>
+                <div className="mt-4">
                   <button
                     onClick={handleAnalyze}
                     disabled={loading || anamnese.trim().length < 20}
                     className={cn(
-                      "flex w-full items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:justify-start",
-                      modoUE ? "bg-red-700 hover:bg-red-800" : "bg-foreground text-background hover:bg-foreground/90"
+                      "flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold shadow-sm transition disabled:cursor-not-allowed disabled:opacity-50",
+                      modoUE ? "bg-red-700 text-white hover:bg-red-800" : "bg-foreground text-background hover:bg-foreground/90"
                     )}
                   >
                     {loading ? (
@@ -837,6 +856,9 @@ export function AnamnesePage() {
                       </>
                     )}
                   </button>
+                  <p className="mt-2.5 text-center text-[11px] text-muted-foreground/60">
+                    Sugestões geradas por IA — confirme os códigos na tabela oficial antes de usar
+                  </p>
                 </div>
 
                 {error && (
@@ -891,14 +913,19 @@ export function AnamnesePage() {
                       key={ex.titulo}
                       onClick={() => setAnamnese(ex.texto)}
                       className={cn(
-                        'rounded-xl border p-3 text-left transition',
+                        'group flex items-start justify-between gap-2 rounded-xl border p-3 text-left transition',
                         modoUE
-                            ? 'border-border bg-card hover:border-red-500/40'
-                            : 'border-border bg-card hover:border-foreground/20'
+                            ? 'border-border bg-card hover:border-red-500/40 hover:bg-red-500/5'
+                            : 'border-border bg-card hover:border-primary/40 hover:bg-primary/5'
                       )}
                     >
-                      <p className={cn("text-xs font-semibold", "text-foreground")}>{ex.titulo}</p>
-                      <p className={cn("mt-0.5 text-[11px] leading-snug", "text-muted-foreground/70")}>{ex.subtitulo}</p>
+                      <div className="min-w-0">
+                        <p className="text-xs font-semibold text-foreground">{ex.titulo}</p>
+                        <p className="mt-0.5 text-[11px] leading-snug text-muted-foreground/70">{ex.subtitulo}</p>
+                      </div>
+                      <svg className="h-3.5 w-3.5 shrink-0 text-muted-foreground/30 transition group-hover:text-primary group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
                     </button>
                   ))}
                 </div>
@@ -906,10 +933,20 @@ export function AnamnesePage() {
             )}
             </div>
 
-            {/* AIH — só aparece após análise */}
-            {analyzed && aih && (
-              <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
-                <div className="mb-3 flex items-center justify-between">
+            {/* CIDs + procedimentos — coluna esquerda, juntos */}
+            {showResults && (
+              <>
+                {loading ? cidsSkeleton : cidsBlock}
+                {loading ? procsSkeleton : procedimentosBlock}
+              </>
+            )}
+          </div>
+
+          {/* ── Coluna direita (1/3): AIH sticky ── */}
+          {showResults && analyzed && aih && (
+            <div className="lg:col-span-1">
+              <div className="lg:sticky lg:top-6 rounded-xl border border-border bg-card p-5 shadow-sm">
+                <div className="mb-3 flex items-center justify-between gap-2">
                   <div>
                     <h2 className="text-sm font-semibold text-foreground/90">Texto para AIH</h2>
                     <p className="text-[11px] text-muted-foreground/70 mt-0.5">{aih.length} caracteres</p>
@@ -928,46 +965,28 @@ export function AnamnesePage() {
                     <button
                       onClick={handleCopyAih}
                       className={cn(
-                        "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-white transition",
-                        modoUE ? "bg-red-700 hover:bg-red-800" : "bg-foreground text-background hover:bg-foreground/90"
+                        "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition",
+                        modoUE ? "bg-red-700 text-white hover:bg-red-800" : "bg-foreground text-background hover:bg-foreground/90"
                       )}
                     >
                       <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                           d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                       </svg>
-                      Copiar texto
+                      Copiar
                     </button>
                   </div>
                 </div>
                 <textarea
                   value={aih}
                   onChange={e => setAih(e.target.value)}
-                  rows={10}
+                  rows={16}
                   className={cn(
                     "w-full resize-y rounded-lg border border-border bg-background p-3 text-sm leading-relaxed text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2",
                     modoUE ? "focus:border-red-400 focus:ring-red-400/20" : "focus:border-foreground/30 focus:ring-foreground/10"
                   )}
                 />
               </div>
-            )}
-          </div>
-
-          {/* ── Col 2 (xl+): CIDs — oculta em mobile/tablet ── */}
-          {showResults && (
-            <div className="hidden xl:block">
-              {loading ? cidsSkeleton : cidsBlock}
-            </div>
-          )}
-
-          {/* ── Col 3 (xl+) / Col 2 (lg): CIDs+Procs em mobile/tablet; só Procs em desktop ── */}
-          {showResults && (
-            <div className="space-y-6">
-              {/* CIDs visíveis apenas em mobile/tablet (em desktop ficam na col 2) */}
-              <div className="xl:hidden">
-                {loading ? cidsSkeleton : cidsBlock}
-              </div>
-              {loading ? procsSkeleton : procedimentosBlock}
             </div>
           )}
 
