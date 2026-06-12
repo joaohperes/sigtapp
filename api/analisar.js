@@ -1,4 +1,14 @@
 import Groq from 'groq-sdk'
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(
+  process.env.VITE_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_KEY || process.env.VITE_SUPABASE_ANON_KEY
+)
+
+// Termos-ruído: o modelo às vezes devolve medicamentos/condutas como "termo de
+// busca", que não casam nenhum procedimento SIGTAP e só geram busca vazia.
+const TERMO_RUIDO = /^(ceftriaxona|noradrenalina|adrenalina|dobutamina|vancomicina|meropenem|piperacilina|tazobactam|expans[ãa]o vol[êe]mica|hidrata[çc][ãa]o|antibioticoterapia|antibi[óo]tico|soro|volume|cristaloide|troponina|hemograma|gasometria|lactato|d[íi]mero|inr\b|coagulograma)/i
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -159,12 +169,24 @@ ${anamnese}`
     // Deduplica por grupo de 3 chars: se o modelo retornar K920 + K921, mantém apenas o primeiro.
     // Isso evita dois cards idênticos na UI quando o paciente tem hematêmese E melena (mesmo grupo K92).
     const seenPrefixes = new Set()
-    const cids = cidsGuardados.filter(c => {
+    const cidsDedup = cidsGuardados.filter(c => {
       const prefix = c.co_cid.slice(0, 3)
       if (seenPrefixes.has(prefix)) return false
       seenPrefixes.add(prefix)
       return true
     })
+
+    // Corrige códigos de 3 chars → subcategoria de 4 chars (o modelo desobedece a
+    // regra de formato com frequência: retorna J18 em vez de J189). Resolve via
+    // banco (XXX9 ou a subcategoria correta), pois "completar com 9" falha em ~19%.
+    let cids = cidsDedup
+    if (cidsDedup.length > 0) {
+      const { data: resolvidos } = await supabase.rpc('resolver_cid_4char', {
+        p_codigos: cidsDedup.map(c => c.co_cid),
+      })
+      const mapa = Object.fromEntries((resolvidos || []).map(r => [r.entrada, r.resolvido]))
+      cids = cidsDedup.map(c => ({ ...c, co_cid: mapa[c.co_cid] || c.co_cid }))
+    }
 
     // Normaliza separadores de parágrafo — o modelo às vezes usa ". . " (ponto espaço ponto espaço)
     // em vez de "\n\n", especialmente em respostas compactas.
@@ -174,7 +196,11 @@ ${anamnese}`
       .replace(/\.\s+\.\s+(?=[A-ZÁÉÍÓÚÃÕÂÊÎ])/g, '.\n\n')        // ". . P" → ".\n\nP"
       .trim()
 
-    const result = { cids, termos: raw.termos || raw.terms || [], aih }
+    // Filtra termos-ruído (medicamentos/condutas/exames laboratoriais que o
+    // modelo às vezes devolve como termo de busca — não casam procedimento SIGTAP).
+    const termos = (raw.termos || raw.terms || []).filter(t => t && !TERMO_RUIDO.test(t.trim()))
+
+    const result = { cids, termos, aih }
     return res.status(200).json(result)
   } catch (err) {
     console.error('Erro ao analisar anamnese:', err)
