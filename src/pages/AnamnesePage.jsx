@@ -795,41 +795,41 @@ export function AnamnesePage() {
           {/* ── Coluna esquerda (2/3): input expandido + CIDs + procedimentos ── */}
           <div className={cn('space-y-6', showResults && 'lg:col-span-2')}>
 
-            {/* Card de input — escondido quando recolhido */}
+            {/* Input — estilo busca do Diagnóstico: textarea leve, sem card pesado */}
             <div className={cn(
-              !showResults ? 'mx-auto max-w-2xl' : '',
+              !showResults ? 'mx-auto max-w-2xl pt-2' : '',
               showResults && !inputAberto && 'hidden'
             )}>
-              <div className={cn(
-                "rounded-xl border p-6 shadow-sm",
-                "border-border bg-card"
-              )}>
-                <div className="mb-3 flex items-center justify-between">
-                  <label className={cn("text-sm font-semibold", "text-foreground")}>
-                    Texto clínico / Anamnese
-                  </label>
+                {!showResults && (
+                  <div className="mb-5 text-center">
+                    <h2 className="text-lg font-semibold text-foreground">Comece pela anamnese</h2>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Cole o texto clínico e a IA sugere CIDs, procedimentos SIGTAP e o laudo de AIH
+                    </p>
+                  </div>
+                )}
+                <div className="relative">
+                  <textarea
+                    value={anamnese}
+                    onChange={e => setAnamnese(e.target.value)}
+                    placeholder="Descreva o quadro clínico: queixas, história, exame físico, sinais vitais, exames, hipóteses..."
+                    rows={8}
+                    className={cn(
+                      "w-full resize-y rounded-xl border border-border bg-card p-4 text-sm leading-relaxed text-foreground placeholder:text-muted-foreground/50 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/30 transition",
+                      modoUE && "focus:border-red-400 focus:ring-red-400/20"
+                    )}
+                  />
                   {!anamnese && (
                     <button
                       onClick={() => setAnamnese(EXEMPLO)}
-                      className={cn("text-xs hover:underline", modoUE ? "text-red-500" : "text-muted-foreground")}
+                      className="absolute right-3 top-3 text-[11px] text-muted-foreground/60 hover:text-foreground transition"
                     >
                       Usar exemplo
                     </button>
                   )}
                 </div>
 
-                <textarea
-                  value={anamnese}
-                  onChange={e => setAnamnese(e.target.value)}
-                  placeholder="Descreva o quadro clínico do paciente: queixas, história, exame físico, hipóteses diagnósticas..."
-                  rows={8}
-                  className={cn(
-                    "w-full resize-y rounded-lg border border-border bg-background p-3 text-sm leading-relaxed text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:border-foreground/30 focus:ring-foreground/10",
-                    modoUE && "focus:border-red-400 focus:ring-red-400/20"
-                  )}
-                />
-
-                <div className="mt-4">
+                <div className="mt-3">
                   <button
                     onClick={handleAnalyze}
                     disabled={loading || anamnese.trim().length < 20}
@@ -862,11 +862,10 @@ export function AnamnesePage() {
                 </div>
 
                 {error && (
-                  <div className="mt-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                  <div className="mt-3 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-500">
                     {error}
                   </div>
                 )}
-              </div>
             {/* Análises salvas — visíveis apenas antes da análise */}
             {!showResults && savedAnalyses.length > 0 && (
               <div className="mt-4">
