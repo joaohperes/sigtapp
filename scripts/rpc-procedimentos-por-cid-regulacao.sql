@@ -1,21 +1,19 @@
 -- RPC procedimentos_por_cid_regulacao — lista de procedimentos para regulação
--- de internação, dado um CID. Aplica blocklist de prefixos que NÃO são
--- regulação de internação aguda (reabilitação/seguimento ambulatorial).
+-- de internação, dado um CID.
 --
--- 2026-06-11: removido '030410' do blocklist. Esse prefixo contém 2
--- procedimentos de SUPORTE clínico oncológico:
---   0304100013 TRATAMENTO DE INTERCORRÊNCIAS CLÍNICAS DE PACIENTE ONCOLÓGICO
---   0304100021 TRATAMENTO CLÍNICO DE PACIENTE ONCOLÓGICO
--- Estavam bloqueados por engano (colados junto com os de reabilitação 030319/
--- 030111, que permanecem). Era a causa de o código de intercorrência oncológica
--- não aparecer na Regulação — o caso real do osteossarcoma (C402).
+-- Blocklist de prefixos ambulatoriais/seguimento (não são internação aguda):
+--   030104 atenção primária, 030112 acompanhamento de crônicas, 030109 geriatria,
+--   030319/030111 reabilitação, 0302 fisio inteira, etc. + códigos pontuais em
+--   prefixos mistos (glaucoma fundoscopia, diálise domiciliar/treinamento...).
+-- Suporte oncológico (030410) só em CID oncológico (cap. C / D00-D48).
 --
--- 2026-06-12: esses 2 códigos são vinculados pela tabela SIGTAP a ~540 CIDs,
--- mas só ~507 são oncológicos; os ~33 restantes (pneumonia, ITU, sepse, anemia,
--- herpes zoster...) faziam "paciente oncológico" poluir a lista de CID não-onco.
--- Agora o prefixo 030410 só aparece em CID oncológico (cap. C ou D00-D48).
+-- Granularidade (2026-06-12): quando o CID buscado é CATEGORIA de 3 chars, casa
+-- o PREFIXO (próprio + subcategorias), não só o exato. Sem isso, ~1078 categorias
+-- davam "nenhum procedimento" (os vínculos estão nas subcategorias: I63→I630-I639
+-- com trombólise/trombectomia; N30→N300-N309 com proc urológicos). Subcategorias
+-- são variações da mesma doença → agregado coerente. CID de 4 chars: match exato.
 --
--- Aplicada no remoto via MCP. Re-rodar este arquivo é idempotente.
+-- Aplicada no remoto via MCP. Idempotente.
 
 CREATE OR REPLACE FUNCTION public.procedimentos_por_cid_regulacao(p_co_cid text)
  RETURNS TABLE(co_procedimento text, no_procedimento text, grupo text, vl_sh numeric, vl_sa numeric, vl_sp numeric, st_principal character)
@@ -25,17 +23,21 @@ DECLARE
   v_cid TEXT := TRIM(UPPER(p_co_cid));
   v_tem_especificos_psiq BOOLEAN := FALSE;
   v_eh_oncologico BOOLEAN;
+  v_expandir BOOLEAN;
 BEGIN
-  -- Oncológico = cap. C, ou D00-D48 (neoplasias in situ/benignas/comportamento incerto)
   v_eh_oncologico := (LEFT(v_cid,1) = 'C')
     OR (LEFT(v_cid,1) = 'D' AND v_cid ~ '^D[0-9][0-9]'
         AND CAST(SUBSTRING(v_cid,2,2) AS int) BETWEEN 0 AND 48);
+
+  -- Categoria de 3 chars: casa próprio + subcategorias (prefixo).
+  v_expandir := (v_cid ~ '^[A-Z][0-9][0-9]$');
 
   IF LEFT(v_cid, 1) = 'F' THEN
     SELECT EXISTS (
       SELECT 1 FROM procedimento_cids pc
       JOIN procedimentos p ON p.co_procedimento = pc.co_procedimento
-      WHERE TRIM(UPPER(pc.co_cid)) = v_cid
+      WHERE (CASE WHEN v_expandir THEN TRIM(UPPER(pc.co_cid)) LIKE v_cid || '%'
+                  ELSE TRIM(UPPER(pc.co_cid)) = v_cid END)
         AND p.co_procedimento IN ('0303170131','0303170140','0303170158','0303170166')
     ) INTO v_tem_especificos_psiq;
   END IF;
@@ -51,30 +53,20 @@ BEGIN
     pc.st_principal
   FROM procedimento_cids pc
   JOIN procedimentos p ON p.co_procedimento = pc.co_procedimento
-  WHERE TRIM(UPPER(pc.co_cid)) = v_cid
+  WHERE (CASE WHEN v_expandir THEN TRIM(UPPER(pc.co_cid)) LIKE v_cid || '%'
+              ELSE TRIM(UPPER(pc.co_cid)) = v_cid END)
     AND LEFT(p.co_procedimento, 2) IN ('03', '04')
-    -- Fisioterapia (0302) inteira: reabilitacao ambulatorial.
     AND LEFT(p.co_procedimento, 4) != '0302'
     AND LEFT(p.co_procedimento, 6) NOT IN (
       '030107','030105','030101','030113',
-      -- 030104 atencao primaria (DIU, terapia, TDO), 030112 acompanhamento de
-      -- doencas cronicas, 030109 geriatria ambulatorial: nao sao internacao.
       '030104','030112','030109',
-      -- Reabilitacao/seguimento ambulatorial: nao sao regulacao de internacao aguda.
       '030319','030111'
     )
     AND LEFT(p.co_procedimento, 6) != '030108'
-    -- Codigos ambulatoriais/logisticos em prefixos MISTOS (preserva o resto do prefixo).
     AND p.co_procedimento NOT IN (
-      '0303070137', -- intercorrencia pos-cirurgia bariatrica
-      '0301160015', -- reabilitacao falencia intestinal AMBULATORIAL (mantem hospitalar)
-      '0303050012', -- acompanhamento de glaucoma por fundoscopia/tonometria
-      '0303050020', -- exercicios ortopticos
-      '0305010166', -- manutencao/acompanhamento DOMICILIAR de DPA/DPAC
-      '0305010182', -- treinamento de paciente em dialise peritoneal
-      '0305010212'  -- identificacao de paciente dialitico em transito
+      '0303070137','0301160015','0303050012','0303050020',
+      '0305010166','0305010182','0305010212'
     )
-    -- Suporte oncológico (030410): só em CID oncológico, senão polui pneumonia/ITU/etc.
     AND NOT (
       LEFT(p.co_procedimento, 6) = '030410'
       AND NOT v_eh_oncologico
