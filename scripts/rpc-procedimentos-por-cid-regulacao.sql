@@ -2,17 +2,20 @@
 -- de internação, dado um CID. Aplica blocklist de prefixos que NÃO são
 -- regulação de internação aguda (reabilitação/seguimento ambulatorial).
 --
--- 2026-06-11: removido '030410' do blocklist. Esse prefixo continha apenas 2
--- procedimentos, ambos SUPORTE clínico oncológico de uso amplo (~540 CIDs):
+-- 2026-06-11: removido '030410' do blocklist. Esse prefixo contém 2
+-- procedimentos de SUPORTE clínico oncológico:
 --   0304100013 TRATAMENTO DE INTERCORRÊNCIAS CLÍNICAS DE PACIENTE ONCOLÓGICO
 --   0304100021 TRATAMENTO CLÍNICO DE PACIENTE ONCOLÓGICO
 -- Estavam bloqueados por engano (colados junto com os de reabilitação 030319/
 -- 030111, que permanecem). Era a causa de o código de intercorrência oncológica
--- não aparecer na Regulação — o caso real do osteossarcoma (C402). Validado:
--- remover só 030410 traz de volta exatamente esses 2 códigos e nada mais.
+-- não aparecer na Regulação — o caso real do osteossarcoma (C402).
 --
--- Aplicada no remoto via MCP (migration regulacao_libera_030410_suporte_oncologico).
--- Re-rodar este arquivo é idempotente.
+-- 2026-06-12: esses 2 códigos são vinculados pela tabela SIGTAP a ~540 CIDs,
+-- mas só ~507 são oncológicos; os ~33 restantes (pneumonia, ITU, sepse, anemia,
+-- herpes zoster...) faziam "paciente oncológico" poluir a lista de CID não-onco.
+-- Agora o prefixo 030410 só aparece em CID oncológico (cap. C ou D00-D48).
+--
+-- Aplicada no remoto via MCP. Re-rodar este arquivo é idempotente.
 
 CREATE OR REPLACE FUNCTION public.procedimentos_por_cid_regulacao(p_co_cid text)
  RETURNS TABLE(co_procedimento text, no_procedimento text, grupo text, vl_sh numeric, vl_sa numeric, vl_sp numeric, st_principal character)
@@ -21,7 +24,13 @@ AS $function$
 DECLARE
   v_cid TEXT := TRIM(UPPER(p_co_cid));
   v_tem_especificos_psiq BOOLEAN := FALSE;
+  v_eh_oncologico BOOLEAN;
 BEGIN
+  -- Oncológico = cap. C, ou D00-D48 (neoplasias in situ/benignas/comportamento incerto)
+  v_eh_oncologico := (LEFT(v_cid,1) = 'C')
+    OR (LEFT(v_cid,1) = 'D' AND v_cid ~ '^D[0-9][0-9]'
+        AND CAST(SUBSTRING(v_cid,2,2) AS int) BETWEEN 0 AND 48);
+
   IF LEFT(v_cid, 1) = 'F' THEN
     SELECT EXISTS (
       SELECT 1 FROM procedimento_cids pc
@@ -49,15 +58,16 @@ BEGIN
     AND LEFT(p.co_procedimento, 6) NOT IN (
       '030107','030105','030101','030113',
       -- Reabilitacao/seguimento ambulatorial: nao sao regulacao de internacao aguda.
-      -- 030319 "Tratamento em reabilitacao" vazava p/ encefalopatia/neuro (G934 etc).
-      -- 030111 "Acompanhamento de queimado" e seguimento e gera glosa em internacao.
       '030319','030111'
-      -- NOTA: '030410' foi REMOVIDO deste blocklist. Continha apenas suporte
-      -- clinico oncologico (0304100013 / 0304100021), bloqueado por engano.
     )
     AND LEFT(p.co_procedimento, 6) != '030108'
     AND p.co_procedimento NOT IN (
       '0303070137'  -- intercorrencia pos-cirurgia bariatrica
+    )
+    -- Suporte oncológico (030410): só em CID oncológico, senão polui pneumonia/ITU/etc.
+    AND NOT (
+      LEFT(p.co_procedimento, 6) = '030410'
+      AND NOT v_eh_oncologico
     )
     AND NOT (
       v_tem_especificos_psiq = TRUE
