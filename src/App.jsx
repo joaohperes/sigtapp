@@ -9,6 +9,7 @@ import { AnamnesePage } from './pages/AnamnesePage'
 import { FavoritosPage } from './pages/FavoritosPage'
 import { CalculadoraPage } from './pages/CalculadoraPage'
 import { HroPage } from './pages/HroPage'
+import { MapaPage } from './pages/MapaPage'
 import { AppNav } from './components/AppNav'
 import { CommandMenu } from './components/CommandMenu'
 import { TooltipProvider } from '@/components/ui/tooltip'
@@ -50,6 +51,7 @@ function AppShell() {
           <Route path="/grupo/:co" element={<GroupPage />} />
           <Route path="/procedimento/:codigo" element={<ProcedureDetail />} />
           <Route path="/cid" element={<CidSearch />} />
+          <Route path="/mapa" element={<MapaPage />} />
           <Route path="/anamnese" element={<AnamnesePage />} />
           <Route path="/favoritos" element={<FavoritosPage />} />
           <Route path="/calculadora" element={<CalculadoraPage />} />
