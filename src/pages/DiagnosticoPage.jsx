@@ -44,32 +44,23 @@ function CidRow({ cid, dark, expandirAuto }) {
 
   return (
     <div className="border-b border-border last:border-0 px-4 py-3.5">
-      <div className="flex items-start gap-3 mb-2">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-baseline gap-2.5 flex-wrap">
-            <span className="font-mono text-sm font-bold shrink-0 text-foreground">
-              {cid.co_cid.trim()}
-            </span>
-            <span className="text-sm text-muted-foreground leading-snug">
-              {cid.no_cid?.trim()}
-            </span>
-          </div>
-          {sexo && (
-            <span className="mt-1 inline-block rounded-full bg-secondary px-2 py-0.5 text-xs text-muted-foreground">
-              {sexo}
-            </span>
-          )}
+      <div className="mb-2">
+        <div className="flex items-baseline gap-2.5 flex-wrap">
+          <span className="font-mono text-sm font-bold shrink-0 text-foreground">
+            {cid.co_cid.trim()}
+          </span>
+          <span className="text-sm text-muted-foreground leading-snug">
+            {cid.no_cid?.trim()}
+          </span>
         </div>
-        {/* Link discreto — faturamento é secundário; o valor (regulação) abre inline abaixo */}
-        <div className="shrink-0">
-          <Link
-            to={`/procedimentos?q=${encodeURIComponent(cid.co_cid.trim())}&sc=1`}
-            className="text-[11px] text-muted-foreground/50 hover:text-muted-foreground transition whitespace-nowrap"
-          >
-            procedimentos →
-          </Link>
-        </div>
+        {sexo && (
+          <span className="mt-1 inline-block rounded-full bg-secondary px-2 py-0.5 text-xs text-muted-foreground">
+            {sexo}
+          </span>
+        )}
       </div>
+      {/* Gesto único: o botão dentro do ContextoClinico abre a regulação inline.
+          O link p/ a página de faturamento cheia vive lá dentro, quando aberto. */}
       <ContextoClinico cid={cid} collapsible={!expandirAuto} />
     </div>
   )

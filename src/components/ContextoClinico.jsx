@@ -122,13 +122,11 @@ function ProcList({ procs, dark, labelClinicos = 'Clínicos — use para regula�
   return (
     <div className="space-y-1.5">
       {suporte.length > 0 && (
-        <div className="rounded-lg border border-sky-500/25 bg-sky-500/5 p-2.5 space-y-1.5">
-          <div className="flex items-baseline gap-2">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-sky-500">
-              Internação de suporte / observação
-            </p>
-          </div>
-          <p className="text-[11px] text-muted-foreground/80 leading-snug -mt-0.5">
+        <div className="space-y-1.5">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-sky-600 dark:text-sky-400">
+            Internação de suporte / observação
+          </p>
+          <p className="text-[11px] text-muted-foreground/70 leading-snug -mt-0.5">
             Para internar sem ser para tratar a doença de base — intercorrência, suporte clínico ou observação.
           </p>
           {suporte.map(p => <ProcReg key={p.co_procedimento} p={p} dark={dark} />)}
@@ -145,7 +143,7 @@ function ProcList({ procs, dark, labelClinicos = 'Clínicos — use para regula�
       {!soCirurgicos && (
         <>
           {clinicos.length > 0 && (
-            <div className="space-y-1.5">
+            <div className={cn('space-y-1.5', suporte.length > 0 && 'pt-2 border-t border-border/40')}>
               <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
                 {labelClinicos}
               </p>
@@ -184,13 +182,23 @@ function ProcList({ procs, dark, labelClinicos = 'Clínicos — use para regula�
   )
 }
 
-function ProcRegList({ procs, dark }) {
+function ProcRegList({ procs, dark, coCid }) {
   return (
     <div className="space-y-2">
       <ProcList procs={procs} dark={dark} />
-      <p className="text-[11px] text-muted-foreground/60 pt-1">
-        Dados da tabela SIGTAP · clique para ver detalhes do procedimento
-      </p>
+      <div className="flex items-center justify-between gap-2 pt-1">
+        <p className="text-[11px] text-muted-foreground/60">
+          Dados da tabela SIGTAP · clique para ver detalhes do procedimento
+        </p>
+        {coCid && (
+          <Link
+            to={`/procedimentos?q=${encodeURIComponent(coCid)}&sc=1`}
+            className="text-[11px] text-muted-foreground/60 hover:text-foreground transition whitespace-nowrap"
+          >
+            abrir página completa →
+          </Link>
+        )}
+      </div>
     </div>
   )
 }
@@ -419,18 +427,18 @@ export function ContextoClinico({ cid, collapsible = false }) {
       {collapsible && (
         <button
           onClick={toggle}
-          title="Ver procedimentos SIGTAP por contexto clínico e regulação"
+          title="Ver procedimentos SIGTAP e regulação para este CID"
           className={cn(
-            'flex items-center gap-1 rounded-lg border px-2.5 py-1 text-xs font-medium transition whitespace-nowrap',
+            'flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition whitespace-nowrap',
             aberto
-              ? 'border-foreground/30 bg-foreground/5 text-foreground'
-              : 'border-border text-muted-foreground hover:border-foreground/20 hover:text-foreground'
+              ? 'border-primary/40 bg-primary/10 text-foreground'
+              : 'border-border text-foreground hover:border-primary/40 hover:bg-primary/5'
           )}
         >
-          <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+          <svg className={cn('h-3.5 w-3.5 transition-transform', aberto && 'rotate-90')} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
-          Contexto
+          {aberto ? 'Ocultar procedimentos' : 'Ver procedimentos e regulação'}
         </button>
       )}
       {aberto && <div className={cn('rounded-xl border overflow-hidden mt-2', 'border-border bg-card')}>
@@ -477,7 +485,7 @@ export function ContextoClinico({ cid, collapsible = false }) {
             <p className="text-xs text-muted-foreground">Nenhum procedimento grupo 03/04 vinculado a este CID na tabela SIGTAP.</p>
           )}
           {procsReg && procsReg.length > 0 && (
-            <ProcRegList procs={procsReg} dark={dark} />
+            <ProcRegList procs={procsReg} dark={dark} coCid={cid.co_cid?.trim()} />
           )}
 
           {correlatos === null && !loadingReg && (
