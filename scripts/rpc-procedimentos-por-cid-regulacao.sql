@@ -57,15 +57,22 @@ BEGIN
     AND LEFT(p.co_procedimento, 4) != '0302'
     AND LEFT(p.co_procedimento, 6) NOT IN (
       '030107','030105','030101','030113',
-      -- 030109: atencao ambulatorial ao idoso (geriatria, avaliacao da pessoa
-      -- idosa) — nao e regulacao de internacao. Poluia AVC/HAS/etc.
-      '030109',
+      -- 030104 atencao primaria (DIU, terapia, TDO), 030112 acompanhamento de
+      -- doencas cronicas, 030109 geriatria ambulatorial: nao sao internacao.
+      '030104','030112','030109',
       -- Reabilitacao/seguimento ambulatorial: nao sao regulacao de internacao aguda.
       '030319','030111'
     )
     AND LEFT(p.co_procedimento, 6) != '030108'
+    -- Codigos ambulatoriais/logisticos em prefixos MISTOS (preserva o resto do prefixo).
     AND p.co_procedimento NOT IN (
-      '0303070137'  -- intercorrencia pos-cirurgia bariatrica
+      '0303070137', -- intercorrencia pos-cirurgia bariatrica
+      '0301160015', -- reabilitacao falencia intestinal AMBULATORIAL (mantem hospitalar)
+      '0303050012', -- acompanhamento de glaucoma por fundoscopia/tonometria
+      '0303050020', -- exercicios ortopticos
+      '0305010166', -- manutencao/acompanhamento DOMICILIAR de DPA/DPAC
+      '0305010182', -- treinamento de paciente em dialise peritoneal
+      '0305010212'  -- identificacao de paciente dialitico em transito
     )
     -- Suporte oncológico (030410): só em CID oncológico, senão polui pneumonia/ITU/etc.
     AND NOT (
