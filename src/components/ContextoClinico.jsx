@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils'
 const cacheReg = new Map()
 const cacheCor = new Map()
 const cacheIA = new Map()
+const cacheRel = new Map()
 
 // Detecta procedimentos de SUPORTE/observação: internar o paciente para
 // segurar/acompanhar uma intercorrência, não para resolver definitivamente a
@@ -223,6 +224,37 @@ function CorrelatosColapsaveis({ correlatos, dark }) {
   )
 }
 
+// CIDs do mesmo bloco que têm procedimentos próprios — para o médico refinar o
+// diagnóstico e descobrir outras opções de regulação. Não sugere procedimento de
+// outro CID (o SIGTAP vincula proc↔CID); sugere o CID, que tem seu próprio cardápio.
+function CidsRelacionados({ relacionados, generico }) {
+  return (
+    <div className="mt-3 pt-3 border-t border-border/50 space-y-1.5">
+      <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
+        CIDs relacionados · refine para mais opções
+      </p>
+      {generico && (
+        <p className="text-[11px] text-muted-foreground/70 leading-snug -mt-0.5 mb-1.5">
+          Este CID é genérico — se o quadro for mais específico, troque por um destes para ver outros procedimentos.
+        </p>
+      )}
+      <div className="flex flex-wrap gap-1.5">
+        {relacionados.map(c => (
+          <Link
+            key={c.co_cid}
+            to={`/?q=${encodeURIComponent(c.co_cid)}&ctx=1`}
+            title={c.no_cid}
+            className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-border px-2.5 py-1 text-xs transition hover:border-foreground/30 hover:bg-secondary"
+          >
+            <span className="font-mono text-[10px] font-bold shrink-0 text-foreground">{c.co_cid}</span>
+            <span className="truncate text-muted-foreground">{c.no_cid}</span>
+          </Link>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 // Procedimento sugerido pela IA já casado com um código SIGTAP real.
 function ProcIASigtap({ p }) {
   const navigate = useNavigate()
@@ -302,6 +334,11 @@ export function ContextoClinico({ cid, collapsible = false }) {
   const [correlatos, setCorrelatos] = useState(null)
   const buscandoCorRef = useRef(false)
 
+  // CIDs relacionados (mesmo bloco) — para refinar o diagnóstico e ver outras
+  // opções de regulação. Útil quando o CID é genérico (ex: J189) e mostra poucos
+  // procedimentos: o médico pode não perceber que CIDs irmãos abrem outras opções.
+  const [relacionados, setRelacionados] = useState(null)
+
   // IA state
   const [dadosIA, setDadosIA] = useState(null)
   const [loadingIA, setLoadingIA] = useState(false)
@@ -316,7 +353,9 @@ export function ContextoClinico({ cid, collapsible = false }) {
     buscandoCorRef.current = false
     setProcsReg(null)
     setCorrelatos(null)
+    setRelacionados(null)
     setErroReg(null)
+    buscarRelacionados()
     if (!collapsible) buscarReg()
   }, [cid.co_cid]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -382,6 +421,22 @@ export function ContextoClinico({ cid, collapsible = false }) {
       setCorrelatos([])
     } finally {
       buscandoCorRef.current = false
+    }
+  }
+
+  async function buscarRelacionados() {
+    const key = cid.co_cid?.trim()
+    if (!key) return
+    if (cacheRel.has(key)) { setRelacionados(cacheRel.get(key)); return }
+    try {
+      const { data, error } = await supabase.rpc('cids_relacionados_bloco', { p_co_cid: key })
+      if (cid.co_cid?.trim() !== key) return
+      if (error) throw new Error(error.message)
+      const resultado = data || []
+      cacheRel.set(key, resultado)
+      setRelacionados(resultado)
+    } catch {
+      setRelacionados([])
     }
   }
 
@@ -527,6 +582,13 @@ export function ContextoClinico({ cid, collapsible = false }) {
 
           {correlatos && correlatos.length > 0 && !/^A41/i.test(cid.co_cid?.trim()) && (
             <CorrelatosColapsaveis correlatos={correlatos} dark={dark} />
+          )}
+
+          {relacionados && relacionados.length > 0 && (
+            <CidsRelacionados
+              relacionados={relacionados}
+              generico={/[89]$/.test(cid.co_cid?.trim())}
+            />
           )}
         </div>
       )}
