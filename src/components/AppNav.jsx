@@ -3,6 +3,7 @@ import { useModoUE } from '../contexts/ModoUEContext'
 import { useFavoritos } from '../contexts/FavoritosContext'
 import { useTheme } from '../contexts/ThemeContext'
 import { CommandMenu } from './CommandMenu'
+import { BrandMark } from './BrandMark'
 import { cn } from '@/lib/utils'
 
 function NavLink({ to, label, active, modoUE, dark, badge }) {
@@ -52,12 +53,17 @@ export function AppNav() {
         <button
           onClick={() => navigate('/', { state: { reset: Date.now() } })}
           className={cn(
-            'text-sm font-semibold tracking-widest transition font-mono',
+            'flex items-center gap-1.5 text-sm font-semibold tracking-widest transition font-mono',
             modoUE ? 'text-white' : 'text-foreground'
           )}
-          style={{ letterSpacing: '0.12em' }}
         >
-          SIGTAPP
+          <BrandMark
+            className={cn(
+              'h-[18px] w-auto shrink-0',
+              modoUE ? 'text-white' : 'text-emerald-500'
+            )}
+          />
+          <span style={{ letterSpacing: '0.12em' }}>SIGTAPP</span>
         </button>
 
         <div className="mx-3 h-5 w-px bg-current opacity-20" />
