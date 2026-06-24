@@ -102,6 +102,147 @@ function PainelCid({ cid }) {
   )
 }
 
+// Nível ativo no modo mobile: 'sistemas' | 'categorias' | 'subcategorias' | 'folha'
+function MapaMobile({ colSistemas }) {
+  const [path, setPath] = useState([]) // seleções acumuladas
+  const [nivelAtual, setNivelAtual] = useState({ titulo: 'Sistema', itens: colSistemas.itens, loading: false })
+  const [folha, setFolha] = useState(null)
+
+  async function selecionar(item) {
+    setFolha(null)
+    if (item.co_cid && !item.tem_filhos) {
+      setFolha({ co_cid: item.co_cid, label: item.label })
+      setPath(prev => [...prev, item])
+      return
+    }
+    const novoPath = [...path, item]
+    setPath(novoPath)
+    setNivelAtual({ titulo: '...', itens: [], loading: true })
+    let data
+    if (path.length === 0) {
+      ;({ data } = await supabase.rpc('cids_mapa_categorias', { p_prefixos: item.prefixos }))
+    } else {
+      ;({ data } = await supabase.rpc('cids_mapa_filhos', { p_prefixo: item.co_cid }))
+    }
+    const itens = (data || []).map(r => ({
+      id: r.co_cid, co_cid: r.co_cid, label: r.no_cid, tem_filhos: r.tem_filhos,
+    }))
+    setNivelAtual({ titulo: path.length === 0 ? 'Categoria' : 'Subcategoria', itens, loading: false })
+  }
+
+  function voltar(nivelIdx) {
+    setFolha(null)
+    if (nivelIdx < 0) {
+      setPath([])
+      setNivelAtual({ titulo: 'Sistema', itens: colSistemas.itens, loading: false })
+      return
+    }
+    const novoPath = path.slice(0, nivelIdx + 1)
+    setPath(novoPath)
+    // Re-navega para o último item selecionado reconstruindo o estado
+    const item = novoPath[nivelIdx]
+    selecionar_volta(novoPath.slice(0, nivelIdx), item)
+  }
+
+  async function selecionar_volta(pathAnterior, item) {
+    if (item.co_cid && !item.tem_filhos) {
+      setFolha({ co_cid: item.co_cid, label: item.label })
+      return
+    }
+    setNivelAtual({ titulo: '...', itens: [], loading: true })
+    let data
+    if (pathAnterior.length === 0) {
+      ;({ data } = await supabase.rpc('cids_mapa_categorias', { p_prefixos: item.prefixos }))
+    } else {
+      ;({ data } = await supabase.rpc('cids_mapa_filhos', { p_prefixo: item.co_cid }))
+    }
+    const itens = (data || []).map(r => ({
+      id: r.co_cid, co_cid: r.co_cid, label: r.no_cid, tem_filhos: r.tem_filhos,
+    }))
+    setNivelAtual({ titulo: pathAnterior.length === 0 ? 'Categoria' : 'Subcategoria', itens, loading: false })
+  }
+
+  const mostrarItens = !folha
+
+  return (
+    <div className="overflow-hidden rounded-xl border border-border bg-card">
+      {/* Breadcrumb */}
+      {path.length > 0 && (
+        <div className="flex items-center gap-1 overflow-x-auto border-b border-border bg-secondary/40 px-3 py-2 text-xs">
+          <button onClick={() => voltar(-1)} className="shrink-0 font-medium text-muted-foreground hover:text-foreground">
+            Sistema
+          </button>
+          {path.map((p, i) => (
+            <span key={p.id} className="flex items-center gap-1 shrink-0">
+              <svg className="h-3 w-3 text-muted-foreground/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+              {i < path.length - 1 ? (
+                <button onClick={() => voltar(i)} className="max-w-[100px] truncate font-medium text-muted-foreground hover:text-foreground">
+                  {p.label}
+                </button>
+              ) : (
+                <span className="max-w-[120px] truncate font-semibold text-foreground">{p.label}</span>
+              )}
+            </span>
+          ))}
+        </div>
+      )}
+
+      {/* Painel de folha CID */}
+      {folha && (
+        <div className="flex flex-col gap-3 p-4">
+          <div>
+            <p className="font-mono text-base font-bold text-foreground">{folha.co_cid}</p>
+            <p className="mt-0.5 text-sm text-muted-foreground leading-snug">{folha.label}</p>
+          </div>
+          <Link
+            to={`/?q=${encodeURIComponent(folha.co_cid)}&ctx=1`}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-primary/40 bg-primary/10 px-3 py-2 text-sm font-medium text-foreground hover:bg-primary/20 transition"
+          >
+            Ver regulação →
+          </Link>
+          <button
+            onClick={() => { setFolha(null); setPath(prev => prev.slice(0, -1)) }}
+            className="text-left text-xs font-medium text-muted-foreground hover:text-foreground"
+          >
+            ← Voltar
+          </button>
+        </div>
+      )}
+
+      {/* Lista de itens do nível atual */}
+      {mostrarItens && (
+        <div className="divide-y divide-border/40" style={{ maxHeight: '65vh', overflowY: 'auto' }}>
+          {nivelAtual.loading ? (
+            <div className="flex items-center gap-2 px-4 py-4"><Spinner /></div>
+          ) : nivelAtual.itens.length === 0 ? (
+            <p className="px-4 py-4 text-sm text-muted-foreground">Nenhum CID com procedimento.</p>
+          ) : (
+            nivelAtual.itens.map(it => (
+              <button
+                key={it.id}
+                onClick={() => selecionar(it)}
+                className="flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-secondary/60 active:bg-secondary"
+              >
+                {it.co_cid && (
+                  <span className="font-mono text-xs font-bold shrink-0 text-primary">{it.co_cid}</span>
+                )}
+                <span className="flex-1 text-sm leading-snug text-foreground">{it.label}</span>
+                {(it.tem_filhos || it.leaf) && (
+                  <svg className="h-4 w-4 shrink-0 text-muted-foreground/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                )}
+              </button>
+            ))
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 export function MapaPage() {
   useEffect(() => { document.title = 'SIGTAPP — Mapa de diagnósticos' }, [])
 
@@ -163,7 +304,8 @@ export function MapaPage() {
           </p>
         </div>
 
-        <div className="overflow-hidden rounded-xl border border-border bg-card">
+        {/* Desktop: Miller columns */}
+        <div className="hidden overflow-hidden rounded-xl border border-border bg-card md:block">
           <div className="flex overflow-x-auto" style={{ minHeight: '28rem', maxHeight: '70vh' }}>
             <Coluna
               titulo={colSistemas.titulo}
@@ -186,6 +328,11 @@ export function MapaPage() {
             ))}
             {folha && <PainelCid cid={folha} />}
           </div>
+        </div>
+
+        {/* Mobile: drill-down vertical */}
+        <div className="md:hidden">
+          <MapaMobile colSistemas={colSistemas} />
         </div>
       </div>
     </div>

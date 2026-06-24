@@ -338,7 +338,7 @@ export function Home() {
 
   return (
     <div className="min-h-screen bg-background">
-      <main className="mx-auto max-w-7xl px-6 py-6">
+      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
         {/* Error */}
         {error && (
           <div className="mb-4 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
@@ -769,10 +769,10 @@ export function Home() {
             )}
 
             {/* Painéis */}
-            <div className="flex flex-col md:flex-row items-start gap-3 min-h-[480px]">
+            <div className="flex flex-col md:flex-row items-start gap-3 md:min-h-[480px]">
 
               {/* Painel 1 — Groups (sempre coluna única) */}
-              <div className="w-52 shrink-0">
+              <div className="w-full md:w-52 md:shrink-0">
                 <div className="overflow-hidden rounded-xl bg-card border border-border shadow-sm">
                   {gruposVisiveis.map((g) => {
                     const estilo = GRUPO_MAP[g.co_grupo]
