@@ -90,7 +90,10 @@ export function ProcedureCard({ procedure, onSelect, compareMode, compareSelecte
   const inner = (
     <Card className={cn(
       'overflow-hidden border-border bg-card transition-all duration-200',
+      'shadow-sm dark:shadow-none dark:ring-1 dark:ring-white/[0.04]',
       'group-hover:border-foreground/20 group-hover:-translate-y-0.5',
+      'group-hover:shadow-[0_2px_4px_rgba(15,23,42,0.06),0_8px_24px_rgba(15,23,42,0.10)]',
+      'dark:group-hover:shadow-[0_8px_24px_rgba(0,0,0,0.4)] dark:group-hover:ring-white/[0.08]',
       compareSelected && 'ring-2 ring-foreground/30 ring-offset-1 ring-offset-background',
     )}>
       <div className="flex min-h-[88px]">

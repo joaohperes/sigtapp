@@ -25,11 +25,14 @@ const COR_MAP = {
   pink:   { dot: 'bg-pink-400',   label: 'text-pink-600 dark:text-pink-400',     chip: 'border-pink-200 text-pink-700 hover:border-pink-400 hover:bg-pink-50 dark:border-pink-400/20 dark:text-pink-300 dark:hover:border-pink-400/60 dark:hover:bg-pink-400/10',   header: 'bg-pink-50 dark:bg-pink-400/10'   },
 }
 
-function CidRow({ cid, expandirAuto }) {
+function CidRow({ cid, expandirAuto, index = 0 }) {
   const sexo = { M: 'Masculino', F: 'Feminino', I: null, A: null }[cid.tp_sexo]
 
   return (
-    <div className="border-b border-border last:border-0 px-4 py-3.5">
+    <div
+      className="border-b border-border last:border-0 px-4 py-3.5 animate-rise"
+      style={{ animationDelay: `${Math.min(index, 8) * 35}ms` }}
+    >
       <div className="mb-2">
         <div className="flex items-baseline gap-2.5 flex-wrap">
           <span className="font-mono text-sm font-bold shrink-0 text-foreground">
@@ -60,7 +63,7 @@ function Chip({ c, cor }) {
       to={`/?q=${encodeURIComponent(c.co_cid)}&ctx=1`}
       title={c.co_cid}
       className={cn(
-        'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition-all',
+        'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition-all active:scale-[0.97]',
         cor.chip
       )}
     >
@@ -270,7 +273,7 @@ export function DiagnosticoPage() {
                   <button
                     onClick={() => setFiltroSistema(null)}
                     className={cn(
-                      'rounded-full border px-3 py-1 text-xs font-medium transition',
+                      'rounded-full border px-3 py-1 text-xs font-medium transition active:scale-[0.97]',
                       !filtroSistema
                         ? 'border-primary/40 bg-primary/10 text-foreground'
                         : 'border-border text-muted-foreground hover:text-foreground hover:border-foreground/20'
@@ -283,7 +286,7 @@ export function DiagnosticoPage() {
                       key={p.id}
                       onClick={() => setFiltroSistema(filtroSistema === p.id ? null : p.id)}
                       className={cn(
-                        'rounded-full border px-3 py-1 text-xs font-medium transition',
+                        'rounded-full border px-3 py-1 text-xs font-medium transition active:scale-[0.97]',
                         filtroSistema === p.id
                           ? 'border-primary/40 bg-primary/10 text-foreground'
                           : 'border-border text-muted-foreground hover:text-foreground hover:border-foreground/20'
@@ -298,8 +301,8 @@ export function DiagnosticoPage() {
               {agrupar ? (
                 <>
                   <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
-                    {comuns.map((cid) => (
-                      <CidRow key={cid.co_cid} cid={cid} expandirAuto={expandirAuto} />
+                    {comuns.map((cid, i) => (
+                      <CidRow key={cid.co_cid} cid={cid} expandirAuto={expandirAuto} index={i} />
                     ))}
                   </div>
 
@@ -334,8 +337,8 @@ export function DiagnosticoPage() {
                 </>
               ) : (
                 <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
-                  {resultsFiltrados.map((cid) => (
-                    <CidRow key={cid.co_cid} cid={cid} expandirAuto={expandirAuto} />
+                  {resultsFiltrados.map((cid, i) => (
+                    <CidRow key={cid.co_cid} cid={cid} expandirAuto={expandirAuto} index={i} />
                   ))}
                 </div>
               )}
