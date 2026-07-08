@@ -1,21 +1,20 @@
-import { Component } from 'react'
+import { Component, Suspense, lazy } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { DiagnosticoPage } from './pages/DiagnosticoPage'
-import { Home } from './pages/Home'
-import { ProcedureDetail } from './pages/ProcedureDetail'
-import { GroupPage } from './pages/GroupPage'
-import { CidSearch } from './pages/CidSearch'
-import { AnamnesePage } from './pages/AnamnesePage'
-import { FavoritosPage } from './pages/FavoritosPage'
-import { CalculadoraPage } from './pages/CalculadoraPage'
-import { HroPage } from './pages/HroPage'
-import { MapaPage } from './pages/MapaPage'
+
+// Code-splitting: só a landing (Diagnóstico) entra no bundle inicial;
+// as demais páginas carregam sob demanda.
+const Home = lazy(() => import('./pages/Home').then(m => ({ default: m.Home })))
+const ProcedureDetail = lazy(() => import('./pages/ProcedureDetail').then(m => ({ default: m.ProcedureDetail })))
+const GroupPage = lazy(() => import('./pages/GroupPage').then(m => ({ default: m.GroupPage })))
+const CidSearch = lazy(() => import('./pages/CidSearch').then(m => ({ default: m.CidSearch })))
+const AnamnesePage = lazy(() => import('./pages/AnamnesePage').then(m => ({ default: m.AnamnesePage })))
+const FavoritosPage = lazy(() => import('./pages/FavoritosPage').then(m => ({ default: m.FavoritosPage })))
+const CalculadoraPage = lazy(() => import('./pages/CalculadoraPage').then(m => ({ default: m.CalculadoraPage })))
+const HroPage = lazy(() => import('./pages/HroPage').then(m => ({ default: m.HroPage })))
+const MapaPage = lazy(() => import('./pages/MapaPage').then(m => ({ default: m.MapaPage })))
 import { AppNav } from './components/AppNav'
-import { CommandMenu } from './components/CommandMenu'
-import { TooltipProvider } from '@/components/ui/tooltip'
-import { Toaster } from 'sonner'
 import { Analytics } from '@vercel/analytics/react'
-import { useTheme } from './contexts/ThemeContext'
 
 class ErrorBoundary extends Component {
   constructor(props) { super(props); this.state = { error: null } }
@@ -40,11 +39,15 @@ class ErrorBoundary extends Component {
 }
 
 function AppShell() {
-  const { dark } = useTheme()
   return (
     <>
       <AppNav />
       <ErrorBoundary>
+        <Suspense fallback={
+          <div className="flex min-h-[60vh] items-center justify-center">
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-foreground" />
+          </div>
+        }>
         <Routes>
           <Route path="/" element={<DiagnosticoPage />} />
           <Route path="/procedimentos" element={<Home />} />
@@ -57,20 +60,17 @@ function AppShell() {
           <Route path="/calculadora" element={<CalculadoraPage />} />
           <Route path="/hro" element={<HroPage />} />
         </Routes>
+        </Suspense>
       </ErrorBoundary>
-      <footer className={dark
-        ? 'border-t border-[rgba(255,255,255,0.06)] bg-[#0a0e1a] py-5 text-center'
-        : 'border-t border-slate-100 bg-white py-5 text-center'
-      }>
-        <p className={dark ? 'text-xs text-[#8896a8]' : 'text-xs text-slate-400'}>
+      <footer className="border-t border-border bg-background py-5 text-center">
+        <p className="text-xs text-muted-foreground/60 transition-opacity hover:text-muted-foreground">
           Desenvolvido por{' '}
-          <span className="font-medium text-[#38bdf8]">@joaohperes</span>
+          <span className="font-medium text-sky-500 dark:text-sky-400">@joaohperes</span>
           {' '}com{' '}
-          <img src="/claude-icon.ico" alt="Claude" className="mb-0.5 inline h-3.5 w-3.5" />
-          {' '}<span className="font-medium text-orange-400">Claude</span>
+          <img src="/claude-icon.ico" alt="Claude" className="mb-0.5 inline h-3.5 w-3.5 opacity-80" />
+          {' '}<span className="font-medium text-orange-500 dark:text-orange-400">Claude</span>
         </p>
       </footer>
-      <Toaster position="bottom-right" richColors />
       <Analytics />
     </>
   )
@@ -79,9 +79,7 @@ function AppShell() {
 export default function App() {
   return (
     <BrowserRouter>
-      <TooltipProvider delayDuration={300}>
-        <AppShell />
-      </TooltipProvider>
+      <AppShell />
     </BrowserRouter>
   )
 }
