@@ -21,6 +21,14 @@ if ('serviceWorker' in navigator) {
 }
 
 import { createRoot } from 'react-dom/client'
+// Fontes auto-hospedadas (sem request ao Google Fonts, sem FOUT de rede externa)
+import '@fontsource/ibm-plex-sans/300.css'
+import '@fontsource/ibm-plex-sans/400.css'
+import '@fontsource/ibm-plex-sans/500.css'
+import '@fontsource/ibm-plex-sans/600.css'
+import '@fontsource/ibm-plex-mono/400.css'
+import '@fontsource/ibm-plex-mono/600.css'
+import '@fontsource/bebas-neue/400.css'
 import './index.css'
 import App from './App.jsx'
 import { TooltipProvider } from '@/components/ui/tooltip'

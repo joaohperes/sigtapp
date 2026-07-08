@@ -138,6 +138,13 @@ function formatCidCode(code) {
   return `${code.slice(0, 3)}.${code.slice(3)}`
 }
 
+const LOADING_STEPS = [
+  'Lendo o texto clínico…',
+  'Extraindo diagnósticos CID-10…',
+  'Buscando procedimentos SIGTAP…',
+  'Gerando laudo para AIH…',
+]
+
 const SESSION_V = 11 // incrementar sempre que mudar o formato/filtros dos resultados
 const SAVED_KEY = 'sigtap-analises-salvas'
 const MAX_SAVED = 10
@@ -153,6 +160,7 @@ export function AnamnesePage() {
   const { modoUE } = useModoUE()
   const [anamnese, setAnamnese] = useState(() => getSession().anamnese || '')
   const [loading, setLoading] = useState(false)
+  const [loadingStep, setLoadingStep] = useState(0)
   const [error, setError] = useState(null)
   const [cids, setCids] = useState(() => getSession().cids || [])
   const [procedimentos, setProcedimentos] = useState(() => getSession().procedimentos || [])
@@ -225,6 +233,15 @@ export function AnamnesePage() {
       sessionStorage.setItem('aih-session', JSON.stringify({ v: SESSION_V, anamnese, cids, procedimentos, aih, analyzed, cidProcsData }))
     }
   }, [anamnese, cids, procedimentos, aih, analyzed, cidProcs])
+
+  // Progresso narrado durante a análise (~5–10s) — avança a cada 2,4s e para no último passo.
+  useEffect(() => {
+    if (!loading) { setLoadingStep(0); return }
+    const id = setInterval(() => {
+      setLoadingStep(s => Math.min(s + 1, LOADING_STEPS.length - 1))
+    }, 2400)
+    return () => clearInterval(id)
+  }, [loading])
 
   async function handleAnalyze() {
     if (anamnese.trim().length < 20) return
@@ -866,7 +883,7 @@ export function AnamnesePage() {
                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
                         </svg>
-                        Analisando...
+                        <span className="animate-pulse">{LOADING_STEPS[loadingStep]}</span>
                       </>
                     ) : (
                       <>
