@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from 'react'
-import { useTheme } from '../contexts/ThemeContext'
 import { Link, useSearchParams, useLocation } from 'react-router-dom'
 import { ProcedureCard, ProcedureCardSkeleton } from '../components/ProcedureCard'
 import { ProcedureTable } from '../components/ProcedureTable'
@@ -101,7 +100,6 @@ export function Home() {
 
   // Modo Urgência/Emergência (global via contexto)
   const { modoUE } = useModoUE()
-  const { dark } = useTheme()
 
   // Paginação client-side
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
@@ -727,9 +725,8 @@ export function Home() {
             {selectedGroup && (
               <div className={cn(
                 "mb-4 flex items-center rounded-xl px-4 py-2.5 border transition-colors",
-                dark
-                  ? "bg-card border-border"
-                  : cn(selectedEstilo?.bg, selectedEstilo?.border)
+                selectedEstilo?.bg, selectedEstilo?.border,
+                "dark:bg-card dark:border-border"
               )}>
                 <nav className="flex items-center gap-1.5 text-sm">
                   <button
@@ -737,19 +734,21 @@ export function Home() {
                       setSelectedGroup(null); setSelectedSubgroup(null)
                       setSubgroups([]); setSubgroupProcs([])
                     }}
-                    className={cn("font-medium hover:underline", dark ? "text-primary" : (selectedEstilo?.text ?? "text-foreground"))}
+                    className={cn("font-medium hover:underline", selectedEstilo?.text ?? "text-foreground", "dark:text-primary")}
                   >
                     Grupos
                   </button>
-                  <svg className={cn("h-3.5 w-3.5 opacity-50", dark ? "text-muted-foreground" : (selectedEstilo?.text ?? "text-muted-foreground"))} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className={cn("h-3.5 w-3.5 opacity-50", selectedEstilo?.text ?? "text-muted-foreground", "dark:text-muted-foreground")} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                   <button
                     onClick={() => { setSelectedSubgroup(null); setSubgroupProcs([]) }}
                     className={cn(
                       "font-medium",
-                      dark ? (selectedSubgroup ? "text-primary hover:underline" : "text-foreground cursor-default")
-                           : (selectedSubgroup ? cn(selectedEstilo?.text, "hover:underline") : cn(selectedEstilo?.text, "cursor-default"))
+                      selectedEstilo?.text,
+                      selectedSubgroup
+                        ? "hover:underline dark:text-primary"
+                        : "cursor-default dark:text-foreground"
                     )}
                   >
                     {selectedGroup.no_grupo}
@@ -785,7 +784,7 @@ export function Home() {
                         className={cn(
                           "relative flex w-full items-center gap-2.5 overflow-hidden border-b border-border px-3 py-2.5 text-left transition last:border-0",
                           isActive
-                            ? dark ? cn("bg-[rgba(56,189,248,0.08)]", estilo.text, "font-medium") : cn(estilo.bg, estilo.text, "font-medium")
+                            ? cn(estilo.bg, estilo.text, "font-medium dark:bg-[rgba(56,189,248,0.08)]")
                             : "text-muted-foreground hover:bg-secondary hover:text-foreground"
                         )}
                       >
@@ -853,9 +852,7 @@ export function Home() {
                               className={cn(
                                 "relative flex w-full items-center justify-between gap-3 overflow-hidden px-4 py-3 text-left transition",
                                 isActive
-                                  ? dark
-                                    ? cn("bg-[rgba(56,189,248,0.1)]", selectedEstilo?.text ?? "text-primary", "font-medium")
-                                    : cn(selectedEstilo?.bg ?? "bg-primary/10", selectedEstilo?.text ?? "text-primary", "font-medium")
+                                  ? cn(selectedEstilo?.bg ?? "bg-primary/10", selectedEstilo?.text ?? "text-primary", "font-medium dark:bg-[rgba(56,189,248,0.1)]")
                                   : "text-muted-foreground hover:bg-secondary hover:text-foreground"
                               )}
                             >
@@ -864,9 +861,7 @@ export function Home() {
                               <span className={cn(
                                 "shrink-0 rounded-full px-2 py-0.5 text-xs tabular-nums",
                                 isActive
-                                  ? dark
-                                    ? cn("font-semibold bg-[rgba(56,189,248,0.15)]", selectedEstilo?.text ?? "text-primary")
-                                    : cn("font-semibold", selectedEstilo?.bg, selectedEstilo?.text)
+                                  ? cn("font-semibold", selectedEstilo?.bg, selectedEstilo?.text ?? "text-primary", "dark:bg-[rgba(56,189,248,0.15)]")
                                   : "bg-secondary text-muted-foreground"
                               )}>
                                 {Number(s.qt_procedimentos).toLocaleString('pt-BR')}

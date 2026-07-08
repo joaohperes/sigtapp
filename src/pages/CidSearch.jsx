@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { useCidSearch } from '../hooks/useCidSearch'
-import { useTheme } from '../contexts/ThemeContext'
 import { ContextoClinico } from '../components/ContextoClinico'
 import { cn } from '@/lib/utils'
 
@@ -9,7 +8,6 @@ const SEXO_LABEL = { M: 'Masculino', F: 'Feminino', I: null, A: null }
 const EXEMPLOS = ['câncer de ovário', 'infarto', 'diabetes', 'derrame cerebral', 'pneumonia']
 
 export function CidSearch() {
-  const { dark } = useTheme()
   const [searchParams, setSearchParams] = useSearchParams()
   const initialQuery = searchParams.get('q') || ''
   const autoCtx = searchParams.get('ctx') === '1'
@@ -142,7 +140,7 @@ export function CidSearch() {
             </p>
             <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
               {results.map((cid, i) => (
-                <CidRow key={cid.co_cid} cid={cid} dark={dark} autoCtx={autoCtx && i === 0} />
+                <CidRow key={cid.co_cid} cid={cid} autoCtx={autoCtx && i === 0} />
               ))}
             </div>
           </>
@@ -157,7 +155,7 @@ export function CidSearch() {
 
         {!searched && (
           <div className="py-16 text-center">
-            <div className={cn("mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full", dark ? "bg-primary/10" : "bg-secondary")}>
+            <div className={"mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-secondary dark:bg-primary/10"}>
               <svg className="h-6 w-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                   d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -175,7 +173,7 @@ export function CidSearch() {
   )
 }
 
-function CidRow({ cid, dark, autoCtx = false }) {
+function CidRow({ cid, autoCtx = false }) {
   const sexo = SEXO_LABEL[cid.tp_sexo]
   const isCidCategory = cid.co_cid.trim().length === 3
 
@@ -205,9 +203,7 @@ function CidRow({ cid, dark, autoCtx = false }) {
             to={`/?q=${encodeURIComponent(cid.co_cid.trim())}`}
             className={cn(
               "rounded-lg border px-2.5 py-1 text-xs font-medium transition whitespace-nowrap",
-              dark
-                ? "border-[rgba(255,255,255,0.1)] text-muted-foreground hover:border-[rgba(255,255,255,0.2)] hover:text-foreground"
-                : "border-border text-muted-foreground hover:text-foreground"
+              "border-border text-muted-foreground hover:text-foreground dark:border-white/10 dark:hover:border-white/20"
             )}
           >
             Procedimentos →

@@ -187,7 +187,7 @@ export function HelpSheet({ pagina, open, onClose }) {
 
 // ── Botão de ajuda reutilizável ────────────────────────────────────────────────
 
-export function HelpButton({ onClick, dark = false }) {
+export function HelpButton({ onClick }) {
   return (
     <button
       onClick={onClick}

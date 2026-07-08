@@ -6,7 +6,6 @@ import { formatBRL, formatCodigo } from '../utils/formatters'
 import { ProcedureRow } from '../components/ProcedureCard'
 import { ProcedureSheetContent } from '../components/ProcedureSheetContent'
 import { useModoUE } from '../contexts/ModoUEContext'
-import { useTheme } from '../contexts/ThemeContext'
 import { Sheet, SheetContent } from '@/components/ui/sheet'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
@@ -152,7 +151,6 @@ function getSession() {
 
 export function AnamnesePage() {
   const { modoUE } = useModoUE()
-  const { dark } = useTheme()
   const [anamnese, setAnamnese] = useState(() => getSession().anamnese || '')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -746,7 +744,7 @@ export function AnamnesePage() {
             </p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            <HelpButton onClick={() => setHelpOpen(true)} dark={modoUE || dark} />
+            <HelpButton onClick={() => setHelpOpen(true)} />
             {showResults && (
             <button
               onClick={handleNova}
@@ -754,9 +752,7 @@ export function AnamnesePage() {
                 "shrink-0 flex items-center gap-1.5 rounded-full border px-4 py-1.5 text-xs font-medium transition",
                 modoUE
                   ? "border-red-300/50 bg-red-900/30 text-red-100 hover:bg-red-900/50"
-                  : dark
-                    ? "border-border bg-secondary text-foreground hover:bg-accent"
-                    : "border-border bg-secondary text-foreground/90 hover:bg-accent"
+                  : "border-border bg-secondary text-foreground/90 hover:bg-accent dark:text-foreground"
               )}
             >
               <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

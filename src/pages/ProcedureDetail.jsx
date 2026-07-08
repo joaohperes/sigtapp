@@ -6,7 +6,6 @@ import { formatBRL, formatCodigo, toSentenceCase } from '../utils/formatters'
 import { GRUPO_MAP } from '../data/grupos'
 import { useFavoritos } from '../contexts/FavoritosContext'
 import { useModoUE } from '../contexts/ModoUEContext'
-import { useTheme } from '../contexts/ThemeContext'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
@@ -19,7 +18,6 @@ export function ProcedureDetail() {
   const [compatibilidades, setCompatibilidades] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const { dark } = useTheme()
   const { modoUE } = useModoUE()
   const { isFavorito, toggleFavorito } = useFavoritos()
 

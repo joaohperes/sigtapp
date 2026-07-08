@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useFavoritos } from '../contexts/FavoritosContext'
 import { useModoUE } from '../contexts/ModoUEContext'
-import { useTheme } from '../contexts/ThemeContext'
 import { ProcedureCard, ProcedureRow } from '../components/ProcedureCard'
 import { ProcedureSheetContent } from '../components/ProcedureSheetContent'
 import { Sheet, SheetContent } from '@/components/ui/sheet'
@@ -11,7 +10,6 @@ import { cn } from '@/lib/utils'
 export function FavoritosPage() {
   const { favoritos } = useFavoritos()
   const { modoUE } = useModoUE()
-  const { dark } = useTheme()
   const [view, setView] = useState('cards')
   const [sheetProc, setSheetProc] = useState(null)
 

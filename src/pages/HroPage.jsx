@@ -10,7 +10,6 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { HelpSheet, HelpButton } from '../components/HelpSheet'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
-import { useTheme } from '../contexts/ThemeContext'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -593,7 +592,6 @@ const TABS = [
 ]
 
 export function HroPage() {
-  const { dark } = useTheme()
   const [tab, setTab] = useState('especialidade')
   const [procNames, setProcNames] = useState({})  // code → full SIGTAP name
   const [cidNames, setCidNames] = useState({})    // normalizedCode → no_cid
@@ -641,23 +639,23 @@ export function HroPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className={dark ? "bg-gradient-to-br from-[#0A1628] via-[#0D2347] to-[#0F3460]" : "border-b border-border bg-card"}>
+      <div className="border-b border-border bg-card dark:border-transparent dark:bg-gradient-to-br dark:from-[#0A1628] dark:via-[#0D2347] dark:to-[#0F3460]">
         <div className="mx-auto max-w-5xl px-4 py-4 sm:px-6">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <h1 className={cn("text-lg font-bold", dark ? "text-white" : "text-foreground")}>Guia de Códigos — PS HRO</h1>
-              <p className={cn("mt-0.5 text-sm", dark ? "text-blue-200" : "text-muted-foreground")}>CNES 2537788 · SIGTAP 202602</p>
+              <h1 className="text-lg font-bold text-foreground dark:text-white">Guia de Códigos — PS HRO</h1>
+              <p className="mt-0.5 text-sm text-muted-foreground dark:text-blue-200">CNES 2537788 · SIGTAP 202602</p>
             </div>
             <div className="flex items-center gap-3 shrink-0">
               <div className="hidden sm:flex items-center gap-3 text-[11px] text-blue-300/70">
                 <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-emerald-400" />Gr.03 clínico</span>
                 <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-orange-400" />Gr.04 verificar FPO</span>
               </div>
-              <HelpButton onClick={() => setHelpOpen(true)} dark />
+              <HelpButton onClick={() => setHelpOpen(true)} />
             </div>
           </div>
 
-          <div className={cn("flex gap-1 mt-4 rounded-xl p-1", dark ? "bg-white/5 ring-1 ring-white/10" : "bg-secondary border border-border")}>
+          <div className="flex gap-1 mt-4 rounded-xl p-1 bg-secondary border border-border dark:bg-white/5 dark:border-transparent dark:ring-1 dark:ring-white/10">
             {TABS.map(t => (
               <button
                 key={t.id}
@@ -665,8 +663,8 @@ export function HroPage() {
                 className={cn(
                   'flex-1 rounded-lg py-2 text-xs font-medium transition',
                   tab === t.id
-                    ? dark ? 'bg-white text-foreground shadow-sm' : 'bg-card text-foreground shadow-sm'
-                    : dark ? 'text-blue-200/70 hover:text-white' : 'text-muted-foreground hover:text-foreground'
+                    ? 'bg-card text-foreground shadow-sm dark:bg-white dark:text-zinc-900'
+                    : 'text-muted-foreground hover:text-foreground dark:text-blue-200/70 dark:hover:text-white'
                 )}
               >
                 {t.label}

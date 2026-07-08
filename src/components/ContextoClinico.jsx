@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
-import { useTheme } from '../contexts/ThemeContext'
 import { supabase } from '../lib/supabase'
 import { track } from '@vercel/analytics'
 import { formatBRL, formatCodigo } from '../utils/formatters'
@@ -59,7 +58,7 @@ function BotaoAIH({ co_procedimento, navigate }) {
   )
 }
 
-function ProcReg({ p, dark }) {
+function ProcReg({ p }) {
   const navigate = useNavigate()
   const total = (parseFloat(p.vl_sh) || 0) + (parseFloat(p.vl_sa) || 0) + (parseFloat(p.vl_sp) || 0)
 
@@ -102,7 +101,7 @@ function ProcReg({ p, dark }) {
 
 const CLINICOS_PREVIEW = 5
 
-function ProcList({ procs, dark, labelClinicos = 'Clínicos — use para regulação' }) {
+function ProcList({ procs, labelClinicos = 'Clínicos — use para regulação' }) {
   const [cirurgicosAbertos, setCirurgicosAbertos] = useState(false)
   const [clinicosExpandidos, setClinicosExpandidos] = useState(false)
 
@@ -130,7 +129,7 @@ function ProcList({ procs, dark, labelClinicos = 'Clínicos — use para regula�
           <p className="text-[11px] text-muted-foreground/70 leading-snug -mt-0.5">
             Para internar sem ser para tratar a doença de base — intercorrência, suporte clínico ou observação.
           </p>
-          {suporte.map(p => <ProcReg key={p.co_procedimento} p={p} dark={dark} />)}
+          {suporte.map(p => <ProcReg key={p.co_procedimento} p={p} />)}
         </div>
       )}
       {soCirurgicos && (
@@ -138,7 +137,7 @@ function ProcList({ procs, dark, labelClinicos = 'Clínicos — use para regula�
           <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
             Procedimentos para regulação
           </p>
-          {cirurgicos.map(p => <ProcReg key={p.co_procedimento} p={p} dark={dark} />)}
+          {cirurgicos.map(p => <ProcReg key={p.co_procedimento} p={p} />)}
         </>
       )}
       {!soCirurgicos && (
@@ -148,7 +147,7 @@ function ProcList({ procs, dark, labelClinicos = 'Clínicos — use para regula�
               <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
                 {labelClinicos}
               </p>
-              {clinicosVisiveis.map(p => <ProcReg key={p.co_procedimento} p={p} dark={dark} />)}
+              {clinicosVisiveis.map(p => <ProcReg key={p.co_procedimento} p={p} />)}
               {temMaisClinicos && (
                 <button
                   onClick={() => setClinicosExpandidos(v => !v)}
@@ -172,7 +171,7 @@ function ProcList({ procs, dark, labelClinicos = 'Clínicos — use para regula�
               </button>
               {cirurgicosAbertos && (
                 <div className="mt-1.5 space-y-1.5">
-                  {cirurgicos.map(p => <ProcReg key={p.co_procedimento} p={p} dark={dark} />)}
+                  {cirurgicos.map(p => <ProcReg key={p.co_procedimento} p={p} />)}
                 </div>
               )}
             </div>
@@ -183,10 +182,10 @@ function ProcList({ procs, dark, labelClinicos = 'Clínicos — use para regula�
   )
 }
 
-function ProcRegList({ procs, dark, coCid }) {
+function ProcRegList({ procs, coCid }) {
   return (
     <div className="space-y-2">
-      <ProcList procs={procs} dark={dark} />
+      <ProcList procs={procs} />
       <div className="flex items-center justify-between gap-2 pt-1">
         <p className="text-[11px] text-muted-foreground/60">
           Dados da tabela SIGTAP · clique para ver detalhes do procedimento
@@ -204,7 +203,7 @@ function ProcRegList({ procs, dark, coCid }) {
   )
 }
 
-function CorrelatosColapsaveis({ correlatos, dark }) {
+function CorrelatosColapsaveis({ correlatos }) {
   return (
     <div className="mt-3 pt-3 border-t border-border/50 space-y-1.5">
       <p className="text-[11px] font-semibold uppercase tracking-wider text-amber-500 mb-1">
@@ -212,7 +211,7 @@ function CorrelatosColapsaveis({ correlatos, dark }) {
       </p>
       {correlatos.map(p => (
         <div key={p.co_procedimento}>
-          <ProcReg p={p} dark={dark} />
+          <ProcReg p={p} />
           {p.co_cid_ref && (
             <p className="ml-3 text-[11px] text-muted-foreground/50">
               via <span className="font-mono">{p.co_cid_ref}</span> · {p.no_cid_ref}
@@ -319,7 +318,6 @@ function ProcsIA({ procs, onBuscar }) {
 }
 
 export function ContextoClinico({ cid, collapsible = false }) {
-  const { dark } = useTheme()
   const navigate = useNavigate()
   const [aberto, setAberto] = useState(!collapsible)
   const [aba, setAba] = useState('regulacao') // 'regulacao' | 'ia'
@@ -540,7 +538,7 @@ export function ContextoClinico({ cid, collapsible = false }) {
             <p className="text-xs text-muted-foreground">Nenhum procedimento grupo 03/04 vinculado a este CID na tabela SIGTAP.</p>
           )}
           {procsReg && procsReg.length > 0 && (
-            <ProcRegList procs={procsReg} dark={dark} coCid={cid.co_cid?.trim()} />
+            <ProcRegList procs={procsReg} coCid={cid.co_cid?.trim()} />
           )}
 
           {correlatos === null && !loadingReg && (
@@ -555,8 +553,8 @@ export function ContextoClinico({ cid, collapsible = false }) {
 
           {/* Dica especial para Sepse */}
           {correlatos !== null && /^A41/i.test(cid.co_cid?.trim()) && (
-            <div className={cn('mt-4 pt-4 border-t', dark ? 'border-[rgba(255,255,255,0.06)]' : 'border-border')}>
-              <div className={cn('rounded-lg p-3', dark ? 'bg-amber-500/10 border border-amber-500/20' : 'bg-amber-50 border border-amber-200')}>
+            <div className={'mt-4 pt-4 border-t border-border dark:border-white/[0.06]'}>
+              <div className={'rounded-lg p-3 border bg-amber-50 border-amber-200 dark:bg-amber-500/10 dark:border-amber-500/20'}>
                 <p className="text-[11px] font-semibold text-amber-500 uppercase tracking-wider mb-1">
                   Dica para regulação de Sepse
                 </p>
@@ -581,7 +579,7 @@ export function ContextoClinico({ cid, collapsible = false }) {
           )}
 
           {correlatos && correlatos.length > 0 && !/^A41/i.test(cid.co_cid?.trim()) && (
-            <CorrelatosColapsaveis correlatos={correlatos} dark={dark} />
+            <CorrelatosColapsaveis correlatos={correlatos} />
           )}
 
           {relacionados && relacionados.length > 0 && (

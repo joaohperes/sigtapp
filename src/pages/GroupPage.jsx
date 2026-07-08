@@ -11,7 +11,6 @@ import { Sheet, SheetContent } from '@/components/ui/sheet'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
-import { useTheme } from '../contexts/ThemeContext'
 
 const VIEW_MODES = ['cards', 'tabela']
 const SORT_OPTIONS = [
@@ -36,7 +35,6 @@ function applySort(arr, key) {
 }
 
 export function GroupPage() {
-  const { dark } = useTheme()
   const { co } = useParams()
   const [subgrupoAtivo, setSubgrupoAtivo] = useState(null)
   const [view, setView] = useState('cards')

@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Link, useSearchParams, useNavigate } from 'react-router-dom'
 import { useCidSearch } from '../hooks/useCidSearch'
-import { useTheme } from '../contexts/ThemeContext'
 import { useModoUE } from '../contexts/ModoUEContext'
 import { ContextoClinico } from '../components/ContextoClinico'
 import { CORINGAS_GRUPOS, CORINGAS_CID } from '../data/coringas'
@@ -12,34 +11,21 @@ import { cn } from '@/lib/utils'
 // Set dos CIDs curados do app — usados como sinal forte de "comum" no agrupamento.
 const CORINGAS_SET = new Set(CORINGAS_CID.map(c => c.co_cid.trim()))
 
+// Mapa único de cores — classes light por padrão + variantes dark: (Tailwind resolve pelo <html class="dark">).
 const COR_MAP = {
-  red:    { dot: 'bg-red-400',    label: 'text-red-400',    chip: 'border-red-400/20 text-red-300 hover:border-red-400/60 hover:bg-red-400/10',    header: 'bg-red-400/10'    },
-  orange: { dot: 'bg-orange-400', label: 'text-orange-400', chip: 'border-orange-400/20 text-orange-300 hover:border-orange-400/60 hover:bg-orange-400/10', header: 'bg-orange-400/10' },
-  blue:   { dot: 'bg-blue-400',   label: 'text-blue-400',   chip: 'border-blue-400/20 text-blue-300 hover:border-blue-400/60 hover:bg-blue-400/10',   header: 'bg-blue-400/10'   },
-  purple: { dot: 'bg-purple-400', label: 'text-purple-400', chip: 'border-purple-400/20 text-purple-300 hover:border-purple-400/60 hover:bg-purple-400/10', header: 'bg-purple-400/10' },
-  yellow: { dot: 'bg-yellow-400', label: 'text-yellow-400', chip: 'border-yellow-400/20 text-yellow-300 hover:border-yellow-400/60 hover:bg-yellow-400/10', header: 'bg-yellow-400/10' },
-  green:  { dot: 'bg-green-400',  label: 'text-green-400',  chip: 'border-green-400/20 text-green-300 hover:border-green-400/60 hover:bg-green-400/10',  header: 'bg-green-400/10'  },
-  teal:   { dot: 'bg-teal-400',   label: 'text-teal-400',   chip: 'border-teal-400/20 text-teal-300 hover:border-teal-400/60 hover:bg-teal-400/10',   header: 'bg-teal-400/10'   },
-  stone:  { dot: 'bg-stone-400',  label: 'text-stone-300',  chip: 'border-stone-400/20 text-stone-300 hover:border-stone-400/60 hover:bg-stone-400/10',  header: 'bg-stone-400/10'  },
-  indigo: { dot: 'bg-indigo-400', label: 'text-indigo-400', chip: 'border-indigo-400/20 text-indigo-300 hover:border-indigo-400/60 hover:bg-indigo-400/10', header: 'bg-indigo-400/10' },
-  pink:   { dot: 'bg-pink-400',   label: 'text-pink-400',   chip: 'border-pink-400/20 text-pink-300 hover:border-pink-400/60 hover:bg-pink-400/10',   header: 'bg-pink-400/10'   },
+  red:    { dot: 'bg-red-400',    label: 'text-red-600 dark:text-red-400',       chip: 'border-red-200 text-red-700 hover:border-red-400 hover:bg-red-50 dark:border-red-400/20 dark:text-red-300 dark:hover:border-red-400/60 dark:hover:bg-red-400/10',    header: 'bg-red-50 dark:bg-red-400/10'    },
+  orange: { dot: 'bg-orange-400', label: 'text-orange-600 dark:text-orange-400', chip: 'border-orange-200 text-orange-700 hover:border-orange-400 hover:bg-orange-50 dark:border-orange-400/20 dark:text-orange-300 dark:hover:border-orange-400/60 dark:hover:bg-orange-400/10', header: 'bg-orange-50 dark:bg-orange-400/10' },
+  blue:   { dot: 'bg-blue-400',   label: 'text-blue-600 dark:text-blue-400',     chip: 'border-blue-200 text-blue-700 hover:border-blue-400 hover:bg-blue-50 dark:border-blue-400/20 dark:text-blue-300 dark:hover:border-blue-400/60 dark:hover:bg-blue-400/10',   header: 'bg-blue-50 dark:bg-blue-400/10'   },
+  purple: { dot: 'bg-purple-400', label: 'text-purple-600 dark:text-purple-400', chip: 'border-purple-200 text-purple-700 hover:border-purple-400 hover:bg-purple-50 dark:border-purple-400/20 dark:text-purple-300 dark:hover:border-purple-400/60 dark:hover:bg-purple-400/10', header: 'bg-purple-50 dark:bg-purple-400/10' },
+  yellow: { dot: 'bg-yellow-400', label: 'text-yellow-700 dark:text-yellow-400', chip: 'border-yellow-200 text-yellow-800 hover:border-yellow-400 hover:bg-yellow-50 dark:border-yellow-400/20 dark:text-yellow-300 dark:hover:border-yellow-400/60 dark:hover:bg-yellow-400/10', header: 'bg-yellow-50 dark:bg-yellow-400/10' },
+  green:  { dot: 'bg-green-400',  label: 'text-green-600 dark:text-green-400',   chip: 'border-green-200 text-green-700 hover:border-green-400 hover:bg-green-50 dark:border-green-400/20 dark:text-green-300 dark:hover:border-green-400/60 dark:hover:bg-green-400/10',  header: 'bg-green-50 dark:bg-green-400/10'  },
+  teal:   { dot: 'bg-teal-400',   label: 'text-teal-600 dark:text-teal-400',     chip: 'border-teal-200 text-teal-700 hover:border-teal-400 hover:bg-teal-50 dark:border-teal-400/20 dark:text-teal-300 dark:hover:border-teal-400/60 dark:hover:bg-teal-400/10',   header: 'bg-teal-50 dark:bg-teal-400/10'   },
+  stone:  { dot: 'bg-stone-400',  label: 'text-stone-600 dark:text-stone-300',   chip: 'border-stone-200 text-stone-700 hover:border-stone-400 hover:bg-stone-50 dark:border-stone-400/20 dark:text-stone-300 dark:hover:border-stone-400/60 dark:hover:bg-stone-400/10',  header: 'bg-stone-50 dark:bg-stone-400/10'  },
+  indigo: { dot: 'bg-indigo-400', label: 'text-indigo-600 dark:text-indigo-400', chip: 'border-indigo-200 text-indigo-700 hover:border-indigo-400 hover:bg-indigo-50 dark:border-indigo-400/20 dark:text-indigo-300 dark:hover:border-indigo-400/60 dark:hover:bg-indigo-400/10', header: 'bg-indigo-50 dark:bg-indigo-400/10' },
+  pink:   { dot: 'bg-pink-400',   label: 'text-pink-600 dark:text-pink-400',     chip: 'border-pink-200 text-pink-700 hover:border-pink-400 hover:bg-pink-50 dark:border-pink-400/20 dark:text-pink-300 dark:hover:border-pink-400/60 dark:hover:bg-pink-400/10',   header: 'bg-pink-50 dark:bg-pink-400/10'   },
 }
 
-// Light mode equivalents
-const COR_MAP_LIGHT = {
-  red:    { dot: 'bg-red-400',    label: 'text-red-600',    chip: 'border-red-200 text-red-700 hover:border-red-400 hover:bg-red-50',    header: 'bg-red-50'    },
-  orange: { dot: 'bg-orange-400', label: 'text-orange-600', chip: 'border-orange-200 text-orange-700 hover:border-orange-400 hover:bg-orange-50', header: 'bg-orange-50' },
-  blue:   { dot: 'bg-blue-400',   label: 'text-blue-600',   chip: 'border-blue-200 text-blue-700 hover:border-blue-400 hover:bg-blue-50',   header: 'bg-blue-50'   },
-  purple: { dot: 'bg-purple-400', label: 'text-purple-600', chip: 'border-purple-200 text-purple-700 hover:border-purple-400 hover:bg-purple-50', header: 'bg-purple-50' },
-  yellow: { dot: 'bg-yellow-400', label: 'text-yellow-700', chip: 'border-yellow-200 text-yellow-800 hover:border-yellow-400 hover:bg-yellow-50', header: 'bg-yellow-50' },
-  green:  { dot: 'bg-green-400',  label: 'text-green-600',  chip: 'border-green-200 text-green-700 hover:border-green-400 hover:bg-green-50',  header: 'bg-green-50'  },
-  teal:   { dot: 'bg-teal-400',   label: 'text-teal-600',   chip: 'border-teal-200 text-teal-700 hover:border-teal-400 hover:bg-teal-50',   header: 'bg-teal-50'   },
-  stone:  { dot: 'bg-stone-400',  label: 'text-stone-600',  chip: 'border-stone-200 text-stone-700 hover:border-stone-400 hover:bg-stone-50',  header: 'bg-stone-50'  },
-  indigo: { dot: 'bg-indigo-400', label: 'text-indigo-600', chip: 'border-indigo-200 text-indigo-700 hover:border-indigo-400 hover:bg-indigo-50', header: 'bg-indigo-50' },
-  pink:   { dot: 'bg-pink-400',   label: 'text-pink-600',   chip: 'border-pink-200 text-pink-700 hover:border-pink-400 hover:bg-pink-50',   header: 'bg-pink-50'   },
-}
-
-function CidRow({ cid, dark, expandirAuto }) {
+function CidRow({ cid, expandirAuto }) {
   const sexo = { M: 'Masculino', F: 'Feminino', I: null, A: null }[cid.tp_sexo]
 
   return (
@@ -68,7 +54,7 @@ function CidRow({ cid, dark, expandirAuto }) {
 
 const CHIPS_PREVIEW = 4
 
-function Chip({ c, cor, dark }) {
+function Chip({ c, cor }) {
   return (
     <Link
       to={`/?q=${encodeURIComponent(c.co_cid)}&ctx=1`}
@@ -79,16 +65,15 @@ function Chip({ c, cor, dark }) {
       )}
     >
       <span className="font-mono text-[9px] opacity-50 shrink-0 tabular-nums">{c.co_cid}</span>
-      <span className={cn('h-2.5 w-px shrink-0 opacity-25', dark ? 'bg-white' : 'bg-current')} />
+      <span className="h-2.5 w-px shrink-0 opacity-25 bg-current dark:bg-white" />
       {c.label}
     </Link>
   )
 }
 
-function GrupoCard({ grupo, dark }) {
+function GrupoCard({ grupo }) {
   const [extraAberto, setExtraAberto] = useState(false)
-  const corMap = dark ? COR_MAP : COR_MAP_LIGHT
-  const cor = corMap[grupo.cor] || corMap.blue
+  const cor = COR_MAP[grupo.cor] || COR_MAP.blue
   const temExtra = grupo.extra?.length > 0
 
   return (
@@ -108,23 +93,23 @@ function GrupoCard({ grupo, dark }) {
         {grupo.cids.map((c, i) =>
           c.break
             ? <div key={`br-${i}`} className="w-full" />
-            : <Chip key={c.co_cid} c={c} cor={cor} dark={dark} />
+            : <Chip key={c.co_cid} c={c} cor={cor} />
         )}
       </div>
 
       {/* Extras colapsáveis */}
       {temExtra && (
-        <div className={cn('border-t', dark ? 'border-[rgba(255,255,255,0.05)]' : 'border-border/40')}>
+        <div className="border-t border-border/40 dark:border-white/5">
           {extraAberto && (
             <div className="px-2.5 pt-1.5 pb-1 flex flex-wrap gap-1.5">
-              {grupo.extra.map(c => <Chip key={c.co_cid} c={c} cor={cor} dark={dark} />)}
+              {grupo.extra.map(c => <Chip key={c.co_cid} c={c} cor={cor} />)}
             </div>
           )}
           <button
             onClick={() => setExtraAberto(v => !v)}
             className={cn(
               'w-full px-3 py-1 text-[10px] font-medium transition flex items-center gap-1',
-              dark ? 'text-muted-foreground/50 hover:text-muted-foreground' : 'text-muted-foreground/60 hover:text-muted-foreground'
+              'text-muted-foreground/60 hover:text-muted-foreground dark:text-muted-foreground/50'
             )}
           >
             <svg className={cn('h-3 w-3 transition-transform', extraAberto ? 'rotate-180' : '')} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -139,7 +124,6 @@ function GrupoCard({ grupo, dark }) {
 }
 
 export function DiagnosticoPage() {
-  const { dark } = useTheme()
   const { modoUE } = useModoUE()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -315,7 +299,7 @@ export function DiagnosticoPage() {
                 <>
                   <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
                     {comuns.map((cid) => (
-                      <CidRow key={cid.co_cid} cid={cid} dark={dark} expandirAuto={expandirAuto} />
+                      <CidRow key={cid.co_cid} cid={cid} expandirAuto={expandirAuto} />
                     ))}
                   </div>
 
@@ -342,7 +326,7 @@ export function DiagnosticoPage() {
                       </button>
                       <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm opacity-80">
                         {variantes.map((cid) => (
-                          <CidRow key={cid.co_cid} cid={cid} dark={dark} expandirAuto={false} />
+                          <CidRow key={cid.co_cid} cid={cid} expandirAuto={false} />
                         ))}
                       </div>
                     </>
@@ -351,7 +335,7 @@ export function DiagnosticoPage() {
               ) : (
                 <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
                   {resultsFiltrados.map((cid) => (
-                    <CidRow key={cid.co_cid} cid={cid} dark={dark} expandirAuto={expandirAuto} />
+                    <CidRow key={cid.co_cid} cid={cid} expandirAuto={expandirAuto} />
                   ))}
                 </div>
               )}
@@ -400,7 +384,7 @@ export function DiagnosticoPage() {
 
             <div className="grid gap-3 grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
               {CORINGAS_GRUPOS.map(grupo => (
-                <GrupoCard key={grupo.id} grupo={grupo} dark={dark} />
+                <GrupoCard key={grupo.id} grupo={grupo} />
               ))}
             </div>
           </div>

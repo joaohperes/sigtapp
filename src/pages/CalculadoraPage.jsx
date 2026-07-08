@@ -8,7 +8,6 @@ import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { HelpSheet, HelpButton } from '../components/HelpSheet'
-import { useTheme } from '../contexts/ThemeContext'
 
 function totalOf(p) {
   return (p.vl_sa || 0) + (p.vl_sh || 0) + (p.vl_sp || 0)
@@ -177,7 +176,6 @@ function TrashIcon() {
 const CALC_STORAGE_KEY = 'sigtap-calc-items'
 
 export function CalculadoraPage() {
-  const { dark } = useTheme()
   const [searchParams, setSearchParams] = useSearchParams()
   const [helpOpen, setHelpOpen] = useState(false)
   // items: { procedure, qty } — o primeiro é sempre o principal
@@ -387,7 +385,7 @@ export function CalculadoraPage() {
                   Monte um conjunto de procedimentos e calcule o valor total faturável pelo SUS.
                 </p>
               </div>
-              <HelpButton onClick={() => setHelpOpen(true)} dark={dark} />
+              <HelpButton onClick={() => setHelpOpen(true)} />
             </div>
           </div>
         </div>
